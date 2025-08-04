@@ -19,9 +19,9 @@ from accounts.views.admin_views import (
     RevenueReportView,
 )
 
-admin.site.site_header = "Doccure Admin"
-admin.site.site_title = "Doccure Admin Portal"
-admin.site.index_title = "Welcome to Doccure Admin Portal"
+admin.site.site_header = "Laso Digital Health Admin"
+admin.site.site_title = "Laso Digital Health Admin Portal"
+admin.site.index_title = "Welcome to Laso Digital Health Admin Portal"
 
 
 urlpatterns = (

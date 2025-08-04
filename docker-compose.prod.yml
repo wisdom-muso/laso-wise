@@ -7,12 +7,12 @@ services:
       context: .
       dockerfile: Dockerfile.prod
     expose:
-      - 8002
+      - 8005
     volumes:
       - static_volume:/usr/src/app/staticfiles
       - media_volume:/usr/src/app/media
     #    env_file: .env
-    command: gunicorn doccure.wsgi:application --bind 0.0.0.0:8002
+    command: gunicorn doccure.wsgi:application --bind 0.0.0.0:8005
 
   nginx:
     restart: always

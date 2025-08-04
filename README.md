@@ -1,6 +1,6 @@
-# DocCure - Healthcare Appointment System
+# Laso Digital Health - Healthcare Appointment System
 
-DocCure is a modern healthcare appointment booking system that connects patients with doctors. The platform streamlines the process of finding doctors, booking appointments, and managing medical consultations.
+Laso Digital Health is a modern healthcare appointment booking system that connects patients with doctors. The platform streamlines the process of finding doctors, booking appointments, and managing medical consultations.
 
 Live: [Demo](http://doccure.manjurulhoque.com/)
 
@@ -112,7 +112,7 @@ python manage.py loaddata fixtures/initial_data.json
 python manage.py runserver
 ```
 
-8. Visit http://localhost:8002 in your browser
+8. Visit http://localhost:8005 in your browser
 
 ## Environment Variables
 Create a `.env` file in the project root and add:
@@ -183,7 +183,7 @@ For support, email support@doccure.com or create an issue in the repository.
 
 ## Conclusion
 
-DocCure aims to modernize healthcare access in Bangladesh by:
+Laso Digital Health aims to modernize healthcare access in Bangladesh by:
 
 1. **Simplified Booking**: Making it easy for patients to find and book appointments with qualified doctors
 2. **Digital Management**: Helping doctors manage their practice more efficiently

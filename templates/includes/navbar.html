@@ -11,22 +11,22 @@
                     <span></span>
                 </span>
             </a>
-            <a href="{% url 'core:home' %}" class="navbar-brand logo">
-                <img src="{% static 'assets/img/logo2.svg' %}" class="img-fluid" alt="Logo">
+            <a href="{% url 'core:home-page' %}" class="navbar-brand logo">
+                <img src="{% static 'assets/img/laso-logo.svg' %}" class="img-fluid" alt="Laso Digital Health Logo">
             </a>
         </div>
         <div class="main-menu-wrapper">
             <div class="menu-header">
-                <a href="{% url 'core:home' %}" class="menu-logo">
-                    <img src="{% static 'assets/img/logo2.svg' %}" class="img-fluid" alt="Logo">
+                <a href="{% url 'core:home-page' %}" class="menu-logo">
+                    <img src="{% static 'assets/img/laso-logo.svg' %}" class="img-fluid" alt="Laso Digital Health Logo">
                 </a>
                 <a id="menu_close" class="menu-close" href="javascript:void(0);">
                     <i class="fas fa-times"></i>
                 </a>
             </div>
             <ul class="main-nav">
-                <li {% if request.path == '/' %}class="active"{% endif %}>
-                    <a href="{% url 'core:home' %}">Home</a>
+                <li {% if request.path == '/home/' %}class="active"{% endif %}>
+                    <a href="{% url 'core:home-page' %}">Home</a>
                 </li>
                 <li class="has-submenu{% if request.path == '/doctors/' %} active {% endif %}">
 {#                    <a href="#">Doctors <i class="fas fa-chevron-down"></i></a>#}
