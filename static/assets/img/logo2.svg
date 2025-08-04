@@ -1,12 +1,24 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 100">
-  <!-- Medical Cross Symbol -->
-  <path d="M40 20 h20 v20 h20 v20 h-20 v20 h-20 v-20 h-20 v-20 h20 z" 
-        fill="#1976D2"/>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="60" viewBox="0 0 200 60" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#12bab8;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0e8a88;stop-opacity:1" />
+    </linearGradient>
+  </defs>
   
-  <!-- Text "DocCure" -->
-  <text x="100" y="65" 
-        font-family="Arial, sans-serif" 
-        font-size="48" 
-        font-weight="bold" 
-        fill="#1976D2">DocCure</text>
+  <!-- Medical Cross Icon -->
+  <g transform="translate(10, 15)">
+    <circle cx="15" cy="15" r="15" fill="url(#logoGradient)"/>
+    <rect x="12" y="8" width="6" height="14" fill="white"/>
+    <rect x="8" y="12" width="14" height="6" fill="white"/>
+  </g>
+  
+  <!-- Company Name -->
+  <text x="50" y="25" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#0e8a88">
+    Laso Digital
+  </text>
+  <text x="50" y="45" font-family="Arial, sans-serif" font-size="16" font-weight="normal" fill="#12bab8">
+    Health
+  </text>
 </svg>
