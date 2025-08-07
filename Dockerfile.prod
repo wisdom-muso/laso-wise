@@ -35,12 +35,26 @@ RUN mkdir -p $APP_HOME/staticfiles && mkdir -p $APP_HOME/media
 # Set proper permissions
 RUN chmod +x manage.py
 
-# Collect static files with increased verbosity and ignore errors
-RUN python manage.py collectstatic --noinput --clear --verbosity 0 || true
+# Install wget for health check
+RUN apk add --no-cache wget
+
+# Remove duplicate static files to prevent conflicts
+RUN echo "Removing duplicate static files..." && \
+    if [ -d "static/ckeditor/ckeditor" ]; then echo "- Removing static/ckeditor/ckeditor" && rm -rf static/ckeditor/ckeditor; fi && \
+    if [ -d "static/ckeditor/file-icons" ]; then echo "- Removing static/ckeditor/file-icons" && rm -rf static/ckeditor/file-icons; fi && \
+    if [ -d "static/ckeditor/galleriffic" ]; then echo "- Removing static/ckeditor/galleriffic" && rm -rf static/ckeditor/galleriffic; fi && \
+    if [ -f "static/ckeditor/ckeditor-init.js" ]; then echo "- Removing static/ckeditor/ckeditor-init.js" && rm -f static/ckeditor/ckeditor-init.js; fi && \
+    if [ -f "static/ckeditor/ckeditor.css" ]; then echo "- Removing static/ckeditor/ckeditor.css" && rm -f static/ckeditor/ckeditor.css; fi && \
+    if [ -f "static/ckeditor/fixups.js" ]; then echo "- Removing static/ckeditor/fixups.js" && rm -f static/ckeditor/fixups.js; fi && \
+    if [ -d "static/unfold" ]; then echo "- Removing static/unfold" && rm -rf static/unfold; fi && \
+    if [ -d "static/admin" ]; then echo "- Removing static/admin" && rm -rf static/admin; fi
+
+# Collect static files with better error handling
+RUN python manage.py collectstatic --noinput --clear --verbosity 1
 
 # Expose the port specified in the .env file (default: 8005)
 EXPOSE 8005
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
+# Health check with longer timeout for startup
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost:8005/ || exit 1

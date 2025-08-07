@@ -15,7 +15,8 @@ DEBUG = os.getenv("DEBUG", "False").lower() in ("true", "1", "t")
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "*").split(",")
 
 # CSRF settings
-CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")
+csrf_origins = os.getenv("CSRF_TRUSTED_ORIGINS", "")
+CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in csrf_origins.split(",") if origin.strip()]
 CSRF_COOKIE_SECURE = os.getenv("CSRF_COOKIE_SECURE", "True").lower() in ("true", "1", "t")
 SESSION_COOKIE_SECURE = os.getenv("SESSION_COOKIE_SECURE", "True").lower() in ("true", "1", "t")
 
@@ -53,44 +54,32 @@ UNFOLD = {
     "SITE_HEADER": "Laso Digital Health",
     "SITE_SYMBOL": "settings",  # Symbol from icon set
     "ENVIRONMENT": "Development",
-    "THEME": {
-        "COLORS": {
-            "primary": {
-                "50": "178 245 243",  # #b2f5f3 (accent)
-                "100": "178 245 243",  # #b2f5f3 (accent)
-                "200": "178 245 243",  # #b2f5f3 (accent)
-                "300": "26 162 160",   # #1a9e9c (accent dark)
-                "400": "18 186 184",   # #12bab8 (primary)
-                "500": "18 186 184",   # #12bab8 (primary)
-                "600": "14 138 136",   # #0e8a88 (primary hover)
-                "700": "14 138 136",   # #0e8a88 (secondary)
-                "800": "10 110 108",   # #0a6e6c (secondary dark)
-                "900": "10 110 108",   # #0a6e6c (secondary dark)
-                "950": "10 110 108",   # #0a6e6c (secondary dark)
-            },
-            "gray": {
-                "50": "243 244 246",   # #f3f4f6 (muted)
-                "100": "243 244 246",  # #f3f4f6 (muted)
-                "200": "229 231 235",  # #e5e7eb (sidebar border)
-                "300": "209 213 219",  # #d1d5db
-                "400": "156 163 175",  # #9ca3af (muted dark foreground)
-                "500": "107 114 128",  # #6b7280 (muted foreground)
-                "600": "75 85 99",     # #4b5563
-                "700": "55 65 81",     # #374151 (muted dark)
-                "800": "31 41 55",     # #1f2937 (sidebar dark)
-                "900": "17 24 39",     # #111827
-                "950": "3 7 18",       # #030712
-            },
+    "COLORS": {
+        "primary": {
+            "50": "178 245 243",   # #b2f5f3 (accent)
+            "100": "178 245 243",  # #b2f5f3 (accent)
+            "200": "178 245 243",  # #b2f5f3 (accent)
+            "300": "26 162 160",   # #1a9e9c (accent dark)
+            "400": "18 186 184",   # #12bab8 (primary)
+            "500": "18 186 184",   # #12bab8 (primary)
+            "600": "14 138 136",   # #0e8a88 (primary hover)
+            "700": "14 138 136",   # #0e8a88 (secondary)
+            "800": "10 110 108",   # #0a6e6c (secondary dark)
+            "900": "10 110 108",   # #0a6e6c (secondary dark)
+            "950": "10 110 108",   # #0a6e6c (secondary dark)
         },
-        "ROUNDED": {
-            "DEFAULT": "0.5rem",       # 8px (base radius)
-            "sm": "0.25rem",           # 4px (small radius)
-            "md": "0.375rem",          # 6px (medium radius)
-            "lg": "0.5rem",            # 8px (large radius)
-            "xl": "0.75rem",           # 12px
-            "2xl": "1rem",             # 16px
-            "3xl": "1.5rem",           # 24px
-            "full": "9999px",          # Fully rounded (for badges)
+        "gray": {
+            "50": "243 244 246",   # #f3f4f6 (muted)
+            "100": "243 244 246",  # #f3f4f6 (muted)
+            "200": "229 231 235",  # #e5e7eb (sidebar border)
+            "300": "209 213 219",  # #d1d5db
+            "400": "156 163 175",  # #9ca3af (muted dark foreground)
+            "500": "107 114 128",  # #6b7280 (muted foreground)
+            "600": "75 85 99",     # #4b5563
+            "700": "55 65 81",     # #374151 (muted dark)
+            "800": "31 41 55",     # #1f2937 (sidebar dark)
+            "900": "17 24 39",     # #111827
+            "950": "3 7 18",       # #030712
         },
     },
     "STYLESHEETS": [
@@ -177,12 +166,28 @@ STATICFILES_FINDERS = [
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 ]
 
-# Use appropriate static files storage based on environment
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# Use whitenoise storage without compression to avoid source map issues
+STATICFILES_STORAGE = 'whitenoise.storage.StaticFilesStorage'
+
+# Whitenoise configuration
+WHITENOISE_USE_FINDERS = True
+WHITENOISE_AUTOREFRESH = DEBUG
 
 MEDIA_ROOT = BASE_DIR / "media"
 
 AUTH_USER_MODEL = "accounts.User"
+
+# Session Configuration
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+SESSION_COOKIE_AGE = 86400  # 24 hours
+SESSION_COOKIE_HTTPONLY = True
+SESSION_SAVE_EVERY_REQUEST = False
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+
+# Authentication Configuration
+LOGIN_URL = '/admin/login/'
+LOGIN_REDIRECT_URL = '/admin/'
+LOGOUT_REDIRECT_URL = '/admin/login/'
 
 INTERNAL_IPS = [
     "127.0.0.1",

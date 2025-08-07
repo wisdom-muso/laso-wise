@@ -58,4 +58,5 @@ tzdata==2025.1
 urllib3==2.2.1
 webencodings==0.5.1
 websocket-client==1.8.0
+whitenoise==6.6.0
 wsproto==1.2.0

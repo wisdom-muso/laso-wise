@@ -9,6 +9,7 @@ A Django-based healthcare platform for managing doctors, patients, and appointme
 - Docker-ready deployment
 - Responsive design
 - RESTful API
+- CKEditor integration for rich text editing
 
 ## Development Setup
 
@@ -94,6 +95,20 @@ Key environment variables:
 ## Admin Interface
 
 The admin interface has been enhanced with Django Unfold for a modern, user-friendly experience. Access it at `/admin/` with your superuser credentials.
+
+## Static Files Management
+
+The application uses several packages that include static files which can cause duplicate file warnings during collectstatic:
+
+1. **django-ckeditor**: For rich text editing
+2. **django-unfold**: For admin UI enhancements
+3. **Django Admin**: Default admin static files
+
+The project includes a fix for handling all duplicate static files that may occur during the collectstatic process. This is automatically handled in the following ways:
+
+1. The `collect_static.sh` script removes duplicate static files before running collectstatic
+2. Both Dockerfiles include the same fix to ensure clean builds
+3. If you encounter warnings about duplicate static files, run `./collect_static.sh` to resolve them
 
 ## Security Features
 
