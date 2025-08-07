@@ -15,10 +15,16 @@ DEBUG = os.getenv("DEBUG", "False").lower() in ("true", "1", "t")
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "*").split(",")
 
 # CSRF settings
-csrf_origins = os.getenv("CSRF_TRUSTED_ORIGINS", "")
+csrf_origins = os.getenv("CSRF_TRUSTED_ORIGINS", "https://work-1-ocvowvcuvhzbztbx.prod-runtime.all-hands.dev,https://work-2-ocvowvcuvhzbztbx.prod-runtime.all-hands.dev")
 CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in csrf_origins.split(",") if origin.strip()]
-CSRF_COOKIE_SECURE = os.getenv("CSRF_COOKIE_SECURE", "True").lower() in ("true", "1", "t")
-SESSION_COOKIE_SECURE = os.getenv("SESSION_COOKIE_SECURE", "True").lower() in ("true", "1", "t")
+
+# For development, disable secure cookies if DEBUG is True
+if DEBUG:
+    CSRF_COOKIE_SECURE = False
+    SESSION_COOKIE_SECURE = False
+else:
+    CSRF_COOKIE_SECURE = os.getenv("CSRF_COOKIE_SECURE", "True").lower() in ("true", "1", "t")
+    SESSION_COOKIE_SECURE = os.getenv("SESSION_COOKIE_SECURE", "True").lower() in ("true", "1", "t")
 
 INSTALLED_APPS = [
     # Django Unfold admin

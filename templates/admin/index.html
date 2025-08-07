@@ -1,0 +1,138 @@
+{% extends "admin/index.html" %}
+{% load i18n static %}
+
+{% block extrahead %}
+{{ block.super }}
+<style>
+    .analytics-dashboard-link {
+        background: linear-gradient(135deg, #0891b2, #0e7490);
+        color: white;
+        padding: 15px 20px;
+        border-radius: 8px;
+        text-decoration: none;
+        display: inline-block;
+        margin: 20px 0;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .analytics-dashboard-link:hover {
+        background: linear-gradient(135deg, #0e7490, #155e75);
+        color: white;
+        text-decoration: none;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    
+    .analytics-dashboard-link i {
+        margin-right: 8px;
+    }
+    
+    .quick-actions {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 20px 0;
+        border: 1px solid #e9ecef;
+    }
+    
+    .quick-actions h3 {
+        margin-top: 0;
+        color: #495057;
+        font-size: 18px;
+        margin-bottom: 15px;
+    }
+    
+    .quick-action-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+    }
+    
+    .quick-action-item {
+        background: white;
+        padding: 15px;
+        border-radius: 6px;
+        border: 1px solid #dee2e6;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+    
+    .quick-action-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        border-color: #0891b2;
+    }
+    
+    .quick-action-item a {
+        text-decoration: none;
+        color: #495057;
+        font-weight: 500;
+    }
+    
+    .quick-action-item:hover a {
+        color: #0891b2;
+    }
+    
+    .quick-action-item i {
+        font-size: 24px;
+        margin-bottom: 8px;
+        display: block;
+        color: #0891b2;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="analytics-dashboard-section">
+    <a href="{% url 'core:analytics-dashboard' %}" class="analytics-dashboard-link">
+        <i class="fas fa-chart-line"></i>
+        View Analytics Dashboard
+    </a>
+</div>
+
+<div class="quick-actions">
+    <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
+    <div class="quick-action-grid">
+        <div class="quick-action-item">
+            <a href="{% url 'admin:bookings_booking_changelist' %}">
+                <i class="fas fa-calendar-check"></i>
+                Manage Appointments
+            </a>
+        </div>
+        <div class="quick-action-item">
+            <a href="{% url 'admin:accounts_user_changelist' %}?role__exact=patient">
+                <i class="fas fa-users"></i>
+                View Patients
+            </a>
+        </div>
+        <div class="quick-action-item">
+            <a href="{% url 'admin:accounts_user_changelist' %}?role__exact=doctor">
+                <i class="fas fa-user-md"></i>
+                View Doctors
+            </a>
+        </div>
+        <div class="quick-action-item">
+            <a href="{% url 'admin:core_review_changelist' %}">
+                <i class="fas fa-star"></i>
+                Manage Reviews
+            </a>
+        </div>
+        <div class="quick-action-item">
+            <a href="{% url 'admin:bookings_progressnote_changelist' %}">
+                <i class="fas fa-notes-medical"></i>
+                Progress Notes
+            </a>
+        </div>
+        <div class="quick-action-item">
+            <a href="{% url 'admin:core_hospitalsettings_changelist' %}">
+                <i class="fas fa-cog"></i>
+                Hospital Settings
+            </a>
+        </div>
+    </div>
+</div>
+
+{{ block.super }}
+{% endblock %}

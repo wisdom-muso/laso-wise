@@ -66,3 +66,51 @@ class Prescription(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
+
+
+class ProgressNote(models.Model):
+    """
+    Progress notes for patient appointments
+    """
+    booking = models.ForeignKey(
+        Booking, 
+        on_delete=models.CASCADE, 
+        related_name="progress_notes"
+    )
+    doctor = models.ForeignKey(
+        "accounts.User",
+        on_delete=models.CASCADE,
+        related_name="progress_notes_written",
+        limit_choices_to={"role": "doctor"}
+    )
+    patient = models.ForeignKey(
+        "accounts.User",
+        on_delete=models.CASCADE,
+        related_name="progress_notes_received",
+        limit_choices_to={"role": "patient"}
+    )
+    note_type = models.CharField(
+        max_length=20,
+        choices=[
+            ("consultation", "Consultation Note"),
+            ("follow_up", "Follow-up Note"),
+            ("treatment", "Treatment Note"),
+            ("observation", "Observation"),
+            ("discharge", "Discharge Note"),
+        ],
+        default="consultation"
+    )
+    title = models.CharField(max_length=200)
+    content = models.TextField()
+    is_private = models.BooleanField(
+        default=False, 
+        help_text="Private notes are only visible to healthcare providers"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.title} - {self.patient.get_full_name()}"

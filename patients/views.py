@@ -6,10 +6,12 @@ from django.contrib import messages
 from django.template.loader import render_to_string
 from django.http import HttpResponse
 from django.contrib.auth import update_session_auth_hash
-
+from django.db.models import Count, Q
+from django.utils import timezone
+from datetime import datetime, timedelta
 
 from accounts.models import User
-from bookings.models import Booking
+from bookings.models import Booking, Prescription
 from mixins.custom_mixins import PatientRequiredMixin
 from patients.forms import PatientProfileForm, ChangePasswordForm, ReviewForm
 from core.models import Review
@@ -20,11 +22,33 @@ class PatientDashboardView(PatientRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["appointments"] = (
-            Booking.objects.select_related("doctor", "doctor__profile")
-            .filter(patient=self.request.user)
-            .order_by("-appointment_date", "-appointment_time")
-        )
+        user = self.request.user
+        today = timezone.now().date()
+        
+        # Get all appointments
+        appointments = Booking.objects.select_related("doctor", "doctor__profile").filter(patient=user)
+        context["appointments"] = appointments.order_by("-appointment_date", "-appointment_time")
+        
+        # Dashboard statistics
+        context["upcoming_appointments_count"] = appointments.filter(
+            appointment_date__gte=today,
+            status__in=["pending", "confirmed"]
+        ).count()
+        
+        context["prescriptions_count"] = Prescription.objects.filter(patient=user).count()
+        
+        context["doctors_consulted_count"] = appointments.values('doctor').distinct().count()
+        
+        # Calculate a simple health score based on recent activity
+        recent_appointments = appointments.filter(
+            appointment_date__gte=today - timedelta(days=90),
+            status="completed"
+        ).count()
+        
+        # Simple health score calculation (0-100)
+        health_score = min(100, max(20, 50 + (recent_appointments * 10)))
+        context["health_score"] = health_score
+        
         return context
 
 

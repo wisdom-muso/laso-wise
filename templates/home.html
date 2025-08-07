@@ -12,13 +12,13 @@
     <section class="section section-search">
         <div class="container-fluid">
             <div class="banner-wrapper">
-                <div class="banner-header text-center">
+                <div class="banner-header text-center fade-in">
                     <h1>Find and Book Appointments with Top Doctors</h1>
                     <p>Get instant access to trusted doctors in your area for quality healthcare.</p>
                 </div>
 
                 <!-- Search -->
-                <div class="search-box">
+                <div class="search-box fade-in">
                     <form action="{% url 'doctors:list' %}" method="get">
                         <div class="form-group search-location">
                             <input type="text" name="location" class="form-control" placeholder="Enter City or Division">
@@ -129,7 +129,7 @@
 
                         {% for doctor in doctors %}
                             <!-- Doctor Widget -->
-                            <div class="profile-widget">
+                            <div class="profile-widget fade-in">
                                 <div class="doc-img">
                                     <a href="{% url 'doctors:doctor-profile' doctor.username %}">
                                         <img class="img-fluid" alt="Doctor Image" src="{{ doctor.profile.image }}">
