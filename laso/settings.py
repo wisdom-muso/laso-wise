@@ -52,6 +52,10 @@ INSTALLED_APPS = [
     "doctors",
     "patients",
     "bookings",
+    "mobile_clinic",
+    "vitals",
+    "dashboard",
+    "sync_monitor",
 ]
 
 # Django Unfold settings
@@ -62,34 +66,36 @@ UNFOLD = {
     "ENVIRONMENT": "Development",
     "COLORS": {
         "primary": {
-            "50": "178 245 243",   # #b2f5f3 (accent)
-            "100": "178 245 243",  # #b2f5f3 (accent)
-            "200": "178 245 243",  # #b2f5f3 (accent)
-            "300": "26 162 160",   # #1a9e9c (accent dark)
-            "400": "18 186 184",   # #12bab8 (primary)
-            "500": "18 186 184",   # #12bab8 (primary)
-            "600": "14 138 136",   # #0e8a88 (primary hover)
-            "700": "14 138 136",   # #0e8a88 (secondary)
-            "800": "10 110 108",   # #0a6e6c (secondary dark)
-            "900": "10 110 108",   # #0a6e6c (secondary dark)
-            "950": "10 110 108",   # #0a6e6c (secondary dark)
+            "50": "240 253 250",   # #f0fdfa (teal-50)
+            "100": "204 251 241",  # #ccfbf1 (teal-100)
+            "200": "153 246 228",  # #99f6e4 (teal-200)
+            "300": "94 234 212",   # #5eead4 (teal-300)
+            "400": "45 212 191",   # #2dd4bf (teal-400)
+            "500": "20 184 166",   # #14b8a6 (teal-500)
+            "600": "13 148 136",   # #0d9488 (teal-600)
+            "700": "15 118 110",   # #0f766e (teal-700)
+            "800": "17 94 89",     # #115e59 (teal-800)
+            "900": "19 78 74",     # #134e4a (teal-900)
+            "950": "4 47 46",      # #042f2e (teal-950)
         },
         "gray": {
-            "50": "243 244 246",   # #f3f4f6 (muted)
-            "100": "243 244 246",  # #f3f4f6 (muted)
-            "200": "229 231 235",  # #e5e7eb (sidebar border)
-            "300": "209 213 219",  # #d1d5db
-            "400": "156 163 175",  # #9ca3af (muted dark foreground)
-            "500": "107 114 128",  # #6b7280 (muted foreground)
-            "600": "75 85 99",     # #4b5563
-            "700": "55 65 81",     # #374151 (muted dark)
-            "800": "31 41 55",     # #1f2937 (sidebar dark)
-            "900": "17 24 39",     # #111827
-            "950": "3 7 18",       # #030712
+            "50": "249 250 251",   # #f9fafb (gray-50)
+            "100": "243 244 246",  # #f3f4f6 (gray-100)
+            "200": "229 231 235",  # #e5e7eb (gray-200)
+            "300": "209 213 219",  # #d1d5db (gray-300)
+            "400": "156 163 175",  # #9ca3af (gray-400)
+            "500": "107 114 128",  # #6b7280 (gray-500)
+            "600": "75 85 99",     # #4b5563 (gray-600)
+            "700": "55 65 81",     # #374151 (gray-700)
+            "800": "31 41 55",     # #1f2937 (gray-800)
+            "900": "17 24 39",     # #111827 (gray-900)
+            "950": "3 7 18",       # #030712 (gray-950)
         },
     },
     "STYLESHEETS": [
         "css/laso-theme.css",
+        "css/modern-design-system.css",
+        "css/admin-modern.css",
     ],
 }
 
@@ -105,7 +111,7 @@ MIDDLEWARE = [
     "debug_toolbar.middleware.DebugToolbarMiddleware",
 ]
 
-ROOT_URLCONF = "doccure.urls"
+ROOT_URLCONF = "laso.urls"
 
 TEMPLATES = [
     {
@@ -123,7 +129,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "doccure.wsgi.application"
+WSGI_APPLICATION = "laso.wsgi.application"
 
 DATABASES = {
     "default": {
@@ -227,3 +233,14 @@ CKEDITOR_BASEPATH = "/static/ckeditor/ckeditor/"
 DEBUG_TOOLBAR_CONFIG = {
     "IS_RUNNING_TESTS": False,
 }
+
+# Django Admin Customization
+ADMIN_SITE_HEADER = "Laso Digital Health Administration"
+ADMIN_SITE_TITLE = "Laso Digital Health Admin Portal"
+ADMIN_INDEX_TITLE = "Welcome to Laso Digital Health Admin Portal"
+
+# Custom admin site configuration
+from django.contrib import admin
+admin.site.site_header = ADMIN_SITE_HEADER
+admin.site.site_title = ADMIN_SITE_TITLE
+admin.site.index_title = ADMIN_INDEX_TITLE

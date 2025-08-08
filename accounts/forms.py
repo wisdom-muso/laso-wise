@@ -8,6 +8,10 @@ from .models import User
 class DoctorRegistrationForm(UserCreationForm):
     def __init__(self, *args, **kwargs):
         super(DoctorRegistrationForm, self).__init__(*args, **kwargs)
+        # Remove username field as we'll generate it automatically
+        if 'username' in self.fields:
+            del self.fields['username']
+            
         self.fields["first_name"].label = "First name"
         self.fields["last_name"].label = "Last name"
         self.fields["password1"].label = "Password"
@@ -16,11 +20,13 @@ class DoctorRegistrationForm(UserCreationForm):
         self.fields["first_name"].widget.attrs.update(
             {
                 "placeholder": "Enter first name",
+                "required": True,
             }
         )
         self.fields["last_name"].widget.attrs.update(
             {
                 "placeholder": "Enter last name",
+                "required": True,
             }
         )
         self.fields["email"].widget.attrs.update(
@@ -62,8 +68,7 @@ class DoctorRegistrationForm(UserCreationForm):
     def save(self, commit=True):
         user = super(UserCreationForm, self).save(commit=False)
         user.role = "doctor"
-        if commit:
-            user.save()
+        # Note: We don't save here as the view will handle username generation and saving
         return user
 
 

@@ -1,0 +1,166 @@
+/* Sync Monitor Styles */
+
+/* Status Indicators */
+.status-indicator {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 5px;
+}
+
+.status-healthy, .status-completed, .status-true {
+    background-color: #28a745;
+}
+
+.status-warning, .status-pending {
+    background-color: #ffc107;
+}
+
+.status-critical, .status-failed, .status-false {
+    background-color: #dc3545;
+}
+
+.status-unknown {
+    background-color: #6c757d;
+}
+
+.status-in_progress {
+    background-color: #007bff;
+}
+
+/* Component Cards */
+.component-card {
+    border-radius: 10px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.component-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.component-card .card-header {
+    padding: 15px;
+}
+
+.component-card .card-body {
+    padding: 20px;
+}
+
+/* Sync Stats Cards */
+.sync-stats-card {
+    text-align: center;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.sync-stats-card .card-body {
+    padding: 20px;
+}
+
+.sync-stats-card .stat-value {
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.sync-stats-card .stat-label {
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+/* Charts */
+.chart-container {
+    height: 300px;
+}
+
+/* Timeline */
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline:before {
+    content: '';
+    position: absolute;
+    left: 10px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #e9ecef;
+}
+
+.timeline-item {
+    position: relative;
+    padding-bottom: 20px;
+}
+
+.timeline-item:last-child {
+    padding-bottom: 0;
+}
+
+.timeline-item:before {
+    content: '';
+    position: absolute;
+    left: -30px;
+    top: 0;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #007bff;
+    border: 2px solid #fff;
+}
+
+.timeline-item.success:before {
+    background: #28a745;
+}
+
+.timeline-item.failure:before {
+    background: #dc3545;
+}
+
+.timeline-content {
+    background: #f8f9fa;
+    border-radius: 5px;
+    padding: 15px;
+    position: relative;
+}
+
+.timeline-content:before {
+    content: '';
+    position: absolute;
+    left: -8px;
+    top: 10px;
+    width: 0;
+    height: 0;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+    border-right: 8px solid #f8f9fa;
+}
+
+.timeline-time {
+    color: #6c757d;
+    font-size: 0.8rem;
+}
+
+/* Progress Bars */
+.progress-bar-animated {
+    animation: progress-bar-stripes 1s linear infinite;
+}
+
+/* Filter Forms */
+.filter-form .form-group {
+    margin-right: 15px;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 767px) {
+    .sync-stats-card .stat-value {
+        font-size: 1.5rem;
+    }
+    
+    .chart-container {
+        height: 250px;
+    }
+}

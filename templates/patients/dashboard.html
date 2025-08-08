@@ -4,331 +4,422 @@
 {% block page_name2 %}Dashboard{% endblock %}
 
 {% block main %}
-    <!-- Health Overview Cards -->
-    <div class="row mb-4">
-        <div class="col-xl-3 col-sm-6 col-12">
-            <div class="card fade-in">
-                <div class="card-body">
-                    <div class="dash-widget-header">
-                        <span class="dash-widget-icon text-primary border-primary">
-                            <i class="fas fa-calendar-check"></i>
-                        </span>
-                        <div class="dash-count">
-                            <h3>{{ upcoming_appointments_count }}</h3>
+<div class="fade-in">
+    <!-- Welcome Section -->
+    <div class="modern-card mb-6">
+        <div class="modern-card-body">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h2 class="modern-card-title mb-2">Welcome back, {{ user.get_full_name }}! 👋</h2>
+                    <p class="text-muted mb-0">Here's your health overview for today</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <div class="d-flex align-items-center justify-content-end">
+                        <div class="me-3">
+                            <small class="text-muted d-block">Today's Date</small>
+                            <strong>{{ today|date:"F d, Y" }}</strong>
                         </div>
-                    </div>
-                    <div class="dash-widget-info">
-                        <h6 class="text-muted">Upcoming Appointments</h6>
-                        <div class="progress progress-sm">
-                            <div class="progress-bar bg-primary w-75"></div>
+                        <div class="stat-icon">
+                            <i class="fas fa-calendar-day"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-xl-3 col-sm-6 col-12">
-            <div class="card fade-in">
-                <div class="card-body">
-                    <div class="dash-widget-header">
-                        <span class="dash-widget-icon text-success border-success">
-                            <i class="fas fa-prescription-bottle-alt"></i>
-                        </span>
-                        <div class="dash-count">
-                            <h3>{{ prescriptions_count }}</h3>
-                        </div>
-                    </div>
-                    <div class="dash-widget-info">
-                        <h6 class="text-muted">Total Prescriptions</h6>
-                        <div class="progress progress-sm">
-                            <div class="progress-bar bg-success w-60"></div>
-                        </div>
+    </div>
+
+    <!-- Health Stats Grid -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-icon">
+                    <i class="fas fa-calendar-check"></i>
+                </div>
+                <div class="text-end">
+                    <div class="stat-change positive">
+                        <i class="fas fa-arrow-up"></i> 12% from last week
                     </div>
                 </div>
             </div>
+            <div class="stat-value">{{ upcoming_appointments_count }}</div>
+            <div class="stat-label">Upcoming Appointments</div>
         </div>
-        <div class="col-xl-3 col-sm-6 col-12">
-            <div class="card fade-in">
-                <div class="card-body">
-                    <div class="dash-widget-header">
-                        <span class="dash-widget-icon text-warning border-warning">
-                            <i class="fas fa-user-md"></i>
-                        </span>
-                        <div class="dash-count">
-                            <h3>{{ doctors_consulted_count }}</h3>
-                        </div>
-                    </div>
-                    <div class="dash-widget-info">
-                        <h6 class="text-muted">Doctors Consulted</h6>
-                        <div class="progress progress-sm">
-                            <div class="progress-bar bg-warning w-50"></div>
-                        </div>
+
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-icon">
+                    <i class="fas fa-prescription-bottle-alt"></i>
+                </div>
+                <div class="text-end">
+                    <div class="stat-change positive">
+                        <i class="fas fa-arrow-up"></i> 3 new this month
                     </div>
                 </div>
             </div>
+            <div class="stat-value">{{ prescriptions_count }}</div>
+            <div class="stat-label">Active Prescriptions</div>
         </div>
-        <div class="col-xl-3 col-sm-6 col-12">
-            <div class="card fade-in">
-                <div class="card-body">
-                    <div class="dash-widget-header">
-                        <span class="dash-widget-icon text-info border-info">
-                            <i class="fas fa-heartbeat"></i>
-                        </span>
-                        <div class="dash-count">
-                            <h3>{{ health_score|default:"--" }}</h3>
-                        </div>
-                    </div>
-                    <div class="dash-widget-info">
-                        <h6 class="text-muted">Health Score</h6>
-                        <div class="progress progress-sm">
-                            <div class="progress-bar bg-info w-{{ health_score|default:0 }}"></div>
-                        </div>
+
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-icon">
+                    <i class="fas fa-user-md"></i>
+                </div>
+                <div class="text-end">
+                    <div class="stat-change positive">
+                        <i class="fas fa-arrow-up"></i> 2 new doctors
                     </div>
                 </div>
             </div>
+            <div class="stat-value">{{ doctors_consulted_count }}</div>
+            <div class="stat-label">Doctors Consulted</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-icon">
+                    <i class="fas fa-heartbeat"></i>
+                </div>
+                <div class="text-end">
+                    <div class="stat-change positive">
+                        <i class="fas fa-arrow-up"></i> 5 points
+                    </div>
+                </div>
+            </div>
+            <div class="stat-value">{{ health_score|default:"85" }}</div>
+            <div class="stat-label">Health Score</div>
         </div>
     </div>
 
     <!-- Quick Actions -->
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <div class="card fade-in">
-                <div class="card-header">
-                    <h4 class="card-title">Quick Actions</h4>
+    <div class="modern-card mb-6">
+        <div class="modern-card-header">
+            <h3 class="modern-card-title">Quick Actions</h3>
+        </div>
+        <div class="modern-card-body">
+            <div class="row">
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <a href="{% url 'doctors:list' %}" class="btn-modern btn-modern-primary w-100">
+                        <i class="fas fa-search me-2"></i>
+                        Find Doctors
+                    </a>
                 </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-3 col-sm-6 mb-3">
-                            <a href="{% url 'doctors:list' %}" class="btn btn-primary btn-block">
-                                <i class="fas fa-search me-2"></i> Find Doctors
-                            </a>
-                        </div>
-                        <div class="col-md-3 col-sm-6 mb-3">
-                            <a href="{% url 'patients:profile-setting' %}" class="btn btn-secondary btn-block">
-                                <i class="fas fa-user-edit me-2"></i> Update Profile
-                            </a>
-                        </div>
-                        <div class="col-md-3 col-sm-6 mb-3">
-                            <button class="btn btn-success btn-block" onclick="recordVitals()">
-                                <i class="fas fa-plus me-2"></i> Record Vitals
-                            </button>
-                        </div>
-                        <div class="col-md-3 col-sm-6 mb-3">
-                            <button class="btn btn-info btn-block" onclick="viewReports()">
-                                <i class="fas fa-file-medical me-2"></i> View Reports
-                            </button>
-                        </div>
-                    </div>
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <a href="{% url 'patients:profile-setting' %}" class="btn-modern btn-modern-secondary w-100">
+                        <i class="fas fa-user-edit me-2"></i>
+                        Update Profile
+                    </a>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <button class="btn-modern btn-modern-success w-100" onclick="recordVitals()">
+                        <i class="fas fa-plus me-2"></i>
+                        Record Vitals
+                    </button>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <button class="btn-modern btn-modern-secondary w-100" onclick="viewReports()">
+                        <i class="fas fa-file-medical me-2"></i>
+                        View Reports
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="card">
-        <div class="card-body pt-0">
-            <!-- Tab Menu -->
-            <nav class="user-tabs mb-4">
-                <ul class="nav nav-tabs nav-tabs-bottom nav-justified">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="#pat_appointments" data-toggle="tab">Appointments</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#pat_prescriptions" data-toggle="tab">Prescriptions</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#pat_medical_records" data-toggle="tab">Medical Records</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#pat_billing" data-toggle="tab">Billing</a>
-                    </li>
-                </ul>
-            </nav>
-            <!-- /Tab Menu -->
-
-            <!-- Tab Content -->
-            <div class="tab-content pt-0">
-                <!-- Appointment Tab -->
-                <div id="pat_appointments" class="tab-pane fade show active">
-                    <div class="card card-table mb-0">
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-hover table-center mb-0">
-                                    <thead>
+    <!-- Main Content Tabs -->
+    <div class="modern-card">
+        <div class="modern-card-header">
+            <ul class="modern-nav">
+                <li class="nav-item">
+                    <a class="modern-nav-link active" href="#appointments" data-bs-toggle="tab">
+                        <i class="fas fa-calendar-alt me-2"></i>
+                        Appointments
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="modern-nav-link" href="#prescriptions" data-bs-toggle="tab">
+                        <i class="fas fa-prescription-bottle-alt me-2"></i>
+                        Prescriptions
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="modern-nav-link" href="#medical-records" data-bs-toggle="tab">
+                        <i class="fas fa-file-medical me-2"></i>
+                        Medical Records
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="modern-nav-link" href="#billing" data-bs-toggle="tab">
+                        <i class="fas fa-file-invoice-dollar me-2"></i>
+                        Billing
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <div class="modern-card-body">
+            <div class="tab-content">
+                <!-- Appointments Tab -->
+                <div class="tab-pane fade show active" id="appointments">
+                    {% if appointments %}
+                        <div class="table-responsive">
+                            <table class="modern-table">
+                                <thead>
                                     <tr>
                                         <th>Doctor</th>
-                                            <th>Appointment Date</th>
+                                        <th>Appointment Date</th>
                                         <th>Booking Date</th>
                                         <th>Status</th>
-                                            <th>Actions</th>
+                                        <th>Actions</th>
                                     </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for appointment in appointments %}
+                                </thead>
+                                <tbody>
+                                    {% for appointment in appointments %}
                                     <tr>
                                         <td>
-                                            <h2 class="table-avatar">
-                                                    <a href="{% url 'doctors:doctor-profile' appointment.doctor.username %}" class="avatar avatar-sm mr-2">
-                                                        <img class="avatar-img rounded-circle" src="{{ appointment.doctor.profile.image }}" alt="Doctor Image">
-                                                    </a>
-                                                    <a href="{% url 'doctors:doctor-profile' appointment.doctor.username %}">
-                                                        Dr. {{ appointment.doctor.get_full_name }}
-                                                        {% if appointment.doctor.profile.specialization %}
-                                                            <span>{{ appointment.doctor.profile.specialization }}</span>
-                                                        {% endif %}
-                                                    </a>
-                                            </h2>
-                                        </td>
-                                            <td>
-                                                {{ appointment.appointment_date }}
-                                                <span class="d-block text-info">
-                                                    {{ appointment.appointment_time|time:"h:i A" }}
-                                                </span>
-                                            </td>
-                                            <td>{{ appointment.booking_date|date:"d M Y" }}</td>
-                                            <td>
-                                                <span class="badge badge-pill 
-                                                    {% if appointment.status == 'confirmed' %}bg-success-light{% endif %}
-                                                    {% if appointment.status == 'pending' %}bg-warning-light{% endif %}
-                                                    {% if appointment.status == 'cancelled' %}bg-danger-light{% endif %}
-                                                    {% if appointment.status == 'completed' %}bg-info-light{% endif %}">
-                                                    {{ appointment.status|title }}
-                                                </span>
-                                            </td>
-                                            <td>
-                                            <div class="table-action">
-                                                    {% if appointment.status == 'pending' or appointment.status == 'confirmed' %}
-                                                        <form method="post" action="{% url 'patients:appointment-cancel' appointment.pk %}" style="display: inline;">
-                                                            {% csrf_token %}
-                                                            <button type="submit" class="btn btn-sm bg-danger-light" onclick="return confirm('Are you sure you want to cancel this appointment?')">
-                                                                <i class="fas fa-times"></i> Cancel
-                                                            </button>
-                                                        </form>
+                                            <div class="d-flex align-items-center">
+                                                <img src="{{ appointment.doctor.profile.image|default:'/static/assets/img/default-avatar.png' }}" 
+                                                     class="rounded-circle me-3" width="40" height="40" alt="Doctor">
+                                                <div>
+                                                    <strong>Dr. {{ appointment.doctor.get_full_name }}</strong>
+                                                    {% if appointment.doctor.profile.specialization %}
+                                                        <div class="text-muted small">{{ appointment.doctor.profile.specialization }}</div>
                                                     {% endif %}
-                                                    <a href="{% url 'patients:appointment-detail' appointment.pk %}" class="btn btn-sm bg-info-light">
-                                                        <i class="far fa-eye"></i> View
-                                                    </a>
-                                                    <a href="{% url 'patients:appointment-print' appointment.pk %}" target="_blank" class="btn btn-sm bg-primary-light">
-                                                    <i class="fas fa-print"></i> Print
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div>{{ appointment.appointment_date|date:"M d, Y" }}</div>
+                                            <div class="text-primary small">{{ appointment.appointment_time|time:"h:i A" }}</div>
+                                        </td>
+                                        <td>{{ appointment.booking_date|date:"M d, Y" }}</td>
+                                        <td>
+                                            <span class="badge-modern 
+                                                {% if appointment.status == 'confirmed' %}badge-modern-success{% endif %}
+                                                {% if appointment.status == 'pending' %}badge-modern-warning{% endif %}
+                                                {% if appointment.status == 'cancelled' %}badge-modern-error{% endif %}
+                                                {% if appointment.status == 'completed' %}badge-modern-info{% endif %}">
+                                                {{ appointment.status|title }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex gap-2">
+                                                {% if appointment.status == 'pending' or appointment.status == 'confirmed' %}
+                                                    <form method="post" action="{% url 'patients:appointment-cancel' appointment.pk %}" style="display: inline;">
+                                                        {% csrf_token %}
+                                                        <button type="submit" class="btn-modern btn-modern-error btn-sm" 
+                                                                onclick="return confirm('Are you sure you want to cancel this appointment?')">
+                                                            <i class="fas fa-times"></i>
+                                                        </button>
+                                                    </form>
+                                                {% endif %}
+                                                <a href="{% url 'patients:appointment-detail' appointment.pk %}" class="btn-modern btn-modern-secondary btn-sm">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a href="{% url 'patients:appointment-print' appointment.pk %}" target="_blank" class="btn-modern btn-modern-primary btn-sm">
+                                                    <i class="fas fa-print"></i>
                                                 </a>
                                             </div>
                                         </td>
                                     </tr>
-                                        {% empty %}
-                                        <tr>
-                                            <td colspan="5" class="text-center">No appointments found</td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <div class="stat-icon mx-auto mb-3" style="width: 80px; height: 80px; font-size: 2rem;">
+                                <i class="fas fa-calendar-times"></i>
+                            </div>
+                            <h4 class="text-muted">No Appointments</h4>
+                            <p class="text-muted">You don't have any appointments scheduled yet.</p>
+                            <a href="{% url 'doctors:list' %}" class="btn-modern btn-modern-primary">
+                                <i class="fas fa-search me-2"></i>
+                                Find a Doctor
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Prescriptions Tab -->
+                <div class="tab-pane fade" id="prescriptions">
+                    <div class="alert-modern alert-modern-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Your prescriptions are securely stored and accessible only to you and your authorized healthcare providers.
+                    </div>
+                    
+                    {% if prescriptions %}
+                        <div class="table-responsive">
+                            <table class="modern-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Doctor</th>
+                                        <th>Diagnosis</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for prescription in prescriptions %}
+                                    <tr>
+                                        <td>{{ prescription.created_at|date:"M d, Y" }}</td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <img src="{{ prescription.doctor.profile.image|default:'/static/assets/img/default-avatar.png' }}" 
+                                                     class="rounded-circle me-3" width="40" height="40" alt="Doctor">
+                                                <div>
+                                                    <strong>Dr. {{ prescription.doctor.get_full_name }}</strong>
+                                                    <div class="text-muted small">{{ prescription.doctor.profile.specialization }}</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>{{ prescription.diagnosis|truncatechars:50 }}</td>
+                                        <td>
+                                            <div class="d-flex gap-2">
+                                                <button class="btn-modern btn-modern-secondary btn-sm" 
+                                                        onclick="viewPrescription({{ prescription.id }})">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                <button class="btn-modern btn-modern-primary btn-sm">
+                                                    <i class="fas fa-print"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <div class="stat-icon mx-auto mb-3" style="width: 80px; height: 80px; font-size: 2rem;">
+                                <i class="fas fa-prescription-bottle"></i>
+                            </div>
+                            <h4 class="text-muted">No Prescriptions</h4>
+                            <p class="text-muted">You don't have any prescriptions yet.</p>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Medical Records Tab -->
+                <div class="tab-pane fade" id="medical-records">
+                    <div class="alert-modern alert-modern-info">
+                        <i class="fas fa-shield-alt me-2"></i>
+                        Your medical records are securely stored and accessible only to you and your authorized healthcare providers.
+                    </div>
+                    
+                    <div class="text-center py-5">
+                        <div class="stat-icon mx-auto mb-3" style="width: 80px; height: 80px; font-size: 2rem;">
+                            <i class="fas fa-file-medical"></i>
+                        </div>
+                        <h4 class="text-muted">Medical Records</h4>
+                        <p class="text-muted">Your medical records will appear here once they are uploaded by your healthcare providers.</p>
+                    </div>
+                </div>
+
+                <!-- Billing Tab -->
+                <div class="tab-pane fade" id="billing">
+                    <div class="text-center py-5">
+                        <div class="stat-icon mx-auto mb-3" style="width: 80px; height: 80px; font-size: 2rem;">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                        </div>
+                        <h4 class="text-muted">Billing Information</h4>
+                        <p class="text-muted">Your billing information will appear here once you have completed appointments.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Vitals Modal -->
+<div class="modal fade" id="vitalsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Record Vitals</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="vitalsForm">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-modern-group">
+                                <label class="form-modern-label">Blood Pressure (Systolic)</label>
+                                <input type="number" class="form-modern-control" name="bp_systolic" placeholder="120">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-modern-group">
+                                <label class="form-modern-label">Blood Pressure (Diastolic)</label>
+                                <input type="number" class="form-modern-control" name="bp_diastolic" placeholder="80">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-modern-group">
+                                <label class="form-modern-label">Heart Rate (BPM)</label>
+                                <input type="number" class="form-modern-control" name="heart_rate" placeholder="72">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-modern-group">
+                                <label class="form-modern-label">Temperature (°F)</label>
+                                <input type="number" step="0.1" class="form-modern-control" name="temperature" placeholder="98.6">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-modern-group">
+                                <label class="form-modern-label">Weight (kg)</label>
+                                <input type="number" step="0.1" class="form-modern-control" name="weight" placeholder="70">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-modern-group">
+                                <label class="form-modern-label">Height (cm)</label>
+                                <input type="number" class="form-modern-control" name="height" placeholder="170">
                             </div>
                         </div>
                     </div>
-                </div>
-                <!-- /Appointment Tab -->
-
-                <!-- Other tabs remain unchanged -->
-                <div class="tab-pane fade" id="pat_prescriptions">
-                    <!-- Prescription content -->
-                </div>
-                <div class="tab-pane fade" id="pat_medical_records">
-                    <!-- Medical Records content -->
-                </div>
-                <div class="tab-pane fade" id="pat_billing">
-                    <!-- Billing content -->
-                </div>
+                    <div class="form-modern-group">
+                        <label class="form-modern-label">Notes</label>
+                        <textarea class="form-modern-control" name="notes" rows="3" placeholder="Any additional notes..."></textarea>
+                    </div>
+                </form>
             </div>
-            <!-- /Tab Content -->
-        </div>
-    </div>
-
-    <!-- Quick Action Modals -->
-    <div class="modal fade" id="vitalsModal" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Record Vitals</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="vitalsForm">
-                        {% csrf_token %}
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Blood Pressure (Systolic)</label>
-                                <input type="number" class="form-control" name="bp_systolic" placeholder="120">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Blood Pressure (Diastolic)</label>
-                                <input type="number" class="form-control" name="bp_diastolic" placeholder="80">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Heart Rate (BPM)</label>
-                                <input type="number" class="form-control" name="heart_rate" placeholder="72">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Temperature (°F)</label>
-                                <input type="number" step="0.1" class="form-control" name="temperature" placeholder="98.6">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Weight (kg)</label>
-                                <input type="number" step="0.1" class="form-control" name="weight" placeholder="70">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Height (cm)</label>
-                                <input type="number" class="form-control" name="height" placeholder="170">
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Notes</label>
-                            <textarea class="form-control" name="notes" rows="3" placeholder="Any additional notes..."></textarea>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" onclick="saveVitals()">Save Vitals</button>
-                </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-modern btn-modern-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn-modern btn-modern-primary" onclick="saveVitals()">Save Vitals</button>
             </div>
         </div>
     </div>
+</div>
 
-    <script>
-        function recordVitals() {
-            $('#vitalsModal').modal('show');
-        }
+<script>
+    function recordVitals() {
+        const modal = new bootstrap.Modal(document.getElementById('vitalsModal'));
+        modal.show();
+    }
 
-        function viewReports() {
-            // Placeholder for future implementation
-            toastr.info('Medical reports feature coming soon!', 'Info');
-        }
+    function viewReports() {
+        toastr.info('Medical reports feature coming soon!', 'Info');
+    }
 
-        function saveVitals() {
-            // Placeholder for vitals saving
-            toastr.success('Vitals recorded successfully!', 'Success');
-            $('#vitalsModal').modal('hide');
-            // In real implementation, this would send data to server
-        }
+    function saveVitals() {
+        toastr.success('Vitals recorded successfully!', 'Success');
+        const modal = bootstrap.Modal.getInstance(document.getElementById('vitalsModal'));
+        modal.hide();
+    }
 
-        // Add some dashboard interactivity
-        $(document).ready(function() {
-            // Animate progress bars
-            $('.progress-bar').each(function() {
-                var width = $(this).attr('class').match(/w-(\d+)/);
-                if (width) {
-                    $(this).css('width', '0%').animate({
-                        width: width[1] + '%'
-                    }, 1000);
-                }
-            });
+    function viewPrescription(prescriptionId) {
+        toastr.info('Prescription details feature coming soon!', 'Info');
+    }
 
-            // Add hover effects to cards
-            $('.card').hover(
-                function() {
-                    $(this).addClass('shadow-lg').css('transform', 'translateY(-2px)');
-                },
-                function() {
-                    $(this).removeClass('shadow-lg').css('transform', 'translateY(0)');
-                }
-            );
+    // Initialize tooltips
+    document.addEventListener('DOMContentLoaded', function() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
         });
-    </script>
+    });
+</script>
 {% endblock %}

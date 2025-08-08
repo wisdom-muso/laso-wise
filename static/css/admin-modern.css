@@ -1,0 +1,493 @@
+/* Modern Django Admin Theme - Laso Digital Health */
+
+:root {
+  /* Teal Color Palette */
+  --teal-50: #f0fdfa;
+  --teal-100: #ccfbf1;
+  --teal-200: #99f6e4;
+  --teal-300: #5eead4;
+  --teal-400: #2dd4bf;
+  --teal-500: #14b8a6;
+  --teal-600: #0d9488;
+  --teal-700: #0f766e;
+  --teal-800: #115e59;
+  --teal-900: #134e4a;
+
+  /* Neutral Colors */
+  --gray-50: #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-300: #d1d5db;
+  --gray-400: #9ca3af;
+  --gray-500: #6b7280;
+  --gray-600: #4b5563;
+  --gray-700: #374151;
+  --gray-800: #1f2937;
+  --gray-900: #111827;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+
+  /* Border Radius */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+}
+
+/* Global Admin Styles */
+#header {
+  background: linear-gradient(135deg, var(--teal-600), var(--teal-700));
+  color: white;
+  box-shadow: var(--shadow-lg);
+  border: none;
+  padding: 1rem 2rem;
+}
+
+#header h1 {
+  color: white;
+  font-weight: 600;
+  font-size: 1.5rem;
+}
+
+#header h1 a {
+  color: white;
+  text-decoration: none;
+}
+
+#header h1 a:hover {
+  color: var(--teal-100);
+}
+
+#branding h1 {
+  margin: 0;
+}
+
+/* Sidebar */
+.module h2, .module caption, .inline-group h2 {
+  background: var(--teal-600);
+  color: white;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  font-weight: 600;
+  font-size: 1rem;
+  border: none;
+}
+
+.module {
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--gray-200);
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+}
+
+.module .description {
+  color: var(--gray-600);
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}
+
+/* Navigation */
+#nav-sidebar {
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--gray-200);
+  padding: 1rem 0;
+}
+
+#nav-sidebar .current-app .section {
+  background: var(--teal-50);
+  border-left: 4px solid var(--teal-500);
+  margin: 0.5rem 0;
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+#nav-sidebar .current-app .section a {
+  color: var(--teal-700);
+  font-weight: 500;
+  padding: 0.75rem 1rem;
+  display: block;
+  text-decoration: none;
+}
+
+#nav-sidebar .current-app .section a:hover {
+  background: var(--teal-100);
+}
+
+#nav-sidebar .current-app .section .current {
+  background: var(--teal-100);
+  color: var(--teal-800);
+  font-weight: 600;
+}
+
+/* Breadcrumbs */
+.breadcrumbs {
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.875rem;
+}
+
+.breadcrumbs a {
+  color: var(--teal-600);
+  text-decoration: none;
+}
+
+.breadcrumbs a:hover {
+  color: var(--teal-700);
+  text-decoration: underline;
+}
+
+/* Buttons */
+.button, input[type=submit], input[type=button], .submit-row input, a.button {
+  background: var(--teal-500);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.button:hover, input[type=submit]:hover, input[type=button]:hover, .submit-row input:hover, a.button:hover {
+  background: var(--teal-600);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.button.default, input[type=submit].default, .submit-row input.default {
+  background: var(--teal-600);
+  font-weight: 600;
+}
+
+.button.default:hover, input[type=submit].default:hover, .submit-row input.default:hover {
+  background: var(--teal-700);
+}
+
+.button.delete, input[type=submit].delete, .submit-row input.delete {
+  background: #ef4444;
+}
+
+.button.delete:hover, input[type=submit].delete:hover, .submit-row input.delete:hover {
+  background: #dc2626;
+}
+
+/* Forms */
+.form-row {
+  padding: 1rem;
+  border-bottom: 1px solid var(--gray-100);
+}
+
+.form-row:last-child {
+  border-bottom: none;
+}
+
+.form-row label {
+  color: var(--gray-700);
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.form-row input, .form-row textarea, .form-row select {
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-md);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+}
+
+.form-row input:focus, .form-row textarea:focus, .form-row select:focus {
+  outline: none;
+  border-color: var(--teal-500);
+  box-shadow: 0 0 0 3px var(--teal-100);
+}
+
+/* Tables */
+#changelist table {
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--gray-200);
+  overflow: hidden;
+}
+
+#changelist thead th {
+  background: var(--gray-50);
+  color: var(--gray-700);
+  font-weight: 600;
+  border-bottom: 1px solid var(--gray-200);
+  padding: 0.75rem 1rem;
+}
+
+#changelist tbody td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--gray-100);
+}
+
+#changelist tbody tr:hover {
+  background: var(--gray-50);
+}
+
+/* Object Tools */
+.object-tools {
+  margin-bottom: 1rem;
+}
+
+.object-tools a {
+  background: var(--teal-500);
+  color: white;
+  border-radius: var(--radius-md);
+  padding: 0.5rem 1rem;
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.object-tools a:hover {
+  background: var(--teal-600);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Submit Row */
+.submit-row {
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  padding: 1rem;
+  margin-top: 1.5rem;
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+/* Messages */
+.messagelist {
+  margin-bottom: 1.5rem;
+}
+
+.messagelist li {
+  background: var(--teal-50);
+  border: 1px solid var(--teal-200);
+  color: var(--teal-800);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.5rem;
+  list-style: none;
+}
+
+.messagelist li.success {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+  color: #166534;
+}
+
+.messagelist li.error {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #991b1b;
+}
+
+.messagelist li.warning {
+  background: #fffbeb;
+  border-color: #fed7aa;
+  color: #92400e;
+}
+
+/* Dashboard */
+.dashboard .module table th {
+  background: var(--gray-50);
+  color: var(--gray-700);
+  font-weight: 600;
+  border-bottom: 1px solid var(--gray-200);
+  padding: 0.75rem 1rem;
+}
+
+.dashboard .module table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--gray-100);
+}
+
+.dashboard .module table tr:hover {
+  background: var(--gray-50);
+}
+
+/* Recent Actions */
+.module ul.actionlist {
+  padding: 0;
+  margin: 0;
+}
+
+.module ul.actionlist li {
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid var(--gray-100);
+  list-style: none;
+}
+
+.module ul.actionlist li:last-child {
+  border-bottom: none;
+}
+
+.module ul.actionlist li a {
+  color: var(--teal-600);
+  text-decoration: none;
+}
+
+.module ul.actionlist li a:hover {
+  color: var(--teal-700);
+  text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 767px) {
+  #header {
+    padding: 0.75rem 1rem;
+  }
+  
+  #header h1 {
+    font-size: 1.25rem;
+  }
+  
+  .submit-row {
+    flex-direction: column;
+  }
+  
+  .submit-row input {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+}
+
+/* Custom Admin Branding */
+.admin-branding {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.admin-branding .logo {
+  width: 40px;
+  height: 40px;
+  background: var(--teal-400);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.25rem;
+}
+
+.admin-branding .brand-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-branding .brand-name {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: white;
+  margin: 0;
+}
+
+.admin-branding .brand-subtitle {
+  font-size: 0.75rem;
+  color: var(--teal-100);
+  margin: 0;
+}
+
+/* Enhanced Form Styling */
+.fieldset {
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--gray-200);
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+}
+
+.fieldset h2 {
+  background: var(--gray-50);
+  color: var(--gray-700);
+  padding: 1rem;
+  margin: 0;
+  border-bottom: 1px solid var(--gray-200);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+/* Inline Forms */
+.inline-group {
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--gray-200);
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+}
+
+.inline-related h3 {
+  background: var(--teal-50);
+  color: var(--teal-700);
+  padding: 0.75rem 1rem;
+  margin: 0;
+  border-bottom: 1px solid var(--teal-200);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+/* Filter Sidebar */
+#changelist-filter {
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--gray-200);
+  padding: 1rem;
+}
+
+#changelist-filter h2 {
+  background: var(--teal-600);
+  color: white;
+  padding: 0.75rem 1rem;
+  margin: -1rem -1rem 1rem -1rem;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+#changelist-filter li.selected {
+  background: var(--teal-50);
+  border-left: 3px solid var(--teal-500);
+  padding-left: 0.75rem;
+}
+
+#changelist-filter a {
+  color: var(--gray-600);
+  text-decoration: none;
+  padding: 0.25rem 0;
+  display: block;
+}
+
+#changelist-filter a:hover {
+  color: var(--teal-600);
+}
+
+#changelist-filter li.selected a {
+  color: var(--teal-700);
+  font-weight: 500;
+} 

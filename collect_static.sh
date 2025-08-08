@@ -65,6 +65,6 @@ rm -rf staticfiles/*
 
 # Collect static files with minimal output
 echo "Collecting static files..."
-python manage.py collectstatic --noinput --clear --verbosity 0
+python3 manage.py collectstatic --noinput --clear --verbosity 0
 
 echo "Static files collection completed."

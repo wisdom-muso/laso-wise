@@ -30,6 +30,9 @@
     <!-- Laso Digital Health Theme CSS -->
     <link rel="stylesheet" href="{% static 'css/laso-theme.css' %}">
     
+    <!-- Modern Design System CSS -->
+    <link rel="stylesheet" href="{% static 'css/modern-design-system.css' %}">
+    
     <!-- Laso Modern Theme CSS (Bootstrap 5 Enhanced) -->
     <link rel="stylesheet" href="{% static 'css/laso-modern.css' %}">
     
@@ -54,58 +57,58 @@
 
     {% include 'includes/navbar.html' %}
 
-    {% if messages %}
-        <div class="container mt-4">
-            {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-            {% endfor %}
-        </div>
-    {% endif %}
-
-    <div class="fade-in">
+    <!-- Page Content -->
+    <div class="page-wrapper">
         {% block content %}{% endblock %}
     </div>
+    <!-- /Page Content -->
 
     {% include 'includes/footer.html' %}
 
 </div>
 <!-- /Main Wrapper -->
 
-<!-- Bootstrap 5 Bundle JS (includes Popper) -->
+<!-- jQuery -->
+<script src="{% static 'assets/js/jquery-3.6.0.min.js' %}"></script>
+
+<!-- Bootstrap Core JS -->
 <script src="{% static 'assets/bootstrap5/bootstrap.bundle.min.js' %}"></script>
-
-<!-- jQuery (still needed for some plugins) -->
-<script src="{% static 'assets/js/jquery.min.js' %}"></script>
-
-<!-- Slick JS -->
-<script src="{% static 'assets/js/slick.js' %}"></script>
 
 <!-- Custom JS -->
 <script src="{% static 'assets/js/script.js' %}"></script>
-<script defer type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+<!-- Toastr JS -->
+<script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
 <script>
-    // hook up csrf tokens to all htmx requests
-    document.body.addEventListener('htmx:configRequest', (event) => {
-        event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
-    });
+    // Configure toastr
+    toastr.options = {
+        "closeButton": true,
+        "debug": false,
+        "newestOnTop": false,
+        "progressBar": true,
+        "positionClass": "toast-top-right",
+        "preventDuplicates": false,
+        "onclick": null,
+        "showDuration": "300",
+        "hideDuration": "1000",
+        "timeOut": "5000",
+        "extendedTimeOut": "1000",
+        "showEasing": "swing",
+        "hideEasing": "linear",
+        "showMethod": "fadeIn",
+        "hideMethod": "fadeOut"
+    };
 
-    document.addEventListener('show-toast', event => {
-        const {level, message, title} = event.detail;
-        toastr[level](message, title);
-    });
-    
-    // Initialize all tooltips
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl)
-    });
+    // Global success message handler
+    {% if messages %}
+        {% for message in messages %}
+            toastr.{{ message.tags }}('{{ message }}');
+        {% endfor %}
+    {% endif %}
 </script>
 
-{% block scripts %}{% endblock %}
+{% block js %}{% endblock %}
 
 </body>
 </html>

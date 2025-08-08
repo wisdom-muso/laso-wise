@@ -11,7 +11,7 @@ A Django-based healthcare platform for managing doctors, patients, and appointme
 - RESTful API
 - CKEditor integration for rich text editing
 
-## Development Setup
+## Quick Start
 
 ### Using Docker (Recommended)
 
@@ -21,17 +21,21 @@ A Django-based healthcare platform for managing doctors, patients, and appointme
    cd lasoai
    ```
 
-2. Create a `.env` file based on `.env.example`:
+2. Run the application:
    ```bash
-   cp .env.example .env
+   # Development mode (default)
+   ./run.sh
+   
+   # Or explicitly specify development
+   ./run.sh dev
+   
+   # Production mode
+   ./run.sh production
    ```
 
-3. Build and run the Docker containers:
-   ```bash
-   docker-compose up --build
-   ```
-
-4. Access the application at http://localhost:8005
+3. Access the application:
+   - Development: http://localhost:8005
+   - Production (default mapping): http://localhost:12000
 
 ### Manual Setup
 
@@ -52,9 +56,9 @@ A Django-based healthcare platform for managing doctors, patients, and appointme
    pip install -r requirements.txt
    ```
 
-4. Create a `.env` file based on `.env.example`:
+4. Create a `.env` file based on `env.template`:
    ```bash
-   cp .env.example .env
+   cp env.template .env
    ```
 
 5. Apply migrations:
@@ -69,28 +73,53 @@ A Django-based healthcare platform for managing doctors, patients, and appointme
 
 7. Access the application at http://localhost:8005
 
-## Production Deployment
+## Docker Commands
 
-For production deployment, use the Docker Compose production configuration:
+The `run.sh` script provides a unified interface for managing the application:
 
 ```bash
-docker-compose -f docker-compose.prod.yml up --build -d
+# Development mode (default)
+./run.sh
+
+# Production mode
+./run.sh production
+
+# Stop all containers
+./run.sh stop
+
+# Clean up (stop containers and remove volumes)
+./run.sh clean
+
+# Show help
+./run.sh help
 ```
 
-This will:
-1. Build the application with production settings
-2. Run the application on port 8005
-3. Set up Nginx as a reverse proxy
+### Manual Docker Commands
+
+If you prefer to use Docker commands directly:
+
+```bash
+# Development
+docker-compose up --build
+
+# Production
+docker-compose -f docker-compose.prod.yml up --build -d
+
+# Stop containers
+docker-compose down
+docker-compose -f docker-compose.prod.yml down
+```
 
 ## Environment Variables
 
-Key environment variables:
+Copy `env.template` to `.env` and configure the following variables:
 
 - `DEBUG`: Set to "False" in production
 - `SECRET_KEY`: Django secret key
 - `ALLOWED_HOSTS`: Comma-separated list of allowed hosts
 - `CSRF_TRUSTED_ORIGINS`: Comma-separated list of trusted origins for CSRF
-- `DJANGO_PORT`: Port for the Django application (default: 8005)
+- `CSRF_COOKIE_SECURE`: Set to "True" in production
+- `SESSION_COOKIE_SECURE`: Set to "True" in production
 
 ## Admin Interface
 
@@ -116,6 +145,31 @@ The project includes a fix for handling all duplicate static files that may occu
 - Secure cookie settings for production
 - Environment-based configuration
 - Proper error handling for CSRF failures
+
+## Project Structure
+
+```
+lasoai/
+├── docker-compose.yml          # Development Docker configuration (8005)
+├── docker-compose.prod.yml     # Production Docker configuration (nginx 12000->80)
+├── Dockerfile                  # Development Docker image (exposes 8005)
+├── Dockerfile.prod            # Production Docker image (exposes 8005)
+├── run.sh                     # Unified run script
+├── env.template               # Environment variables template
+├── requirements.txt           # Python dependencies
+├── manage.py                  # Django management script
+├── laso/                      # Main Django project
+├── core/                      # Core app
+├── accounts/                  # User accounts app
+├── doctors/                   # Doctors management app
+├── patients/                  # Patients management app
+├── bookings/                  # Appointments app
+├── mobile_clinic/             # Mobile clinic app
+├── vitals/                    # Patient vitals app
+├── dashboard/                 # Dashboard app
+├── sync_monitor/              # Sync monitoring app
+└── deployment/                # Production deployment files
+```
 
 ## License
 

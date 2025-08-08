@@ -1,4 +1,4 @@
-version: '3'
+version: '3.8'
 
 services:
   web:
@@ -8,25 +8,35 @@ services:
       dockerfile: Dockerfile.prod
     expose:
       - 8005
-    ports:
-      - "8005:8005"
     volumes:
       - static_volume:/usr/src/app/staticfiles
       - media_volume:/usr/src/app/media
-    env_file: .env
-    command: gunicorn doccure.wsgi:application --bind 0.0.0.0:8005 --workers 2 --timeout 120
+    environment:
+      - DEBUG=False
+      - SECRET_KEY=${SECRET_KEY:-g!y0otek@9t^b+b*7)&q2a5^=8_9&xcdii8@6h^_*wphl-(fu9}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-*,65.108.91.110,localhost,127.0.0.1}
+      - CSRF_TRUSTED_ORIGINS=${CSRF_TRUSTED_ORIGINS:-http://65.108.91.110,http://65.108.91.110:12000,http://localhost:12000,http://127.0.0.1:12000}
+      - CSRF_COOKIE_SECURE=True
+      - SESSION_COOKIE_SECURE=True
+    command: gunicorn laso.wsgi:application --bind 0.0.0.0:8005 --workers 2 --timeout 120
     deploy:
       resources:
         limits:
           memory: 1G
         reservations:
           memory: 512M
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8005/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   nginx:
     restart: always
     build: ./deployment/nginx/
     ports:
-      - "12000:80"  # Changed from 8080:80 to 12000:80
+      - "12000:80"
     volumes:
       - static_volume:/usr/src/app/staticfiles
       - media_volume:/usr/src/app/media

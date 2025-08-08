@@ -15,7 +15,8 @@ RUN apk update \
         libffi-dev \
         libmagic \
         libxml2-dev \
-        libxslt-dev
+        libxslt-dev \
+        wget
 
 # Copy requirements and install dependencies
 COPY requirements.txt .
@@ -24,9 +25,6 @@ RUN pip install --upgrade pip \
 
 # Copy the project
 COPY . .
-
-# Use .env if it exists, otherwise use .env.example
-RUN if [ ! -f .env ]; then cp .env.example .env; fi
 
 # Create necessary directories
 RUN mkdir -p /usr/src/app/staticfiles /usr/src/app/media

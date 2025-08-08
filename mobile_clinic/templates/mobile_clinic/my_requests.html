@@ -1,0 +1,76 @@
+{% extends 'includes/patient-sidebar.html' %}
+
+{% block page_name1 %}Mobile Clinic{% endblock %}
+{% block page_name2 %}My Mobile Clinic Requests{% endblock %}
+
+{% block main %}
+<div class="card">
+    <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <h4 class="card-title mb-0">My Mobile Clinic Requests</h4>
+            <a href="{% url 'mobile_clinic:request' %}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i> New Request
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        {% if requests %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Requested Date</th>
+                            <th>Requested Time</th>
+                            <th>Status</th>
+                            <th>Created On</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for request in requests %}
+                            <tr>
+                                <td>{{ request.requested_date }}</td>
+                                <td>{{ request.requested_time }}</td>
+                                <td>
+                                    <span class="badge 
+                                        {% if request.status == 'pending' %}bg-warning{% endif %}
+                                        {% if request.status == 'approved' %}bg-success{% endif %}
+                                        {% if request.status == 'rejected' %}bg-danger{% endif %}
+                                        {% if request.status == 'completed' %}bg-info{% endif %}
+                                        {% if request.status == 'cancelled' %}bg-secondary{% endif %}
+                                    ">
+                                        {{ request.get_status_display }}
+                                    </span>
+                                </td>
+                                <td>{{ request.created_at|date:"M d, Y" }}</td>
+                                <td>
+                                    <div class="d-flex">
+                                        <a href="{% url 'mobile_clinic:request_detail' request.pk %}" class="btn btn-sm btn-info me-2">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        {% if request.status == 'pending' or request.status == 'approved' %}
+                                            <a href="{% url 'mobile_clinic:cancel_request' request.pk %}" class="btn btn-sm btn-danger" 
+                                               onclick="return confirm('Are you sure you want to cancel this request?')">
+                                                <i class="fas fa-times"></i>
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-ambulance fa-3x text-muted mb-3"></i>
+                <h5>No Mobile Clinic Requests</h5>
+                <p class="text-muted">You haven't made any mobile clinic requests yet.</p>
+                <a href="{% url 'mobile_clinic:request' %}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i> Request Mobile Clinic
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

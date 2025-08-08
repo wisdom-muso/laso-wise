@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "Record Vital Sign" %}{% endblock %}
+
+{% block content %}
+<div class="breadcrumb-bar">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-md-12 col-12">
+                <nav aria-label="breadcrumb" class="page-breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'core:home' %}">{% trans "Home" %}</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'vitals:patient-dashboard' %}">{% trans "Vitals Dashboard" %}</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">{% trans "Record Vital Sign" %}</li>
+                    </ol>
+                </nav>
+                <h2 class="breadcrumb-title">{% trans "Record Vital Sign" %}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Profile Sidebar -->
+            <div class="col-md-5 col-lg-4 col-xl-3 theiaStickySidebar">
+                {% include 'includes/patient-sidebar.html' with active='vitals' %}
+            </div>
+            <!-- /Profile Sidebar -->
+
+            <div class="col-md-7 col-lg-8 col-xl-9">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">{% trans "Record Vital Sign" %}</h4>
+                    </div>
+                    <div class="card-body">
+                        <form method="post" action="{% url 'vitals:add-vital' %}">
+                            {% csrf_token %}
+                            <div class="row">
+                                <div class="col-md-6 form-group">
+                                    <label for="{{ form.category.id_for_label }}">{% trans "Vital Sign" %}</label>
+                                    {{ form.category }}
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label for="{{ form.value.id_for_label }}">{% trans "Value" %}</label>
+                                    {{ form.value }}
+                                </div>
+                                <div class="col-md-6 form-group secondary-value-group" style="display: none;">
+                                    <label for="{{ form.secondary_value.id_for_label }}">{% trans "Secondary Value (e.g. Diastolic)" %}</label>
+                                    {{ form.secondary_value }}
+                                    <small class="form-text text-muted">{{ form.secondary_value.help_text }}</small>
+                                </div>
+                                <div class="col-md-12 form-group">
+                                    <label for="{{ form.notes.id_for_label }}">{% trans "Notes" %}</label>
+                                    {{ form.notes }}
+                                </div>
+                                <div class="col-md-12">
+                                    <button type="submit" class="btn btn-primary">{% trans "Save" %}</button>
+                                    <a href="{% url 'vitals:patient-dashboard' %}" class="btn btn-secondary">{% trans "Cancel" %}</a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        // Show/hide secondary value field based on category selection
+        $('#id_category').on('change', function() {
+            var categoryName = $(this).find('option:selected').text();
+            
+            if (categoryName.toLowerCase() === 'blood pressure') {
+                $('.secondary-value-group').show();
+            } else {
+                $('.secondary-value-group').hide();
+            }
+        }).trigger('change');
+    });
+</script>
+{% endblock %}

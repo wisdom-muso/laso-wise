@@ -1,0 +1,360 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "Vital Signs History" %}{% endblock %}
+
+{% block styles %}
+<style>
+    .chart-container {
+        height: 300px;
+        margin-bottom: 30px;
+    }
+    
+    .filter-form .form-group {
+        margin-right: 15px;
+    }
+    
+    .vital-record {
+        border-left: 4px solid #ccc;
+        padding-left: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .vital-record.status-normal {
+        border-left-color: #2ecc71;
+    }
+    
+    .vital-record.status-abnormal-low, .vital-record.status-abnormal-high {
+        border-left-color: #f39c12;
+    }
+    
+    .vital-record.status-critical-low, .vital-record.status-critical-high {
+        border-left-color: #e74c3c;
+    }
+    
+    .vital-record .vital-value {
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
+    
+    .vital-record .vital-status {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 3px;
+        font-size: 0.8rem;
+        margin-left: 10px;
+    }
+    
+    .vital-record .status-normal {
+        background-color: #d4edda;
+        color: #155724;
+    }
+    
+    .vital-record .status-abnormal-low, .vital-record .status-abnormal-high {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+    
+    .vital-record .status-critical-low, .vital-record .status-critical-high {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="breadcrumb-bar">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-md-12 col-12">
+                <nav aria-label="breadcrumb" class="page-breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'core:home' %}">{% trans "Home" %}</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'vitals:patient-dashboard' %}">{% trans "Vitals Dashboard" %}</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">{% trans "History" %}</li>
+                    </ol>
+                </nav>
+                <h2 class="breadcrumb-title">{% trans "Vital Signs History" %}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Profile Sidebar -->
+            <div class="col-md-5 col-lg-4 col-xl-3 theiaStickySidebar">
+                {% include 'includes/patient-sidebar.html' with active='vitals' %}
+            </div>
+            <!-- /Profile Sidebar -->
+
+            <div class="col-md-7 col-lg-8 col-xl-9">
+                <!-- Filter Form -->
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">{% trans "Filter Records" %}</h4>
+                    </div>
+                    <div class="card-body">
+                        <form method="get" class="filter-form">
+                            <div class="row">
+                                <div class="col-md-3 form-group">
+                                    <label for="{{ form.start_date.id_for_label }}">{% trans "Start Date" %}</label>
+                                    {{ form.start_date }}
+                                </div>
+                                <div class="col-md-3 form-group">
+                                    <label for="{{ form.end_date.id_for_label }}">{% trans "End Date" %}</label>
+                                    {{ form.end_date }}
+                                </div>
+                                <div class="col-md-4 form-group">
+                                    <label for="{{ form.category.id_for_label }}">{% trans "Vital Sign" %}</label>
+                                    {{ form.category }}
+                                </div>
+                                <div class="col-md-2 form-group">
+                                    <label class="d-block">&nbsp;</label>
+                                    <button type="submit" class="btn btn-primary">{% trans "Filter" %}</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                {% if chart_data %}
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">{% trans "Trends" %}</h4>
+                    </div>
+                    <div class="card-body">
+                        <ul class="nav nav-tabs" id="vitalChartTabs" role="tablist">
+                            {% for category_id, data in chart_data.items %}
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link {% if forloop.first %}active{% endif %}" 
+                                        id="chart-tab-{{ category_id }}" 
+                                        data-bs-toggle="tab" 
+                                        data-bs-target="#chart-{{ category_id }}" 
+                                        type="button" 
+                                        role="tab" 
+                                        aria-controls="chart-{{ category_id }}" 
+                                        aria-selected="{% if forloop.first %}true{% else %}false{% endif %}">
+                                    {{ data.name }}
+                                </button>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        <div class="tab-content mt-3" id="vitalChartTabContent">
+                            {% for category_id, data in chart_data.items %}
+                            <div class="tab-pane fade {% if forloop.first %}show active{% endif %}" 
+                                 id="chart-{{ category_id }}" 
+                                 role="tabpanel" 
+                                 aria-labelledby="chart-tab-{{ category_id }}">
+                                <div class="chart-container">
+                                    <canvas id="vitalChart{{ category_id }}"></canvas>
+                                </div>
+                                <div class="chart-info">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="card bg-light">
+                                                <div class="card-body text-center">
+                                                    <h5>{% trans "Normal Range" %}</h5>
+                                                    {% if data.min_normal is not None and data.max_normal is not None %}
+                                                        <p class="mb-0">{{ data.min_normal }} - {{ data.max_normal }} {{ data.unit }}</p>
+                                                    {% elif data.min_normal is not None %}
+                                                        <p class="mb-0">{% trans "Above" %} {{ data.min_normal }} {{ data.unit }}</p>
+                                                    {% elif data.max_normal is not None %}
+                                                        <p class="mb-0">{% trans "Below" %} {{ data.max_normal }} {{ data.unit }}</p>
+                                                    {% else %}
+                                                        <p class="mb-0">{% trans "Not specified" %}</p>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="card bg-light">
+                                                <div class="card-body text-center">
+                                                    <h5>{% trans "Average" %}</h5>
+                                                    <p class="mb-0">
+                                                        {{ data.values|average|floatformat:1 }} {{ data.unit }}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="card bg-light">
+                                                <div class="card-body text-center">
+                                                    <h5>{% trans "Lowest" %}</h5>
+                                                    <p class="mb-0">
+                                                        {{ data.values|min }} {{ data.unit }}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="card bg-light">
+                                                <div class="card-body text-center">
+                                                    <h5>{% trans "Highest" %}</h5>
+                                                    <p class="mb-0">
+                                                        {{ data.values|max }} {{ data.unit }}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Records List -->
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">{% trans "Records" %}</h4>
+                    </div>
+                    <div class="card-body">
+                        {% if vitals %}
+                            <div class="vital-records-list">
+                                {% for vital in vitals %}
+                                <div class="vital-record status-{{ vital.status }}">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h5>
+                                            <i class="{{ vital.category.icon }}"></i> {{ vital.category.name }}
+                                            <span class="vital-status status-{{ vital.status }}">{{ vital.status_display }}</span>
+                                        </h5>
+                                        <small class="text-muted">{{ vital.recorded_at|date:"M d, Y H:i" }}</small>
+                                    </div>
+                                    <div class="vital-value">
+                                        {{ vital.value }} 
+                                        {% if vital.secondary_value %}/ {{ vital.secondary_value }}{% endif %} 
+                                        {{ vital.category.unit }}
+                                    </div>
+                                    {% if vital.is_professional_reading %}
+                                    <div class="recorded-by">
+                                        <small class="text-primary">
+                                            <i class="fas fa-user-md"></i> 
+                                            {% trans "Recorded by" %}: 
+                                            {% if vital.recorded_by %}
+                                                {{ vital.recorded_by.get_full_name }}
+                                            {% else %}
+                                                {% trans "Healthcare Professional" %}
+                                            {% endif %}
+                                        </small>
+                                    </div>
+                                    {% endif %}
+                                    {% if vital.notes %}
+                                    <div class="notes mt-2">
+                                        <small>{{ vital.notes }}</small>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="alert alert-info">
+                                {% trans "No vital records found for the selected filters." %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    $(document).ready(function() {
+        {% for category_id, data in chart_data.items %}
+        // Create chart for {{ data.name }}
+        var ctx{{ category_id }} = document.getElementById('vitalChart{{ category_id }}').getContext('2d');
+        
+        // Define normal range area
+        var normalRangePlugin = {
+            id: 'normalRange',
+            beforeDraw: function(chart) {
+                if (chart.config.options.normalRange) {
+                    var ctx = chart.ctx;
+                    var yAxis = chart.scales.y;
+                    var minNormal = chart.config.options.normalRange.min;
+                    var maxNormal = chart.config.options.normalRange.max;
+                    
+                    if (minNormal !== null && maxNormal !== null) {
+                        var yMin = yAxis.getPixelForValue(minNormal);
+                        var yMax = yAxis.getPixelForValue(maxNormal);
+                        var width = chart.width;
+                        var height = yMin - yMax;
+                        
+                        ctx.save();
+                        ctx.fillStyle = 'rgba(46, 204, 113, 0.1)';
+                        ctx.fillRect(0, yMax, width, height);
+                        ctx.restore();
+                    }
+                }
+            }
+        };
+        
+        var chart{{ category_id }} = new Chart(ctx{{ category_id }}, {
+            type: 'line',
+            data: {
+                labels: {{ data.dates|safe }},
+                datasets: [{
+                    label: '{{ data.name }}',
+                    data: {{ data.values|safe }},
+                    borderColor: '{{ data.color }}',
+                    backgroundColor: 'rgba({{ data.color|color_to_rgb }}, 0.1)',
+                    borderWidth: 2,
+                    pointRadius: 4,
+                    pointBackgroundColor: '{{ data.color }}',
+                    tension: 0.2,
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                normalRange: {
+                    min: {{ data.min_normal|default_if_none:"null" }},
+                    max: {{ data.max_normal|default_if_none:"null" }}
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        title: {
+                            display: true,
+                            text: '{{ data.unit }}'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: '{% trans "Date and Time" %}'
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            title: function(tooltipItems) {
+                                return tooltipItems[0].label;
+                            },
+                            label: function(context) {
+                                return '{{ data.name }}: ' + context.raw + ' {{ data.unit }}';
+                            }
+                        }
+                    },
+                    legend: {
+                        display: false
+                    }
+                }
+            },
+            plugins: [normalRangePlugin]
+        });
+        {% endfor %}
+    });
+</script>
+{% endblock %}

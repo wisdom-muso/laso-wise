@@ -1,0 +1,797 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "Hospital Analytics" %}{% endblock %}
+
+{% block styles %}
+<style>
+    .chart-container {
+        height: 300px;
+        margin-bottom: 20px;
+    }
+    
+    .metric-card {
+        border-radius: 10px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .metric-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    
+    .metric-card .card-body {
+        padding: 20px;
+    }
+    
+    .metric-card .metric-value {
+        font-size: 2rem;
+        font-weight: bold;
+    }
+    
+    .metric-card .metric-label {
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+    
+    .metric-card .metric-icon {
+        font-size: 2.5rem;
+        opacity: 0.2;
+        position: absolute;
+        right: 20px;
+        bottom: 20px;
+    }
+    
+    .filter-form .form-group {
+        margin-right: 15px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="content container-fluid">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="row">
+            <div class="col">
+                <h3 class="page-title">{% trans "Hospital Analytics" %}</h3>
+                <ul class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'admin-dashboard' %}">{% trans "Dashboard" %}</a></li>
+                    <li class="breadcrumb-item active">{% trans "Hospital Analytics" %}</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <!-- /Page Header -->
+
+    <!-- Date Range Filter -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <form method="get" class="filter-form">
+                        <div class="row">
+                            <div class="col-md-4 form-group">
+                                <label for="start_date">{% trans "Start Date" %}</label>
+                                <input type="date" class="form-control" id="start_date" name="start_date" value="{{ start_date|date:'Y-m-d' }}">
+                            </div>
+                            <div class="col-md-4 form-group">
+                                <label for="end_date">{% trans "End Date" %}</label>
+                                <input type="date" class="form-control" id="end_date" name="end_date" value="{{ end_date|date:'Y-m-d' }}">
+                            </div>
+                            <div class="col-md-4 form-group">
+                                <label class="d-block">&nbsp;</label>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-filter"></i> {% trans "Apply Filter" %}
+                                </button>
+                                <a href="{% url 'hospital-analytics' %}" class="btn btn-secondary">
+                                    <i class="fas fa-redo"></i> {% trans "Reset" %}
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Key Metrics -->
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card metric-card bg-primary-light">
+                <div class="card-body">
+                    <div class="metric-value text-primary">${{ total_revenue|floatformat:2 }}</div>
+                    <div class="metric-label">{% trans "Total Revenue" %}</div>
+                    <i class="fas fa-dollar-sign metric-icon text-primary"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card metric-card bg-success-light">
+                <div class="card-body">
+                    <div class="metric-value text-success">{{ avg_rating }}</div>
+                    <div class="metric-label">{% trans "Average Rating" %}</div>
+                    <i class="fas fa-star metric-icon text-success"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card metric-card bg-warning-light">
+                <div class="card-body">
+                    <div class="metric-value text-warning">{{ avg_wait_time }} min</div>
+                    <div class="metric-label">{% trans "Average Wait Time" %}</div>
+                    <i class="fas fa-clock metric-icon text-warning"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card metric-card bg-danger-light">
+                <div class="card-body">
+                    <div class="metric-value text-danger">{{ no_show_rate }}%</div>
+                    <div class="metric-label">{% trans "No-Show Rate" %}</div>
+                    <i class="fas fa-user-times metric-icon text-danger"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Patient Demographics -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">{% trans "Patient Demographics" %}</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="chart-container">
+                                <canvas id="ageDistributionChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="chart-container">
+                                <canvas id="genderDistributionChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Appointment Analytics -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">{% trans "Appointment Analytics" %}</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="chart-container">
+                                <canvas id="appointmentStatusChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="chart-container">
+                                <canvas id="weekdayAppointmentsChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="chart-container">
+                                <canvas id="monthlyAppointmentsChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Revenue Analytics -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">{% trans "Revenue Analytics" %}</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="chart-container">
+                                <canvas id="monthlyRevenueChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="chart-container">
+                                <canvas id="revenueBySpecialityChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Doctor Performance -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">{% trans "Doctor Performance" %}</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h5>{% trans "Doctor Utilization Rate" %}</h5>
+                                    <div class="progress" style="height: 20px;">
+                                        <div class="progress-bar bg-success" role="progressbar" style="width: {{ doctor_utilization }}%" aria-valuenow="{{ doctor_utilization }}" aria-valuemin="0" aria-valuemax="100">{{ doctor_utilization }}%</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover table-center mb-0">
+                            <thead>
+                                <tr>
+                                    <th>{% trans "Doctor" %}</th>
+                                    <th>{% trans "Appointments" %}</th>
+                                    <th>{% trans "Revenue" %}</th>
+                                    <th>{% trans "Avg. Rating" %}</th>
+                                    <th>{% trans "Actions" %}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for doctor in top_doctors %}
+                                <tr>
+                                    <td>
+                                        <h2 class="table-avatar">
+                                            <a href="{% url 'doctor-analytics' doctor.doctor__id %}">
+                                                Dr. {{ doctor.doctor__first_name }} {{ doctor.doctor__last_name }}
+                                            </a>
+                                        </h2>
+                                    </td>
+                                    <td>{{ doctor.appointments }}</td>
+                                    <td>${{ doctor.revenue|floatformat:2 }}</td>
+                                    <td>
+                                        {% if doctor.avg_rating %}
+                                            <div class="rating">
+                                                {% for i in "12345" %}
+                                                    {% if forloop.counter <= doctor.avg_rating|floatformat:"0" %}
+                                                        <i class="fas fa-star text-warning"></i>
+                                                    {% else %}
+                                                        <i class="far fa-star text-warning"></i>
+                                                    {% endif %}
+                                                {% endfor %}
+                                                <span class="ml-1">({{ doctor.avg_rating|floatformat:1 }})</span>
+                                            </div>
+                                        {% else %}
+                                            <span class="text-muted">{% trans "No ratings" %}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'doctor-analytics' doctor.doctor__id %}" class="btn btn-sm btn-info">
+                                            <i class="fas fa-chart-line"></i> {% trans "View Analytics" %}
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center">{% trans "No data available" %}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Patient Health Metrics -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">{% trans "Patient Health Metrics" %}</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h5>{% trans "Abnormal Vitals Rate" %}</h5>
+                                    <div class="progress" style="height: 20px;">
+                                        <div class="progress-bar bg-warning" role="progressbar" style="width: {{ abnormal_vitals_rate }}%" aria-valuenow="{{ abnormal_vitals_rate }}" aria-valuemin="0" aria-valuemax="100">{{ abnormal_vitals_rate }}%</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="vitalTrendsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Prescription Analytics -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">{% trans "Prescription Analytics" %}</h4>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-center mb-0">
+                            <thead>
+                                <tr>
+                                    <th>{% trans "Doctor" %}</th>
+                                    <th>{% trans "Prescriptions" %}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for doctor in prescription_by_doctor %}
+                                <tr>
+                                    <td>Dr. {{ doctor.doctor__first_name }} {{ doctor.doctor__last_name }}</td>
+                                    <td>{{ doctor.count }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="2" class="text-center">{% trans "No data available" %}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Patient Satisfaction -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">{% trans "Patient Satisfaction" %}</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="chart-container">
+                                <canvas id="ratingDistributionChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h5>{% trans "Overall Satisfaction" %}</h5>
+                                    <div class="rating" style="font-size: 2rem;">
+                                        {% for i in "12345" %}
+                                            {% if forloop.counter <= avg_rating|floatformat:"0" %}
+                                                <i class="fas fa-star text-warning"></i>
+                                            {% else %}
+                                                <i class="far fa-star text-warning"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                    <h3 class="mt-2">{{ avg_rating }} / 5</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    $(document).ready(function() {
+        // Age Distribution Chart
+        var ageDistributionData = {{ age_distribution|safe }};
+        var ageCtx = document.getElementById('ageDistributionChart').getContext('2d');
+        var ageDistributionChart = new Chart(ageCtx, {
+            type: 'bar',
+            data: {
+                labels: ageDistributionData.labels,
+                datasets: [{
+                    label: '{% trans "Patients by Age Group" %}',
+                    data: ageDistributionData.data,
+                    backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Gender Distribution Chart
+        var genderDistributionData = {{ gender_distribution|safe }};
+        var genderCtx = document.getElementById('genderDistributionChart').getContext('2d');
+        var genderDistributionChart = new Chart(genderCtx, {
+            type: 'pie',
+            data: {
+                labels: genderDistributionData.labels,
+                datasets: [{
+                    data: genderDistributionData.data,
+                    backgroundColor: [
+                        'rgba(54, 162, 235, 0.7)',
+                        'rgba(255, 99, 132, 0.7)',
+                        'rgba(255, 206, 86, 0.7)',
+                        'rgba(75, 192, 192, 0.7)'
+                    ],
+                    borderColor: [
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right'
+                    }
+                }
+            }
+        });
+        
+        // Appointment Status Chart
+        var appointmentStatusData = {{ appointment_status|safe }};
+        var statusCtx = document.getElementById('appointmentStatusChart').getContext('2d');
+        var appointmentStatusChart = new Chart(statusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: appointmentStatusData.labels,
+                datasets: [{
+                    data: appointmentStatusData.data,
+                    backgroundColor: [
+                        'rgba(40, 167, 69, 0.7)',
+                        'rgba(220, 53, 69, 0.7)',
+                        'rgba(255, 193, 7, 0.7)',
+                        'rgba(23, 162, 184, 0.7)'
+                    ],
+                    borderColor: [
+                        'rgba(40, 167, 69, 1)',
+                        'rgba(220, 53, 69, 1)',
+                        'rgba(255, 193, 7, 1)',
+                        'rgba(23, 162, 184, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    },
+                    title: {
+                        display: true,
+                        text: '{% trans "Appointment Status" %}'
+                    }
+                }
+            }
+        });
+        
+        // Weekday Appointments Chart
+        var weekdayAppointmentsData = {{ weekday_appointments|safe }};
+        var weekdayCtx = document.getElementById('weekdayAppointmentsChart').getContext('2d');
+        var weekdayAppointmentsChart = new Chart(weekdayCtx, {
+            type: 'bar',
+            data: {
+                labels: weekdayAppointmentsData.labels,
+                datasets: [{
+                    label: '{% trans "Appointments" %}',
+                    data: weekdayAppointmentsData.data,
+                    backgroundColor: 'rgba(255, 159, 64, 0.7)',
+                    borderColor: 'rgba(255, 159, 64, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: '{% trans "Appointments by Day of Week" %}'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Monthly Appointments Chart
+        var monthlyAppointmentsData = {{ monthly_appointments|safe }};
+        var monthlyAppCtx = document.getElementById('monthlyAppointmentsChart').getContext('2d');
+        
+        // Format dates for display
+        var monthlyAppLabels = monthlyAppointmentsData.map(function(item) {
+            var date = new Date(item.month);
+            return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+        });
+        
+        var monthlyAppValues = monthlyAppointmentsData.map(function(item) {
+            return item.count;
+        });
+        
+        var monthlyAppointmentsChart = new Chart(monthlyAppCtx, {
+            type: 'line',
+            data: {
+                labels: monthlyAppLabels,
+                datasets: [{
+                    label: '{% trans "Appointments" %}',
+                    data: monthlyAppValues,
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: '{% trans "Monthly Appointments" %}'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Monthly Revenue Chart
+        var monthlyRevenueData = {{ monthly_revenue|safe }};
+        var monthlyRevCtx = document.getElementById('monthlyRevenueChart').getContext('2d');
+        
+        // Format dates for display
+        var monthlyRevLabels = monthlyRevenueData.map(function(item) {
+            var date = new Date(item.month);
+            return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+        });
+        
+        var monthlyRevValues = monthlyRevenueData.map(function(item) {
+            return item.revenue;
+        });
+        
+        var monthlyRevenueChart = new Chart(monthlyRevCtx, {
+            type: 'line',
+            data: {
+                labels: monthlyRevLabels,
+                datasets: [{
+                    label: '{% trans "Revenue" %}',
+                    data: monthlyRevValues,
+                    borderColor: 'rgba(40, 167, 69, 1)',
+                    backgroundColor: 'rgba(40, 167, 69, 0.2)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: '{% trans "Monthly Revenue" %}'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return '$' + value;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Revenue by Speciality Chart
+        var revenueBySpecialityData = {{ revenue_by_speciality|safe }};
+        var specialityCtx = document.getElementById('revenueBySpecialityChart').getContext('2d');
+        
+        // Format data for display
+        var specialityLabels = revenueBySpecialityData.map(function(item) {
+            return item.doctor__profile__specialization__name || 'Unknown';
+        });
+        
+        var specialityValues = revenueBySpecialityData.map(function(item) {
+            return item.revenue;
+        });
+        
+        var revenueBySpecialityChart = new Chart(specialityCtx, {
+            type: 'bar',
+            data: {
+                labels: specialityLabels,
+                datasets: [{
+                    label: '{% trans "Revenue" %}',
+                    data: specialityValues,
+                    backgroundColor: 'rgba(153, 102, 255, 0.7)',
+                    borderColor: 'rgba(153, 102, 255, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: '{% trans "Revenue by Speciality" %}'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return '$' + value;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Vital Trends Chart
+        var vitalTrendsData = {{ vital_trends|safe }};
+        var vitalCtx = document.getElementById('vitalTrendsChart').getContext('2d');
+        
+        var datasets = [];
+        var colors = [
+            'rgba(54, 162, 235, 1)',
+            'rgba(255, 99, 132, 1)',
+            'rgba(255, 206, 86, 1)',
+            'rgba(75, 192, 192, 1)',
+            'rgba(153, 102, 255, 1)'
+        ];
+        
+        var colorIndex = 0;
+        for (var category in vitalTrendsData) {
+            var data = vitalTrendsData[category];
+            var color = data.color || colors[colorIndex % colors.length];
+            
+            var dataPoints = data.data.map(function(point) {
+                return {
+                    x: new Date(point.month),
+                    y: point.avg_value
+                };
+            });
+            
+            datasets.push({
+                label: category + ' (' + data.unit + ')',
+                data: dataPoints,
+                borderColor: color,
+                backgroundColor: color.replace('1)', '0.1)'),
+                tension: 0.4,
+                fill: false
+            });
+            
+            colorIndex++;
+        }
+        
+        var vitalTrendsChart = new Chart(vitalCtx, {
+            type: 'line',
+            data: {
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        type: 'time',
+                        time: {
+                            unit: 'month',
+                            displayFormats: {
+                                month: 'MMM YYYY'
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: '{% trans "Date" %}'
+                        }
+                    },
+                    y: {
+                        beginAtZero: false,
+                        title: {
+                            display: true,
+                            text: '{% trans "Value" %}'
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Rating Distribution Chart
+        var ratingDistributionData = {{ rating_distribution|safe }};
+        var ratingCtx = document.getElementById('ratingDistributionChart').getContext('2d');
+        var ratingDistributionChart = new Chart(ratingCtx, {
+            type: 'bar',
+            data: {
+                labels: ratingDistributionData.labels,
+                datasets: [{
+                    label: '{% trans "Number of Reviews" %}',
+                    data: ratingDistributionData.data,
+                    backgroundColor: 'rgba(255, 193, 7, 0.7)',
+                    borderColor: 'rgba(255, 193, 7, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: '{% trans "Rating Distribution" %}'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: '{% trans "Rating" %}'
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

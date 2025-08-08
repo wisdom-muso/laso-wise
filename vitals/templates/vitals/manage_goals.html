@@ -1,0 +1,242 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "Manage Health Goals" %}{% endblock %}
+
+{% block content %}
+<div class="breadcrumb-bar">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-md-12 col-12">
+                <nav aria-label="breadcrumb" class="page-breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'core:home' %}">{% trans "Home" %}</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'vitals:patient-dashboard' %}">{% trans "Vitals Dashboard" %}</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">{% trans "Manage Goals" %}</li>
+                    </ol>
+                </nav>
+                <h2 class="breadcrumb-title">{% trans "Manage Health Goals" %}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Profile Sidebar -->
+            <div class="col-md-5 col-lg-4 col-xl-3 theiaStickySidebar">
+                {% include 'includes/patient-sidebar.html' with active='vitals' %}
+            </div>
+            <!-- /Profile Sidebar -->
+
+            <div class="col-md-7 col-lg-8 col-xl-9">
+                <!-- Add Goal Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">{% trans "Add New Goal" %}</h4>
+                    </div>
+                    <div class="card-body">
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="row">
+                                <div class="col-md-6 form-group">
+                                    <label for="{{ form.category.id_for_label }}">{% trans "Vital Sign" %}</label>
+                                    {{ form.category }}
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label for="{{ form.target_value.id_for_label }}">{% trans "Target Value" %}</label>
+                                    {{ form.target_value }}
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label for="{{ form.target_date.id_for_label }}">{% trans "Target Date" %}</label>
+                                    {{ form.target_date }}
+                                </div>
+                                <div class="col-md-12 form-group">
+                                    <label for="{{ form.notes.id_for_label }}">{% trans "Notes" %}</label>
+                                    {{ form.notes }}
+                                </div>
+                                <div class="col-md-12">
+                                    <button type="submit" class="btn btn-primary">{% trans "Add Goal" %}</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Active Goals -->
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">{% trans "Active Goals" %}</h4>
+                    </div>
+                    <div class="card-body">
+                        {% if active_goals %}
+                            <div class="table-responsive">
+                                <table class="table table-hover table-center mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>{% trans "Vital Sign" %}</th>
+                                            <th>{% trans "Target" %}</th>
+                                            <th>{% trans "Target Date" %}</th>
+                                            <th>{% trans "Set By" %}</th>
+                                            <th>{% trans "Notes" %}</th>
+                                            <th>{% trans "Actions" %}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for goal in active_goals %}
+                                        <tr>
+                                            <td>
+                                                <h2 class="table-avatar">
+                                                    <div class="avatar avatar-sm me-2" style="background-color: {{ goal.category.color }}">
+                                                        <i class="{{ goal.category.icon }} text-white"></i>
+                                                    </div>
+                                                    {{ goal.category.name }}
+                                                </h2>
+                                            </td>
+                                            <td>{{ goal.target_value }} {{ goal.category.unit }}</td>
+                                            <td>
+                                                {% if goal.target_date %}
+                                                    {{ goal.target_date|date:"M d, Y" }}
+                                                {% else %}
+                                                    --
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if goal.set_by %}
+                                                    {% if goal.set_by.role == 'doctor' %}
+                                                        <span class="text-primary">
+                                                            <i class="fas fa-user-md"></i> Dr. {{ goal.set_by.get_full_name }}
+                                                        </span>
+                                                    {% else %}
+                                                        {{ goal.set_by.get_full_name }}
+                                                    {% endif %}
+                                                {% else %}
+                                                    {% trans "You" %}
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if goal.notes %}
+                                                    <span data-bs-toggle="tooltip" title="{{ goal.notes }}">
+                                                        {{ goal.notes|truncatechars:30 }}
+                                                    </span>
+                                                {% else %}
+                                                    --
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <div class="btn-group">
+                                                    <form method="post" action="{% url 'vitals:mark-goal-achieved' goal.id %}" class="d-inline">
+                                                        {% csrf_token %}
+                                                        <button type="submit" class="btn btn-sm btn-success me-1" data-bs-toggle="tooltip" title="{% trans 'Mark as Achieved' %}">
+                                                            <i class="fas fa-check"></i>
+                                                        </button>
+                                                    </form>
+                                                    <form method="post" action="{% url 'vitals:delete-goal' goal.id %}" class="d-inline">
+                                                        {% csrf_token %}
+                                                        <button type="submit" class="btn btn-sm btn-danger" data-bs-toggle="tooltip" title="{% trans 'Delete Goal' %}">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="alert alert-info">
+                                {% trans "You don't have any active health goals. Add one above to get started." %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Achieved Goals -->
+                {% if achieved_goals %}
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">{% trans "Achieved Goals" %}</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-center mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>{% trans "Vital Sign" %}</th>
+                                        <th>{% trans "Target" %}</th>
+                                        <th>{% trans "Achieved Date" %}</th>
+                                        <th>{% trans "Set By" %}</th>
+                                        <th>{% trans "Notes" %}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for goal in achieved_goals %}
+                                    <tr>
+                                        <td>
+                                            <h2 class="table-avatar">
+                                                <div class="avatar avatar-sm me-2" style="background-color: {{ goal.category.color }}">
+                                                    <i class="{{ goal.category.icon }} text-white"></i>
+                                                </div>
+                                                {{ goal.category.name }}
+                                            </h2>
+                                        </td>
+                                        <td>{{ goal.target_value }} {{ goal.category.unit }}</td>
+                                        <td>
+                                            {% if goal.achieved_date %}
+                                                <span class="text-success">
+                                                    <i class="fas fa-trophy"></i> {{ goal.achieved_date|date:"M d, Y" }}
+                                                </span>
+                                            {% else %}
+                                                --
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if goal.set_by %}
+                                                {% if goal.set_by.role == 'doctor' %}
+                                                    <span class="text-primary">
+                                                        <i class="fas fa-user-md"></i> Dr. {{ goal.set_by.get_full_name }}
+                                                    </span>
+                                                {% else %}
+                                                    {{ goal.set_by.get_full_name }}
+                                                {% endif %}
+                                            {% else %}
+                                                {% trans "You" %}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if goal.notes %}
+                                                <span data-bs-toggle="tooltip" title="{{ goal.notes }}">
+                                                    {{ goal.notes|truncatechars:30 }}
+                                                </span>
+                                            {% else %}
+                                                --
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+    });
+</script>
+{% endblock %}

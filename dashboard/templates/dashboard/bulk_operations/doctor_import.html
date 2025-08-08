@@ -1,0 +1,133 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "Bulk Import Doctors" %}{% endblock %}
+
+{% block content %}
+<div class="content container-fluid">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="row">
+            <div class="col">
+                <h3 class="page-title">{% trans "Bulk Import Doctors" %}</h3>
+                <ul class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'admin-dashboard' %}">{% trans "Dashboard" %}</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'admin-doctors' %}">{% trans "Doctors" %}</a></li>
+                    <li class="breadcrumb-item active">{% trans "Bulk Import" %}</li>
+                </ul>
+            </div>
+            <div class="col-auto">
+                <a href="{% url 'admin-doctors' %}" class="btn btn-primary">
+                    <i class="fas fa-arrow-left"></i> {% trans "Back to Doctors" %}
+                </a>
+            </div>
+        </div>
+    </div>
+    <!-- /Page Header -->
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">{% trans "Import Doctors from CSV" %}</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <h5><i class="fas fa-info-circle"></i> {% trans "Instructions" %}</h5>
+                        <p>{% trans "Upload a CSV file with doctor information to import them in bulk. The CSV file should have the following columns:" %}</p>
+                        <ul>
+                            <li><strong>{% trans "Required" %}:</strong> email, first_name, last_name, speciality</li>
+                            <li><strong>{% trans "Optional" %}:</strong> address, city, state, country, zip_code, phone_number, bio, price</li>
+                        </ul>
+                        <p>{% trans "You can download a template CSV file to get started." %}</p>
+                        <a href="{% url 'bulk-doctor-template' %}" class="btn btn-sm btn-info">
+                            <i class="fas fa-download"></i> {% trans "Download Template" %}
+                        </a>
+                    </div>
+
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="csv_file">{% trans "CSV File" %}</label>
+                            <input type="file" class="form-control" id="csv_file" name="csv_file" accept=".csv" required>
+                            <small class="form-text text-muted">{% trans "Only CSV files are accepted" %}</small>
+                        </div>
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-upload"></i> {% trans "Import Doctors" %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">{% trans "CSV Format Example" %}</h4>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>email</th>
+                                    <th>first_name</th>
+                                    <th>last_name</th>
+                                    <th>speciality</th>
+                                    <th>address</th>
+                                    <th>city</th>
+                                    <th>state</th>
+                                    <th>country</th>
+                                    <th>zip_code</th>
+                                    <th>phone_number</th>
+                                    <th>bio</th>
+                                    <th>price</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>doctor@example.com</td>
+                                    <td>John</td>
+                                    <td>Doe</td>
+                                    <td>Cardiology</td>
+                                    <td>123 Main St</td>
+                                    <td>New York</td>
+                                    <td>NY</td>
+                                    <td>USA</td>
+                                    <td>10001</td>
+                                    <td>+1234567890</td>
+                                    <td>Experienced cardiologist with 10 years of practice</td>
+                                    <td>100</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">{% trans "Notes" %}</h4>
+                </div>
+                <div class="card-body">
+                    <ul>
+                        <li>{% trans "All imported doctors will be created with a temporary password: <strong>TemporaryPassword123</strong>" %}</li>
+                        <li>{% trans "Doctors should be instructed to change their password upon first login" %}</li>
+                        <li>{% trans "If a speciality doesn't exist in the system, it will be automatically created" %}</li>
+                        <li>{% trans "Duplicate emails will be skipped during import" %}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

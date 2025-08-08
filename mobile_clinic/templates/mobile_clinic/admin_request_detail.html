@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin - Mobile Clinic Request Detail{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0">Mobile Clinic Request Details</h1>
+                    <p class="text-muted">Manage request from {{ request.patient.get_full_name }}</p>
+                </div>
+                <div>
+                    <a href="{% url 'mobile_clinic:admin_request_list' %}" class="btn btn-primary">
+                        <i class="fas fa-arrow-left me-2"></i> Back to Requests
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="card-title mb-0">Request Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-4">
+                                <h6 class="text-muted mb-2">Request Status</h6>
+                                <span class="badge 
+                                    {% if request.status == 'pending' %}bg-warning{% endif %}
+                                    {% if request.status == 'approved' %}bg-success{% endif %}
+                                    {% if request.status == 'rejected' %}bg-danger{% endif %}
+                                    {% if request.status == 'completed' %}bg-info{% endif %}
+                                    {% if request.status == 'cancelled' %}bg-secondary{% endif %}
+                                    p-2 fs-6">
+                                    {{ request.get_status_display }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-4">
+                                <h6 class="text-muted mb-2">Request Date</h6>
+                                <p class="mb-0">{{ request.created_at|date:"F d, Y" }} at {{ request.created_at|time:"h:i A" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-4">
+                                <h6 class="text-muted mb-2">Requested Date</h6>
+                                <p class="mb-0">{{ request.requested_date }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-4">
+                                <h6 class="text-muted mb-2">Requested Time</h6>
+                                <p class="mb-0">{{ request.requested_time }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h6 class="text-muted mb-2">Address</h6>
+                        <p class="mb-0">{{ request.address }}</p>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h6 class="text-muted mb-2">Reason for Visit</h6>
+                        <p class="mb-0">{{ request.reason }}</p>
+                    </div>
+                    
+                    {% if request.notes %}
+                    <div class="mb-4">
+                        <h6 class="text-muted mb-2">Additional Notes</h6>
+                        <p class="mb-0">{{ request.notes }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="card-title mb-0">Patient Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <img src="{{ request.patient.profile.image }}" 
+                             class="rounded-circle mb-3" 
+                             width="100" height="100" 
+                             alt="Patient">
+                        <h5>{{ request.patient.get_full_name }}</h5>
+                        <p class="text-muted mb-0">{{ request.patient.email }}</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h6 class="text-muted mb-2">Phone</h6>
+                        <p class="mb-0">{{ request.patient.profile.phone|default:"Not provided" }}</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h6 class="text-muted mb-2">Address</h6>
+                        <p class="mb-0">{{ request.patient.profile.address|default:"Not provided" }}</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h6 class="text-muted mb-2">Date of Birth</h6>
+                        <p class="mb-0">{{ request.patient.profile.dob|default:"Not provided" }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="card-title mb-0">Update Status</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{% url 'mobile_clinic:update_request_status' request.pk %}">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Status</label>
+                            <select name="status" class="form-select">
+                                <option value="pending" {% if request.status == 'pending' %}selected{% endif %}>Pending</option>
+                                <option value="approved" {% if request.status == 'approved' %}selected{% endif %}>Approved</option>
+                                <option value="rejected" {% if request.status == 'rejected' %}selected{% endif %}>Rejected</option>
+                                <option value="completed" {% if request.status == 'completed' %}selected{% endif %}>Completed</option>
+                                <option value="cancelled" {% if request.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Admin Notes</label>
+                            <textarea name="admin_notes" class="form-control" rows="4">{{ request.admin_notes }}</textarea>
+                            <small class="text-muted">These notes will be visible to the patient</small>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100">Update Status</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

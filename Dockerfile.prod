@@ -19,14 +19,12 @@ RUN apk update \
         libmagic \
         libxml2-dev \
         libxslt-dev \
+        wget \
     && python -m pip install --upgrade pip \
     && pip install -r requirements.txt
 
 # Copy the rest of the application
 COPY . .
-
-# Use .env if it exists, otherwise use .env.example
-RUN if [ ! -f .env ]; then cp .env.example .env; fi
 
 ENV APP_HOME=/usr/src/app
 # Create necessary directories
@@ -34,9 +32,6 @@ RUN mkdir -p $APP_HOME/staticfiles && mkdir -p $APP_HOME/media
 
 # Set proper permissions
 RUN chmod +x manage.py
-
-# Install wget for health check
-RUN apk add --no-cache wget
 
 # Remove duplicate static files to prevent conflicts
 RUN echo "Removing duplicate static files..." && \
@@ -52,7 +47,7 @@ RUN echo "Removing duplicate static files..." && \
 # Collect static files with better error handling
 RUN python manage.py collectstatic --noinput --clear --verbosity 1
 
-# Expose the port specified in the .env file (default: 8005)
+# Expose the port
 EXPOSE 8005
 
 # Health check with longer timeout for startup

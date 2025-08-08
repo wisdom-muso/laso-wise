@@ -1,0 +1,135 @@
+/* Vitals Tracking Styles */
+
+/* Vital Cards */
+.vital-card {
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.vital-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+}
+
+.vital-card .card-body {
+    padding: 20px;
+}
+
+.vital-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 15px;
+}
+
+.vital-icon i {
+    font-size: 24px;
+    color: white;
+}
+
+.vital-title {
+    font-size: 16px;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.vital-value {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.vital-value .unit {
+    font-size: 14px;
+    color: #777;
+    margin-left: 5px;
+}
+
+.vital-status {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    margin-bottom: 10px;
+}
+
+.status-normal {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.status-abnormal-low, .status-abnormal-high {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.status-critical-low, .status-critical-high {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.vital-date {
+    font-size: 12px;
+    color: #777;
+}
+
+.vital-card-empty .vital-action {
+    margin-top: 15px;
+}
+
+/* Vital Records List */
+.vital-record {
+    border-left: 4px solid #ccc;
+    padding-left: 15px;
+    margin-bottom: 20px;
+}
+
+.vital-record.status-normal {
+    border-left-color: #2ecc71;
+}
+
+.vital-record.status-abnormal-low, .vital-record.status-abnormal-high {
+    border-left-color: #f39c12;
+}
+
+.vital-record.status-critical-low, .vital-record.status-critical-high {
+    border-left-color: #e74c3c;
+}
+
+.vital-record .vital-value {
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+/* Chart Styles */
+.chart-container {
+    height: 300px;
+    margin-bottom: 30px;
+}
+
+/* Goal Progress */
+.progress {
+    height: 5px;
+    margin-bottom: 5px;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 767px) {
+    .vital-card {
+        margin-bottom: 15px;
+    }
+    
+    .vital-value {
+        font-size: 20px;
+    }
+    
+    .chart-container {
+        height: 250px;
+    }
+}

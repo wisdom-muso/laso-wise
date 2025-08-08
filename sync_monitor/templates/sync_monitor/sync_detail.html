@@ -1,0 +1,431 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "Sync Operation Details" %}{% endblock %}
+
+{% block styles %}
+<style>
+    .status-indicator {
+        width: 15px;
+        height: 15px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 5px;
+    }
+    
+    .status-healthy, .status-completed, .status-true {
+        background-color: #28a745;
+    }
+    
+    .status-warning, .status-pending {
+        background-color: #ffc107;
+    }
+    
+    .status-critical, .status-failed, .status-false {
+        background-color: #dc3545;
+    }
+    
+    .status-unknown {
+        background-color: #6c757d;
+    }
+    
+    .status-in_progress {
+        background-color: #007bff;
+    }
+    
+    .timeline {
+        position: relative;
+        padding-left: 30px;
+    }
+    
+    .timeline:before {
+        content: '';
+        position: absolute;
+        left: 10px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: #e9ecef;
+    }
+    
+    .timeline-item {
+        position: relative;
+        padding-bottom: 20px;
+    }
+    
+    .timeline-item:last-child {
+        padding-bottom: 0;
+    }
+    
+    .timeline-item:before {
+        content: '';
+        position: absolute;
+        left: -30px;
+        top: 0;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #007bff;
+        border: 2px solid #fff;
+    }
+    
+    .timeline-item.success:before {
+        background: #28a745;
+    }
+    
+    .timeline-item.failure:before {
+        background: #dc3545;
+    }
+    
+    .timeline-content {
+        background: #f8f9fa;
+        border-radius: 5px;
+        padding: 15px;
+        position: relative;
+    }
+    
+    .timeline-content:before {
+        content: '';
+        position: absolute;
+        left: -8px;
+        top: 10px;
+        width: 0;
+        height: 0;
+        border-top: 8px solid transparent;
+        border-bottom: 8px solid transparent;
+        border-right: 8px solid #f8f9fa;
+    }
+    
+    .timeline-time {
+        color: #6c757d;
+        font-size: 0.8rem;
+    }
+    
+    .chart-container {
+        height: 250px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="breadcrumb-bar">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-md-12 col-12">
+                <nav aria-label="breadcrumb" class="page-breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'admin-dashboard' %}">{% trans "Dashboard" %}</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'sync_monitor:dashboard' %}">{% trans "System Sync & Monitoring" %}</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">{% trans "Sync Details" %}</li>
+                    </ol>
+                </nav>
+                <h2 class="breadcrumb-title">{% trans "Sync Operation Details" %}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="content">
+    <div class="container-fluid">
+        <!-- Sync Operation Overview -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">{% trans "Sync Operation Overview" %}</h4>
+                        <div class="card-tools">
+                            <a href="{% url 'sync_monitor:dashboard' %}" class="btn btn-sm btn-secondary">
+                                <i class="fas fa-arrow-left"></i> {% trans "Back to Dashboard" %}
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <table class="table">
+                                    <tbody>
+                                        <tr>
+                                            <th>{% trans "Sync Type" %}</th>
+                                            <td>{{ sync_operation.get_sync_type_display }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>{% trans "Status" %}</th>
+                                            <td>
+                                                <span class="status-indicator status-{{ sync_operation.status }}"></span>
+                                                {{ sync_operation.get_status_display }}
+                                                {% if sync_operation.status == 'in_progress' %}
+                                                <div class="progress mt-1" style="height: 5px;">
+                                                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%"></div>
+                                                </div>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>{% trans "Started At" %}</th>
+                                            <td>{{ sync_operation.started_at }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>{% trans "Completed At" %}</th>
+                                            <td>
+                                                {% if sync_operation.completed_at %}
+                                                    {{ sync_operation.completed_at }}
+                                                {% else %}
+                                                    -
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>{% trans "Duration" %}</th>
+                                            <td>
+                                                {% if sync_operation.duration %}
+                                                    {{ sync_operation.duration }}
+                                                {% else %}
+                                                    -
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="col-md-6">
+                                <table class="table">
+                                    <tbody>
+                                        <tr>
+                                            <th>{% trans "Records Processed" %}</th>
+                                            <td>{{ sync_operation.records_processed }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>{% trans "Records Failed" %}</th>
+                                            <td>
+                                                {% if sync_operation.records_failed > 0 %}
+                                                    <span class="text-danger">{{ sync_operation.records_failed }}</span>
+                                                {% else %}
+                                                    {{ sync_operation.records_failed }}
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>{% trans "Success Rate" %}</th>
+                                            <td>
+                                                {% if sync_operation.records_processed > 0 %}
+                                                    <div class="progress" style="height: 5px;">
+                                                        <div class="progress-bar bg-success" role="progressbar" style="width: {{ sync_operation.success_rate }}%"></div>
+                                                    </div>
+                                                    <small>{{ sync_operation.success_rate }}%</small>
+                                                {% else %}
+                                                    -
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>{% trans "Initiated By" %}</th>
+                                            <td>
+                                                {% if sync_operation.initiated_by %}
+                                                    {{ sync_operation.initiated_by.get_full_name }}
+                                                {% else %}
+                                                    {% trans "System" %}
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>{% trans "Error Message" %}</th>
+                                            <td>
+                                                {% if sync_operation.error_message %}
+                                                    <span class="text-danger">{{ sync_operation.error_message }}</span>
+                                                {% else %}
+                                                    -
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Entity Statistics -->
+        {% if entity_stats %}
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">{% trans "Entity Statistics" %}</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>{% trans "Entity Type" %}</th>
+                                                <th>{% trans "Total" %}</th>
+                                                <th>{% trans "Success" %}</th>
+                                                <th>{% trans "Failed" %}</th>
+                                                <th>{% trans "Success Rate" %}</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for stat in entity_stats %}
+                                            <tr>
+                                                <td>{{ stat.entity_type }}</td>
+                                                <td>{{ stat.total }}</td>
+                                                <td>{{ stat.success_count }}</td>
+                                                <td>
+                                                    {% if stat.failure_count > 0 %}
+                                                        <span class="text-danger">{{ stat.failure_count }}</span>
+                                                    {% else %}
+                                                        {{ stat.failure_count }}
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    <div class="progress" style="height: 5px;">
+                                                        <div class="progress-bar bg-success" role="progressbar" style="width: {{ stat.success_rate }}%"></div>
+                                                    </div>
+                                                    <small>{{ stat.success_rate }}%</small>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="chart-container">
+                                    <canvas id="entityChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Sync Logs -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">{% trans "Sync Logs" %}</h4>
+                    </div>
+                    <div class="card-body">
+                        {% if logs %}
+                        <div class="timeline">
+                            {% for log in logs %}
+                            <div class="timeline-item {% if log.success %}success{% else %}failure{% endif %}">
+                                <div class="timeline-content">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <h5 class="mb-0">
+                                            <span class="status-indicator status-{{ log.success|lower }}"></span>
+                                            {{ log.entity_type }} - {{ log.action|title }}
+                                        </h5>
+                                        <span class="timeline-time">{{ log.timestamp|date:"M d, Y H:i:s" }}</span>
+                                    </div>
+                                    <div>
+                                        <strong>{% trans "Entity ID" %}:</strong> {{ log.entity_id }}
+                                    </div>
+                                    {% if not log.success and log.error_message %}
+                                    <div class="mt-2">
+                                        <div class="alert alert-danger mb-0">
+                                            {{ log.error_message }}
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="alert alert-info">
+                            {% trans "No logs found for this sync operation" %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    $(document).ready(function() {
+        {% if entity_stats %}
+        // Entity statistics chart
+        var ctx = document.getElementById('entityChart').getContext('2d');
+        
+        var entityLabels = [{% for stat in entity_stats %}'{{ stat.entity_type }}',{% endfor %}];
+        var successData = [{% for stat in entity_stats %}{{ stat.success_count }},{% endfor %}];
+        var failureData = [{% for stat in entity_stats %}{{ stat.failure_count }},{% endfor %}];
+        
+        var entityChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: entityLabels,
+                datasets: [
+                    {
+                        label: '{% trans "Success" %}',
+                        data: successData,
+                        backgroundColor: 'rgba(40, 167, 69, 0.7)',
+                        borderColor: 'rgba(40, 167, 69, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: '{% trans "Failed" %}',
+                        data: failureData,
+                        backgroundColor: 'rgba(220, 53, 69, 0.7)',
+                        borderColor: 'rgba(220, 53, 69, 1)',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        stacked: true
+                    },
+                    y: {
+                        stacked: true,
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        }
+                    }
+                }
+            }
+        });
+        {% endif %}
+        
+        // Real-time updates for in-progress syncs
+        function updateSyncStatus() {
+            {% if sync_operation.status == 'in_progress' %}
+            $.ajax({
+                url: '{% url "sync_monitor:sync_detail" sync_operation.id %}',
+                type: 'GET',
+                success: function(data) {
+                    // This would be implemented with a proper API endpoint in a real application
+                    // For now, we'll just reload the page every 5 seconds if the sync is in progress
+                    location.reload();
+                },
+                complete: function() {
+                    // Schedule the next update
+                    setTimeout(updateSyncStatus, 5000); // Update every 5 seconds
+                }
+            });
+            {% endif %}
+        }
+        
+        // Start real-time updates if sync is in progress
+        updateSyncStatus();
+    });
+</script>
+{% endblock %}

@@ -2,7 +2,7 @@ from django.contrib import messages, auth
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.views.generic import CreateView, FormView, RedirectView, UpdateView
 from rest_framework.generics import UpdateAPIView
 
@@ -29,15 +29,48 @@ class RegisterDoctorView(CreateView):
             return HttpResponseRedirect(self.get_success_url())
         return super().dispatch(self.request, *args, **kwargs)
 
-    def post(self, request, *args, **kwargs):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            "register_heading": "Doctor Register",
+            "toggle_text": "Are you a Patient?",
+            "toggle_url": reverse("accounts:patient-register"),
+            "is_doctor": True,
+        })
+        return context
 
+    def post(self, request, *args, **kwargs):
         form = self.form_class(data=request.POST)
 
         if form.is_valid():
             user = form.save(commit=False)
             password = form.cleaned_data.get("password1")
             user.set_password(password)
+            
+            # Generate a unique username based on first and last name
+            first_name = form.cleaned_data.get("first_name", "").lower()
+            last_name = form.cleaned_data.get("last_name", "").lower()
+            
+            # Create base username
+            base_username = f"dr_{first_name}_{last_name}"
+            if len(base_username) > 20:
+                base_username = base_username[:20]
+                
+            # Remove special characters and spaces
+            import re
+            base_username = re.sub(r'[^a-z0-9_]', '', base_username)
+            
+            # Ensure username is unique
+            username = base_username
+            counter = 1
+            while User.objects.filter(username=username).exists():
+                username = f"{base_username}{counter}"
+                counter += 1
+                
+            user.username = username
             user.save()
+            
+            messages.success(request, f"Account created successfully. Your username is {username}")
             return redirect("accounts:login")
         else:
             return render(request, "accounts/register.html", {"form": form})
@@ -54,6 +87,16 @@ class RegisterPatientView(CreateView):
         if self.request.user.is_authenticated:
             return HttpResponseRedirect(self.get_success_url())
         return super().dispatch(self.request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            "register_heading": "Patient Register",
+            "toggle_text": "Are you a Doctor?",
+            "toggle_url": reverse("accounts:doctor-register"),
+            "is_doctor": False,
+        })
+        return context
 
     def post(self, request, *args, **kwargs):
 
