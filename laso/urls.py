@@ -28,6 +28,9 @@ urlpatterns = (
         # Django admin with Unfold styling
         path("admin/", admin.site.urls),
         
+        # Admin analytics dashboard
+        path("admin/analytics/", include("core.urls")),
+        
         # Original custom admin interface (renamed to dashboard)
         path(
             "dashboard/",

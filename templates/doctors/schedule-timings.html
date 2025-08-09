@@ -31,9 +31,17 @@
                 </div>
 
                 <div class="box-body">
-                    <form method="post" class="validate-form" action="" role="form">
+                    <form method="post" class="validate-form" action="{% url 'doctors:schedule-timings' %}" role="form">
 
                         {% csrf_token %}
+                        {% if messages %}
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            {% for message in messages %}
+                                {{ message }}
+                            {% endfor %}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                        {% endif %}
 
                         <div class="row main_item">
 
@@ -362,7 +370,11 @@
                             <div class="day_divider"></div>
                         </div>
 
-                        <button type="submit" class="btn btn-primary"><i class="ficon flaticon-check"></i> Update</button>
+                        <div class="form-group mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i> Save Schedule
+                            </button>
+                        </div>
                     </form>
                 </div>
 

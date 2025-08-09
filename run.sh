@@ -235,13 +235,28 @@ run_development() {
     # Check environment
     check_environment ".env.dev"
     
+    # Ensure setup scripts are executable
+    chmod +x setup_app.sh collect_static.sh 2>/dev/null || true
+    
+    # Run setup script to ensure proper directory structure
+    print_status "Setting up application directory structure..."
+    ./setup_app.sh
+    
     print_status "Building and starting development containers..."
-    print_status "Access the application at: http://localhost:8005"
+    print_status "Access the application at: http://65.108.91.110:12000"
     
     export COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME}-dev"
     
-    # Start containers
-    $compose_cmd up --build --remove-orphans
+    # Start containers in detached mode
+    $compose_cmd up --build --remove-orphans -d
+    
+    # Show running containers
+    print_status "Running containers:"
+    $compose_cmd ps
+    
+    # Show access URL
+    print_success "Application started in development mode!"
+    print_status "Access the application at: http://65.108.91.110:12000"
 }
 
 # Function to run in production mode
@@ -269,6 +284,13 @@ run_production() {
     
     # Stop existing containers
     stop_containers
+    
+    # Ensure setup scripts are executable
+    chmod +x setup_app.sh collect_static.sh 2>/dev/null || true
+    
+    # Run setup script to ensure proper directory structure
+    print_status "Setting up application directory structure..."
+    ./setup_app.sh
     
     print_status "Building and starting production containers..."
     

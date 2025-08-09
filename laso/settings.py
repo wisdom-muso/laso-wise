@@ -12,10 +12,10 @@ SECRET_KEY = os.getenv("SECRET_KEY", "g!y0otek@9t^b+b*7)&q2a5^=8_9&xcdii8@6h^_*w
 
 DEBUG = os.getenv("DEBUG", "False").lower() in ("true", "1", "t")
 
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "*").split(",")
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1,0.0.0.0,65.108.91.110").split(",")
 
 # CSRF settings
-csrf_origins = os.getenv("CSRF_TRUSTED_ORIGINS", "https://work-1-dwrrnobogrrhzpma.prod-runtime.all-hands.dev,https://work-2-dwrrnobogrrhzpma.prod-runtime.all-hands.dev")
+csrf_origins = os.getenv("CSRF_TRUSTED_ORIGINS", "https://work-1-dwrrnobogrrhzpma.prod-runtime.all-hands.dev,https://work-2-dwrrnobogrrhzpma.prod-runtime.all-hands.dev,http://65.108.91.110:12000")
 CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in csrf_origins.split(",") if origin.strip()]
 
 # For development, disable secure cookies if DEBUG is True

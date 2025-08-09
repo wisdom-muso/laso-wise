@@ -1,7 +1,8 @@
-{% extends 'includes/patient-sidebar.html' %}
+{% extends 'includes/patient-base.html' %}
 
 {% block page_name1 %}Dashboard{% endblock %}
 {% block page_name2 %}Dashboard{% endblock %}
+{% block page_name4 %}Dashboard{% endblock %}
 
 {% block main %}
 <div class="fade-in">
@@ -177,7 +178,7 @@
                                     <tr>
                                         <td>
                                             <div class="d-flex align-items-center">
-                                                <img src="{{ appointment.doctor.profile.image|default:'/static/assets/img/default-avatar.png' }}" 
+                                                <img src="{{ appointment.doctor.profile.image|default:'/static/assets/img/user.png' }}" 
                                                      class="rounded-circle me-3" width="40" height="40" alt="Doctor">
                                                 <div>
                                                     <strong>Dr. {{ appointment.doctor.get_full_name }}</strong>
@@ -264,7 +265,7 @@
                                         <td>{{ prescription.created_at|date:"M d, Y" }}</td>
                                         <td>
                                             <div class="d-flex align-items-center">
-                                                <img src="{{ prescription.doctor.profile.image|default:'/static/assets/img/default-avatar.png' }}" 
+                                                <img src="{{ prescription.doctor.profile.image|default:'/static/assets/img/user.png' }}" 
                                                      class="rounded-circle me-3" width="40" height="40" alt="Doctor">
                                                 <div>
                                                     <strong>Dr. {{ prescription.doctor.get_full_name }}</strong>
@@ -340,25 +341,28 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <form id="vitalsForm">
+                <form id="vitalsForm" action="{% url 'vitals:add-vital' %}" method="post">
                     {% csrf_token %}
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-modern-group">
                                 <label class="form-modern-label">Blood Pressure (Systolic)</label>
-                                <input type="number" class="form-modern-control" name="bp_systolic" placeholder="120">
+                                <input type="number" class="form-modern-control" name="value" placeholder="120" id="bp_systolic">
+                                <input type="hidden" name="category" value="1" id="bp_systolic_category">
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-modern-group">
                                 <label class="form-modern-label">Blood Pressure (Diastolic)</label>
-                                <input type="number" class="form-modern-control" name="bp_diastolic" placeholder="80">
+                                <input type="number" class="form-modern-control" name="value_diastolic" placeholder="80" id="bp_diastolic">
+                                <input type="hidden" name="category_diastolic" value="2" id="bp_diastolic_category">
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-modern-group">
                                 <label class="form-modern-label">Heart Rate (BPM)</label>
-                                <input type="number" class="form-modern-control" name="heart_rate" placeholder="72">
+                                <input type="number" class="form-modern-control" name="heart_rate" placeholder="72" id="heart_rate">
+                                <input type="hidden" name="category_heart_rate" value="3" id="heart_rate_category">
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -388,7 +392,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn-modern btn-modern-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn-modern btn-modern-primary" onclick="saveVitals()">Save Vitals</button>
+                <button type="submit" class="btn-modern btn-modern-primary">Save Vitals</button>
             </div>
         </div>
     </div>
@@ -404,11 +408,42 @@
         toastr.info('Medical reports feature coming soon!', 'Info');
     }
 
-    function saveVitals() {
-        toastr.success('Vitals recorded successfully!', 'Success');
-        const modal = bootstrap.Modal.getInstance(document.getElementById('vitalsModal'));
-        modal.hide();
-    }
+    // Add event listener to the form
+    document.addEventListener('DOMContentLoaded', function() {
+        const vitalsForm = document.getElementById('vitalsForm');
+        if (vitalsForm) {
+            vitalsForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Create FormData object
+                const formData = new FormData(vitalsForm);
+                
+                // Send AJAX request
+                fetch('{% url "vitals:add-vital" %}', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        toastr.success('Vitals recorded successfully!', 'Success');
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('vitalsModal'));
+                        modal.hide();
+                        // Reload the page after a short delay to show updated data
+                        setTimeout(() => window.location.reload(), 1000);
+                    } else {
+                        toastr.error('Failed to record vitals. Please try again.', 'Error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    toastr.error('An error occurred. Please try again.', 'Error');
+                });
+            });
+        }
+    });
 
     function viewPrescription(prescriptionId) {
         toastr.info('Prescription details feature coming soon!', 'Info');

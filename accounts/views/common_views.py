@@ -47,26 +47,31 @@ class RegisterDoctorView(CreateView):
             password = form.cleaned_data.get("password1")
             user.set_password(password)
             
-            # Generate a unique username based on first and last name
-            first_name = form.cleaned_data.get("first_name", "").lower()
-            last_name = form.cleaned_data.get("last_name", "").lower()
+            # Use the username from the form
+            username = form.cleaned_data.get("username")
             
-            # Create base username
-            base_username = f"dr_{first_name}_{last_name}"
-            if len(base_username) > 20:
-                base_username = base_username[:20]
+            # If no username provided, generate one
+            if not username:
+                # Generate a unique username based on first and last name
+                first_name = form.cleaned_data.get("first_name", "").lower()
+                last_name = form.cleaned_data.get("last_name", "").lower()
                 
-            # Remove special characters and spaces
-            import re
-            base_username = re.sub(r'[^a-z0-9_]', '', base_username)
+                # Create base username
+                base_username = f"dr_{first_name}_{last_name}"
+                if len(base_username) > 20:
+                    base_username = base_username[:20]
+                    
+                # Remove special characters and spaces
+                import re
+                base_username = re.sub(r'[^a-z0-9_]', '', base_username)
+                
+                # Ensure username is unique
+                username = base_username
+                counter = 1
+                while User.objects.filter(username=username).exists():
+                    username = f"{base_username}{counter}"
+                    counter += 1
             
-            # Ensure username is unique
-            username = base_username
-            counter = 1
-            while User.objects.filter(username=username).exists():
-                username = f"{base_username}{counter}"
-                counter += 1
-                
             user.username = username
             user.save()
             

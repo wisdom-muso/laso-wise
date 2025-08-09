@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
-from django.views.generic import UpdateView, DetailView, View, CreateView
+from django.views.generic import UpdateView, DetailView, View, CreateView, ListView
 from django.views.generic.base import TemplateView
 from django.contrib import messages
 from django.template.loader import render_to_string
@@ -11,10 +11,11 @@ from django.utils import timezone
 from datetime import datetime, timedelta
 
 from accounts.models import User
-from bookings.models import Booking, Prescription
+from bookings.models import Booking, Prescription, ProgressNote
 from mixins.custom_mixins import PatientRequiredMixin
 from patients.forms import PatientProfileForm, ChangePasswordForm, ReviewForm
 from core.models import Review
+from vitals.models import VitalRecord
 
 
 class PatientDashboardView(PatientRequiredMixin, TemplateView):
@@ -220,3 +221,64 @@ class AddReviewView(PatientRequiredMixin, CreateView):
             "patients:appointment-detail",
             kwargs={"pk": self.kwargs["booking_id"]},
         )
+
+
+class PrescriptionListView(PatientRequiredMixin, ListView):
+    model = Prescription
+    template_name = "patients/prescriptions.html"
+    context_object_name = "prescriptions"
+    
+    def get_queryset(self):
+        return Prescription.objects.filter(patient=self.request.user).select_related(
+            "doctor", "doctor__profile"
+        ).order_by("-created_at")
+
+
+class PrescriptionDetailView(PatientRequiredMixin, DetailView):
+    model = Prescription
+    template_name = "patients/prescription_detail.html"
+    context_object_name = "prescription"
+    
+    def get_queryset(self):
+        return Prescription.objects.filter(patient=self.request.user).select_related(
+            "doctor", "doctor__profile"
+        )
+
+
+class PrescriptionPrintView(PatientRequiredMixin, DetailView):
+    model = Prescription
+    template_name = "patients/prescription_print.html"
+    context_object_name = "prescription"
+    
+    def get_queryset(self):
+        return Prescription.objects.filter(patient=self.request.user).select_related(
+            "doctor", "doctor__profile", "patient"
+        )
+
+
+class MedicalRecordsView(PatientRequiredMixin, TemplateView):
+    template_name = "patients/medical_records.html"
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        
+        # Get progress notes
+        context["progress_notes"] = ProgressNote.objects.filter(
+            patient=user, is_private=False
+        ).select_related("doctor", "doctor__profile").order_by("-created_at")
+        
+        # Get prescriptions
+        context["prescriptions"] = Prescription.objects.filter(
+            patient=user
+        ).select_related("doctor", "doctor__profile").order_by("-created_at")
+        
+        # Get vitals
+        try:
+            context["vitals"] = VitalRecord.objects.filter(
+                patient=user
+            ).order_by("-recorded_at")
+        except:
+            context["vitals"] = []
+            
+        return context

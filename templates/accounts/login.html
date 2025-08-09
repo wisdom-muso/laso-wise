@@ -18,7 +18,7 @@
                     <div class="account-content">
                         <div class="row align-items-center justify-content-center">
                             <div class="col-md-7 col-lg-6 login-left">
-                                <img src="{% static 'assets/img/login-banner.png' %}" class="img-fluid" alt="Laso Digital Health Login">
+                                <img src="{% static 'assets/img/login-banner-new.png' %}?v={% now 'U' %}" class="img-fluid" alt="Laso Digital Health Login">
                             </div>
                             <div class="col-md-12 col-lg-6 login-right">
                                 <div class="login-header">
@@ -68,19 +68,27 @@
                                         <a class="forgot-link" href="#">Forgot Password?</a>
                                     </div>
                                     <button class="btn btn-primary btn-block btn-lg login-btn" type="submit">Login</button>
-                                    <div class="login-or">
-                                        <span class="or-line"></span>
-                                        <span class="span-or">or</span>
-                                    </div>
-                                    <div class="row form-row social-login">
-                                        <div class="col-6">
-                                            <a href="#" class="btn btn-facebook btn-block"><i class="fab fa-facebook-f mr-1"></i> Login with Facebook</a>
+                                    
+                                    <div class="text-center dont-have mt-4">Don't have an account?</div>
+                                    
+                                    <div class="row mt-3">
+                                        <div class="col-md-6 mb-2">
+                                            <a href="{% url 'accounts:patient-register' %}" class="btn btn-block btn-lg" style="background: linear-gradient(135deg, #9333ea, #a855f7); color: white; border-radius: 10px; transition: all 0.3s ease; padding: 12px 20px;">
+                                                <i class="fas fa-user-plus me-2"></i> Register as Patient
+                                            </a>
                                         </div>
-                                        <div class="col-6">
-                                            <a href="#" class="btn btn-google btn-block"><i class="fab fa-google mr-1"></i> Login with Google</a>
+                                        <div class="col-md-6 mb-2">
+                                            <a href="{% url 'accounts:doctor-register' %}" class="btn btn-block btn-lg" style="background: linear-gradient(135deg, #2563eb, #3b82f6); color: white; border-radius: 10px; transition: all 0.3s ease; padding: 12px 20px;">
+                                                <i class="fas fa-user-md me-2"></i> Register as Doctor
+                                            </a>
                                         </div>
                                     </div>
-                                    <div class="text-center dont-have">Don’t have an account? <a href="{% url 'accounts:patient-register' %}">Register as Patient</a> | <a href="{% url 'accounts:doctor-register' %}">Register as Doctor</a></div>
+                                    
+                                    <div class="text-center mt-3">
+                                        <a href="/admin/" class="btn btn-sm btn-outline-secondary">
+                                            <i class="fas fa-user-shield me-1"></i> Admin Login
+                                        </a>
+                                    </div>
                                 </form>
                             </div>
                         </div>

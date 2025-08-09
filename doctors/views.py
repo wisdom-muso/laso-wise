@@ -3,6 +3,7 @@ from datetime import datetime
 
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 from django.http import (
     HttpRequest,
     HttpResponse,
@@ -110,24 +111,28 @@ def convert_to_24_hour_format(time_str):
 def schedule_timings(request: HttpRequest) -> HttpResponse:
     if request.method == "POST":
         data = request.POST
+        # Clear existing time ranges for the days being updated
         for i in range(7):
             if data.get(f"day_{i}", None):
+                day, created = days[i].objects.get_or_create(user=request.user)
+                day.time_range.clear()  # Remove all existing time ranges
+                
                 start_times = data.getlist(f"start_time_{i}", default=[])
                 end_times = data.getlist(f"end_time_{i}", default=[])
+                
                 for index in range(len(start_times)):
-                    start = convert_to_24_hour_format(start_times[index])
-                    end = convert_to_24_hour_format(end_times[index])
-                    time_range, time_created = TimeRange.objects.get_or_create(
-                        start=start, end=end
-                    )
-                    day, created = days[i].objects.get_or_create(
-                        user=request.user
-                    )
-                    ranges = day.time_range
-                    if time_range.id not in list(
-                        ranges.values_list("id", flat=True)
-                    ):
-                        day.time_range.add(time_range)
+                    if start_times[index] and end_times[index]:  # Only process if both times are provided
+                        try:
+                            start = convert_to_24_hour_format(start_times[index])
+                            end = convert_to_24_hour_format(end_times[index])
+                            time_range, time_created = TimeRange.objects.get_or_create(
+                                start=start, end=end
+                            )
+                            day.time_range.add(time_range)
+                        except Exception as e:
+                            messages.error(request, f"Error processing time: {e}")
+                            
+        messages.success(request, "Your appointment schedule has been updated successfully!")
 
         return HttpResponsePermanentRedirect(
             reverse_lazy("doctors:schedule-timings")

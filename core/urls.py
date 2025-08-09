@@ -1,7 +1,9 @@
 from django.urls import path
 from django.shortcuts import redirect
-from .views import home, TermsView, PrivacyView, analytics_dashboard, analytics_api
-from .views.health import (
+# Import from the views package
+from core.views import (
+    home, TermsView, PrivacyView, 
+    analytics_dashboard, analytics_api,
     health_check, health_detailed, readiness_check, 
     liveness_check, metrics
 )
@@ -16,8 +18,8 @@ urlpatterns = [
     path("home/", home, name="home-page"),
     path("terms/", TermsView.as_view(), name="terms"),
     path("privacy/", PrivacyView.as_view(), name="privacy"),
-    path("admin/analytics/", analytics_dashboard, name="analytics-dashboard"),
-    path("admin/analytics/api/", analytics_api, name="analytics-api"),
+    path("", analytics_dashboard, name="analytics-dashboard"),
+    path("api/", analytics_api, name="analytics-api"),
     
     # Health check endpoints
     path("health/", health_check, name="health"),

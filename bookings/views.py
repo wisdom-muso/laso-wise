@@ -14,6 +14,7 @@ from .models import Booking
 
 class BookingView(LoginRequiredMixin, View):
     template_name = "bookings/booking.html"
+    login_url = '/accounts/login/'  # Redirect to patient login page instead of admin login
 
     def get_week_dates(self):
         """Get the next 7 days starting from today"""

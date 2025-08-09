@@ -1,0 +1,79 @@
+{% extends 'includes/patient-base.html' %}
+{% load static %}
+
+{% block page_name1 %}Prescription{% endblock %}
+{% block page_name2 %}Prescription{% endblock %}
+{% block page_name4 %}Prescription Details{% endblock %}
+
+{% block main %}
+<div class="card">
+    <div class="card-header">
+        <h4 class="card-title d-flex justify-content-between align-items-center">
+            <span>Prescription Details</span>
+            <a href="{% url 'patients:prescription-print' prescription.id %}" class="btn btn-sm btn-primary" target="_blank">
+                <i class="fas fa-print"></i> Print
+            </a>
+        </h4>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-4">
+                    <h5 class="text-muted">Doctor</h5>
+                    <div class="d-flex align-items-center">
+                        <img src="{{ prescription.doctor.profile.image|default:'/static/assets/img/user.png' }}" 
+                             class="rounded-circle me-3" width="50" height="50" alt="Doctor">
+                        <div>
+                            <h5 class="mb-0">Dr. {{ prescription.doctor.get_full_name }}</h5>
+                            <p class="text-muted mb-0">{{ prescription.doctor.profile.specialization }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-4">
+                    <h5 class="text-muted">Date</h5>
+                    <p>{{ prescription.created_at|date:"F d, Y" }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <hr>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-4">
+                    <h5 class="text-muted">Symptoms</h5>
+                    <p>{{ prescription.symptoms }}</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-4">
+                    <h5 class="text-muted">Diagnosis</h5>
+                    <p>{{ prescription.diagnosis }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mb-4">
+            <h5 class="text-muted">Medications</h5>
+            <div class="p-3 border rounded">
+                {{ prescription.medications|safe }}
+            </div>
+        </div>
+        
+        {% if prescription.notes %}
+        <div class="mb-4">
+            <h5 class="text-muted">Additional Notes</h5>
+            <p>{{ prescription.notes }}</p>
+        </div>
+        {% endif %}
+        
+        <div class="text-end mt-4">
+            <a href="{% url 'patients:prescriptions' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Prescriptions
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

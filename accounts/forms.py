@@ -8,9 +8,15 @@ from .models import User
 class DoctorRegistrationForm(UserCreationForm):
     def __init__(self, *args, **kwargs):
         super(DoctorRegistrationForm, self).__init__(*args, **kwargs)
-        # Remove username field as we'll generate it automatically
+        # Keep username field but make it optional
         if 'username' in self.fields:
-            del self.fields['username']
+            self.fields['username'].required = False
+            self.fields['username'].help_text = "Optional. If left blank, a username will be generated for you."
+            self.fields['username'].widget.attrs.update(
+                {
+                    "placeholder": "Enter username (optional)",
+                }
+            )
             
         self.fields["first_name"].label = "First name"
         self.fields["last_name"].label = "Last name"
@@ -50,6 +56,7 @@ class DoctorRegistrationForm(UserCreationForm):
         fields = [
             "first_name",
             "last_name",
+            "username",
             "email",
             "password1",
             "password2",

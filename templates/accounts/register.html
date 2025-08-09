@@ -64,7 +64,6 @@
                                             </div>
                                         {% endfor %}
                                     {% endif %}
-                                    {% if not is_doctor %}
                                     <div class="form-group form-focus">
                                         <input type="text" class="form-control floating" name="username" value="{{ form.username.value|default:"" }}">
                                         <label class="focus-label">Username</label>
@@ -77,7 +76,6 @@
                                                 <strong>{{ error|escape }}</strong>
                                             </div>
                                         {% endfor %}
-                                    {% endif %}
                                     {% endif %}
                                     <div class="form-group form-focus">
                                         <input type="password" class="form-control floating" name="password1">

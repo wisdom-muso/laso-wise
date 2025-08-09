@@ -85,16 +85,29 @@ WORKDIR $APP_HOME
 # Copy application code with proper ownership
 COPY --chown=appuser:appgroup . .
 
-# Remove duplicate static files to prevent conflicts
-RUN echo "Removing duplicate static files..." && \
-    if [ -d "static/ckeditor/ckeditor" ]; then echo "- Removing static/ckeditor/ckeditor" && rm -rf static/ckeditor/ckeditor; fi && \
-    if [ -d "static/ckeditor/file-icons" ]; then echo "- Removing static/ckeditor/file-icons" && rm -rf static/ckeditor/file-icons; fi && \
-    if [ -d "static/ckeditor/galleriffic" ]; then echo "- Removing static/ckeditor/galleriffic" && rm -rf static/ckeditor/galleriffic; fi && \
-    if [ -f "static/ckeditor/ckeditor-init.js" ]; then echo "- Removing static/ckeditor/ckeditor-init.js" && rm -f static/ckeditor/ckeditor-init.js; fi && \
-    if [ -f "static/ckeditor/ckeditor.css" ]; then echo "- Removing static/ckeditor/ckeditor.css" && rm -f static/ckeditor/ckeditor.css; fi && \
-    if [ -f "static/ckeditor/fixups.js" ]; then echo "- Removing static/ckeditor/fixups.js" && rm -f static/ckeditor/fixups.js; fi && \
-    if [ -d "static/unfold" ]; then echo "- Removing static/unfold" && rm -rf static/unfold; fi && \
-    if [ -d "static/admin" ]; then echo "- Removing static/admin" && rm -rf static/admin; fi
+# Create necessary scripts if they don't exist
+RUN if [ ! -f "collect_static.sh" ]; then \
+        echo "collect_static.sh not found, creating it..."; \
+        echo '#!/bin/sh' > collect_static.sh; \
+        echo 'python manage.py collectstatic --noinput' >> collect_static.sh; \
+    fi && \
+    if [ ! -f "setup_app.sh" ]; then \
+        echo "setup_app.sh not found, creating it..."; \
+        echo '#!/bin/sh' > setup_app.sh; \
+        echo 'mkdir -p core/views staticfiles media logs' >> setup_app.sh; \
+        echo 'touch core/views/__init__.py' >> setup_app.sh; \
+    fi && \
+    chmod +x collect_static.sh setup_app.sh
+
+# Create core/views directory and __init__.py file
+RUN mkdir -p core/views && \
+    if [ ! -f "core/views/__init__.py" ]; then \
+        echo "# This file makes the views directory a Python package" > core/views/__init__.py; \
+    fi
+
+# Run static files collection
+RUN echo "Running static files collection script..." && \
+    python manage.py collectstatic --noinput
 
 # Set execute permissions and switch to non-root user
 RUN chmod +x manage.py && \
@@ -103,9 +116,6 @@ USER appuser
 
 # Add local Python packages to PATH
 ENV PATH=/home/appuser/.local/bin:$PATH
-
-# Collect static files
-RUN python manage.py collectstatic --noinput --clear --verbosity 1
 
 # Create entrypoint script
 COPY --chown=appuser:appgroup deployment/entrypoint.sh /home/appuser/entrypoint.sh

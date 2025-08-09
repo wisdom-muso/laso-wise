@@ -4,7 +4,7 @@
 <header class="header shadow-sm">
     <nav class="navbar navbar-expand-lg navbar-light">
         <div class="container">
-            <a href="{% url 'core:home-page' %}" class="navbar-brand">
+            <a href="https://www.lasodigitalhealth.com/" class="navbar-brand" target="_blank">
                 <img src="{% static 'assets/img/laso-logo.svg' %}" height="40" alt="Laso Digital Health Logo">
             </a>
             
@@ -17,9 +17,7 @@
                     <li class="nav-item">
                         <a class="nav-link {% if request.path == '/doctors/' %}active{% endif %}" href="{% url 'doctors:list' %}">Doctors</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if '/mobile-clinic/' in request.path %}active{% endif %}" href="{% url 'mobile_clinic:my_requests' %}">Mobile Clinic</a>
-                    </li>
+
                     {% if user.is_authenticated and user.role == 'patient' %}
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle {% if request.path == '/patients/' %}active{% endif %}" href="#" id="patientDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -35,16 +33,6 @@
                 </ul>
                 
                 <div class="d-flex align-items-center">
-                    <div class="d-none d-lg-flex me-4 align-items-center">
-                        <div class="me-2">
-                            <i class="far fa-hospital text-primary fs-4"></i>
-                        </div>
-                        <div>
-                            <small class="text-muted d-block">Contact</small>
-                            <span class="fw-bold">+8801224242</span>
-                        </div>
-                    </div>
-                    
                     {% if not user.is_authenticated %}
                         <a class="btn btn-primary" href="{% url 'accounts:login' %}">
                             <i class="fas fa-sign-in-alt me-1"></i> Login / Signup
