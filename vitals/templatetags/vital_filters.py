@@ -83,3 +83,23 @@ def default_if_none(value, default):
     if value is None:
         return default
     return value
+
+
+@register.filter
+def min_value(values):
+    """
+    Get the minimum value from a list
+    """
+    if not values:
+        return 0
+    return min(values)
+
+
+@register.filter
+def max_value(values):
+    """
+    Get the maximum value from a list
+    """
+    if not values:
+        return 0
+    return max(values)

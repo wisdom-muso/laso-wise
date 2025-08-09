@@ -3,10 +3,10 @@
 
 :root {
   /* Enhanced Color Palette */
-  --primary-color: #0891b2; /* Cyan-600 */
-  --primary-hover: #0e7490; /* Cyan-700 */
-  --primary-light: #67e8f9; /* Cyan-300 */
-  --primary-dark: #164e63; /* Cyan-900 */
+  --primary-color: #14b8a6; /* Teal-500 */
+  --primary-hover: #0d9488; /* Teal-600 */
+  --primary-light: #5eead4; /* Teal-300 */
+  --primary-dark: #134e4a; /* Teal-900 */
   
   --secondary-color: #059669; /* Emerald-600 */
   --secondary-hover: #047857; /* Emerald-700 */
@@ -19,7 +19,7 @@
   --success-color: #10b981; /* Emerald-500 */
   --warning-color: #f59e0b; /* Amber-500 */
   --danger-color: #ef4444; /* Red-500 */
-  --info-color: #3b82f6; /* Blue-500 */
+  --info-color: #14b8a6; /* Teal-500 */
   
   /* Neutral Colors */
   --gray-50: #f8fafc;

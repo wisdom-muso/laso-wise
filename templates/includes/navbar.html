@@ -15,10 +15,10 @@
             <div class="collapse navbar-collapse" id="navbarMain">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link {% if request.path == '/home/' %}active{% endif %}" href="{% url 'core:home-page' %}">Home</a>
+                        <a class="nav-link {% if request.path == '/doctors/' %}active{% endif %}" href="{% url 'doctors:list' %}">Doctors</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.path == '/doctors/' %}active{% endif %}" href="{% url 'doctors:list' %}">Doctors</a>
+                        <a class="nav-link {% if '/mobile-clinic/' in request.path %}active{% endif %}" href="{% url 'mobile_clinic:my_requests' %}">Mobile Clinic</a>
                     </li>
                     {% if user.is_authenticated and user.role == 'patient' %}
                         <li class="nav-item dropdown">

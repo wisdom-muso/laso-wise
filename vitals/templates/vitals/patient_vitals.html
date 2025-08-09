@@ -5,100 +5,383 @@
 {% block title %}{% trans "Patient Vitals" %} - {{ patient.get_full_name }}{% endblock %}
 
 {% block styles %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
 <style>
-    .chart-container {
-        height: 300px;
-        margin-bottom: 30px;
+    :root {
+        --primary-color: #14b8a6;
+        --secondary-color: #0d9488;
+        --success-color: #10b981;
+        --warning-color: #f59e0b;
+        --danger-color: #ef4444;
+        --info-color: #3b82f6;
+        --light-bg: #f8fafc;
+        --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        --card-shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     }
-    
+
+    body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+    }
+
+    .main-content {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        margin: 20px;
+        box-shadow: var(--card-shadow);
+    }
+
     .vital-card {
-        border-radius: 10px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        margin-bottom: 20px;
+        background: white;
+        border-radius: 16px;
+        box-shadow: var(--card-shadow);
+        border: none;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         overflow: hidden;
+        position: relative;
     }
-    
-    .vital-card .card-body {
-        padding: 20px;
+
+    .vital-card:hover {
+        transform: translateY(-8px);
+        box-shadow: var(--card-shadow-hover);
     }
-    
+
+    .vital-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    }
+
     .vital-icon {
-        width: 50px;
-        height: 50px;
+        width: 60px;
+        height: 60px;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin-bottom: 15px;
+        margin-bottom: 20px;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        box-shadow: 0 4px 12px rgba(20, 184, 166, 0.3);
+        transition: all 0.3s ease;
     }
-    
+
+    .vital-card:hover .vital-icon {
+        transform: scale(1.1);
+        box-shadow: 0 8px 20px rgba(20, 184, 166, 0.4);
+    }
+
     .vital-icon i {
-        font-size: 24px;
+        font-size: 28px;
         color: white;
     }
-    
+
     .vital-title {
-        font-size: 16px;
-        margin-bottom: 10px;
-        color: #333;
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 12px;
+        color: #1f2937;
     }
-    
+
     .vital-value {
-        font-size: 24px;
-        font-weight: bold;
-        margin-bottom: 10px;
+        font-size: 32px;
+        font-weight: 700;
+        margin-bottom: 12px;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
     }
-    
+
     .vital-value .unit {
-        font-size: 14px;
-        color: #777;
-        margin-left: 5px;
+        font-size: 16px;
+        color: #6b7280;
+        margin-left: 8px;
+        font-weight: 400;
     }
-    
+
     .vital-status {
-        display: inline-block;
-        padding: 3px 10px;
-        border-radius: 20px;
-        font-size: 12px;
-        margin-bottom: 10px;
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 16px;
+        border-radius: 25px;
+        font-size: 14px;
+        font-weight: 500;
+        margin-bottom: 12px;
+        transition: all 0.3s ease;
     }
-    
+
     .status-normal {
-        background-color: #d4edda;
-        color: #155724;
+        background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+        color: #065f46;
+        border: 1px solid #10b981;
     }
-    
+
     .status-abnormal-low, .status-abnormal-high {
-        background-color: #fff3cd;
-        color: #856404;
+        background: linear-gradient(135deg, #fef3c7, #fde68a);
+        color: #92400e;
+        border: 1px solid #f59e0b;
     }
-    
+
     .status-critical-low, .status-critical-high {
-        background-color: #f8d7da;
-        color: #721c24;
+        background: linear-gradient(135deg, #fee2e2, #fecaca);
+        color: #991b1b;
+        border: 1px solid #ef4444;
     }
-    
+
     .vital-date {
+        font-size: 13px;
+        color: #9ca3af;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .chart-container {
+        background: white;
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: var(--card-shadow);
+        margin-bottom: 24px;
+        transition: all 0.3s ease;
+    }
+
+    .chart-container:hover {
+        box-shadow: var(--card-shadow-hover);
+    }
+
+    .chart-title {
+        font-size: 20px;
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .chart-title i {
+        color: var(--primary-color);
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: var(--card-shadow);
+        text-align: center;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    }
+
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--card-shadow-hover);
+    }
+
+    .stat-number {
+        font-size: 36px;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin-bottom: 8px;
+    }
+
+    .stat-label {
+        font-size: 14px;
+        color: #6b7280;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 500;
+    }
+
+    .quick-actions {
+        background: white;
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: var(--card-shadow);
+        margin-bottom: 30px;
+    }
+
+    .action-btn {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        border: none;
+        border-radius: 12px;
+        padding: 16px 24px;
+        color: white;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(20, 184, 166, 0.3);
+    }
+
+    .action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(20, 184, 166, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+
+    .real-time-indicator {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: var(--success-color);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 25px;
         font-size: 12px;
-        color: #777;
+        font-weight: 500;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
     }
-    
-    .vital-card-empty .vital-action {
-        margin-top: 15px;
+
+    .real-time-indicator .pulse {
+        width: 8px;
+        height: 8px;
+        background: white;
+        border-radius: 50%;
+        animation: pulse 2s infinite;
     }
-    
-    .tab-pane {
-        padding-top: 20px;
+
+    @keyframes pulse {
+        0% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.5; transform: scale(1.2); }
+        100% { opacity: 1; transform: scale(1); }
+    }
+
+    .trend-indicator {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 12px;
+        font-weight: 500;
+        padding: 4px 8px;
+        border-radius: 12px;
+        margin-left: 8px;
+    }
+
+    .trend-up {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .trend-down {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .trend-stable {
+        background: #f3f4f6;
+        color: #374151;
+    }
+
+    .loading-spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid var(--primary-color);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .breadcrumb-bar {
+        background: white;
+        border-radius: 16px;
+        margin: 20px;
+        padding: 20px;
+        box-shadow: var(--card-shadow);
+    }
+
+    .breadcrumb-title {
+        color: #1f2937;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .breadcrumb {
+        background: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .breadcrumb-item a {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .breadcrumb-item.active {
+        color: #6b7280;
+    }
+
+    @media (max-width: 768px) {
+        .main-content {
+            margin: 10px;
+        }
+        
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .vital-value {
+            font-size: 24px;
+        }
+        
+        .stat-number {
+            font-size: 28px;
+        }
     }
 </style>
 {% endblock %}
 
 {% block content %}
+<!-- Real-time Indicator -->
+<div class="real-time-indicator" id="realTimeIndicator">
+    <div class="pulse"></div>
+    <span>Live Data</span>
+</div>
+
 <div class="breadcrumb-bar">
     <div class="container-fluid">
         <div class="row align-items-center">
-            <div class="col-md-12 col-12">
-                <nav aria-label="breadcrumb" class="page-breadcrumb">
+            <div class="col-md-12">
+                <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item"><a href="{% url 'core:home' %}">{% trans "Home" %}</a></li>
                         {% if request.user.role == 'doctor' %}
@@ -106,629 +389,422 @@
                         {% else %}
                         <li class="breadcrumb-item"><a href="{% url 'admin-patients' %}">{% trans "Patients" %}</a></li>
                         {% endif %}
-                        <li class="breadcrumb-item active" aria-current="page">{{ patient.get_full_name }}</li>
+                        <li class="breadcrumb-item active">{{ patient.get_full_name }}</li>
                     </ol>
                 </nav>
-                <h2 class="breadcrumb-title">{% trans "Vital Signs" %} - {{ patient.get_full_name }}</h2>
+                <h2 class="breadcrumb-title">{% trans "Vital Signs Dashboard" %} - {{ patient.get_full_name }}</h2>
             </div>
         </div>
     </div>
 </div>
 
-<div class="content">
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-md-12">
-                <!-- Quick Actions -->
-                <div class="card">
-                    <div class="card-header">
-                        <h4 class="card-title">{% trans "Quick Actions" %}</h4>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-4 mb-3">
-                                <a href="{% url 'vitals:add-patient-vital' patient.id %}" class="btn btn-primary btn-block">
+<div class="main-content">
+    <div class="container-fluid py-4">
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <h4 class="mb-3"><i class="fas fa-bolt"></i> {% trans "Quick Actions" %}</h4>
+                                    <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <a href="{% url 'vitals:add-patient-vital' patient.id %}" class="action-btn btn-block">
                                     <i class="fas fa-plus-circle"></i> {% trans "Record Vital Sign" %}
                                 </a>
                             </div>
-                            <div class="col-md-4 mb-3">
-                                <a href="{% url 'vitals:add-patient-goal' patient.id %}" class="btn btn-success btn-block">
+                            <div class="col-md-3 mb-3">
+                                <a href="{% url 'vitals:add-patient-goal' patient.id %}" class="action-btn btn-block">
                                     <i class="fas fa-bullseye"></i> {% trans "Set Health Goal" %}
                                 </a>
                             </div>
-                            <div class="col-md-4 mb-3">
+                            <div class="col-md-3 mb-3">
+                                <a href="{% url 'vitals:patient-vitals-analytics' patient.id %}" class="action-btn btn-block">
+                                    <i class="fas fa-chart-line"></i> {% trans "Advanced Analytics" %}
+                                </a>
+                            </div>
+                            <div class="col-md-3 mb-3">
                                 {% if request.user.role == 'doctor' %}
-                                <a href="{% url 'doctors:patient-detail' patient.id %}" class="btn btn-info btn-block">
-                                    <i class="fas fa-user"></i> {% trans "Back to Patient Profile" %}
+                                <a href="{% url 'doctors:patient-detail' patient.id %}" class="action-btn btn-block">
+                                    <i class="fas fa-user"></i> {% trans "Patient Profile" %}
                                 </a>
                                 {% else %}
-                                <a href="{% url 'admin-patient-detail' patient.id %}" class="btn btn-info btn-block">
-                                    <i class="fas fa-user"></i> {% trans "Back to Patient Profile" %}
+                                <a href="{% url 'admin-patient-detail' patient.id %}" class="action-btn btn-block">
+                                    <i class="fas fa-user"></i> {% trans "Patient Profile" %}
                                 </a>
                                 {% endif %}
                             </div>
                         </div>
-                    </div>
-                </div>
+        </div>
 
-                <!-- Latest Vitals -->
-                <div class="card">
-                    <div class="card-header">
-                        <h4 class="card-title">{% trans "Latest Vital Signs" %}</h4>
-                    </div>
-                    <div class="card-body">
-                        {% if latest_vitals %}
-                        <div class="row">
-                            {% for category in categories %}
-                                {% if category.id in latest_vitals %}
-                                    {% with vital=latest_vitals|get_item:category.id %}
-                                    <div class="col-md-6 col-lg-4 mb-4">
-                                        <div class="card vital-card">
-                                            <div class="card-body">
-                                                <div class="vital-icon" style="background-color: {{ category.color }}">
-                                                    <i class="{{ category.icon }}"></i>
-                                                </div>
-                                                <h5 class="vital-title">{{ category.name }}</h5>
-                                                <div class="vital-value">
-                                                    <span class="value">{{ vital.value }}</span>
-                                                    {% if vital.secondary_value %}
-                                                    <span class="separator">/</span>
-                                                    <span class="secondary-value">{{ vital.secondary_value }}</span>
-                                                    {% endif %}
-                                                    <span class="unit">{{ category.unit }}</span>
-                                                </div>
-                                                <div class="vital-status status-{{ vital.status }}">
-                                                    {{ vital.status_display }}
-                                                </div>
-                                                <div class="vital-date">
-                                                    <small>{% trans "Recorded" %}: {{ vital.recorded_at|date:"M d, Y H:i" }}</small>
-                                                </div>
-                                                {% if vital.is_professional_reading %}
-                                                <div class="recorded-by">
-                                                    <small class="text-primary">
-                                                        <i class="fas fa-user-md"></i> 
-                                                        {% trans "Recorded by" %}: 
-                                                        {% if vital.recorded_by %}
-                                                            {{ vital.recorded_by.get_full_name }}
-                                                        {% else %}
-                                                            {% trans "Healthcare Professional" %}
-                                                        {% endif %}
-                                                    </small>
-                                                </div>
-                                                {% endif %}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    {% endwith %}
-                                {% else %}
-                                    <div class="col-md-6 col-lg-4 mb-4">
-                                        <div class="card vital-card vital-card-empty">
-                                            <div class="card-body">
-                                                <div class="vital-icon" style="background-color: {{ category.color }}">
-                                                    <i class="{{ category.icon }}"></i>
-                                                </div>
-                                                <h5 class="vital-title">{{ category.name }}</h5>
-                                                <div class="vital-value">
-                                                    <span class="value">--</span>
-                                                    <span class="unit">{{ category.unit }}</span>
-                                                </div>
-                                                <div class="vital-status">
-                                                    {% trans "No data recorded" %}
-                                                </div>
-                                                <div class="vital-action">
-                                                    <a href="{% url 'vitals:add-patient-vital' patient.id %}" class="btn btn-sm btn-primary">
-                                                        {% trans "Record Now" %}
-                                                    </a>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                {% endif %}
-                            {% endfor %}
-                        </div>
-                        {% else %}
-                        <div class="alert alert-info">
-                            {% trans "No vital signs have been recorded for this patient yet." %}
-                            <a href="{% url 'vitals:add-patient-vital' patient.id %}">{% trans "Record the first vital sign now" %}</a>.
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
+        <!-- Statistics Overview -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="totalVitals">{{ total_vitals|default:0 }}</div>
+                <div class="stat-label">{% trans "Total Records" %}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="normalVitals">{{ normal_vitals|default:0 }}</div>
+                <div class="stat-label">{% trans "Normal Readings" %}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="abnormalVitals">{{ abnormal_vitals|default:0 }}</div>
+                <div class="stat-label">{% trans "Abnormal Readings" %}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="criticalVitals">{{ critical_vitals|default:0 }}</div>
+                <div class="stat-label">{% trans "Critical Readings" %}</div>
+            </div>
+        </div>
 
-                <!-- Vitals History and Goals -->
-                <div class="card">
-                    <div class="card-header">
-                        <ul class="nav nav-tabs card-header-tabs" id="myTab" role="tablist">
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link active" id="history-tab" data-bs-toggle="tab" data-bs-target="#history" type="button" role="tab" aria-controls="history" aria-selected="true">
-                                    {% trans "Vital History" %}
-                                </button>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="goals-tab" data-bs-toggle="tab" data-bs-target="#goals" type="button" role="tab" aria-controls="goals" aria-selected="false">
-                                    {% trans "Health Goals" %}
-                                </button>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="charts-tab" data-bs-toggle="tab" data-bs-target="#charts" type="button" role="tab" aria-controls="charts" aria-selected="false">
-                                    {% trans "Trends" %}
-                                </button>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="card-body">
-                        <div class="tab-content" id="myTabContent">
-                            <!-- History Tab -->
-                            <div class="tab-pane fade show active" id="history" role="tabpanel" aria-labelledby="history-tab">
-                                {% if vitals %}
-                                <div class="table-responsive">
-                                    <table class="table table-hover table-center mb-0 datatable">
-                                        <thead>
-                                            <tr>
-                                                <th>{% trans "Vital Sign" %}</th>
-                                                <th>{% trans "Value" %}</th>
-                                                <th>{% trans "Status" %}</th>
-                                                <th>{% trans "Recorded By" %}</th>
-                                                <th>{% trans "Date & Time" %}</th>
-                                                <th>{% trans "Notes" %}</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {% for vital in vitals %}
-                                            <tr>
-                                                <td>
-                                                    <h2 class="table-avatar">
-                                                        <div class="avatar avatar-sm me-2" style="background-color: {{ vital.category.color }}">
-                                                            <i class="{{ vital.category.icon }} text-white"></i>
-                                                        </div>
-                                                        {{ vital.category.name }}
-                                                    </h2>
-                                                </td>
-                                                <td>
-                                                    {{ vital.value }} 
-                                                    {% if vital.secondary_value %}/ {{ vital.secondary_value }}{% endif %} 
-                                                    {{ vital.category.unit }}
-                                                </td>
-                                                <td>
-                                                    <span class="badge rounded-pill status-{{ vital.status }}">
-                                                        {{ vital.status_display }}
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    {% if vital.is_professional_reading %}
-                                                        {% if vital.recorded_by %}
-                                                            <span class="text-primary">
-                                                                <i class="fas fa-user-md"></i> {{ vital.recorded_by.get_full_name }}
-                                                            </span>
-                                                        {% else %}
-                                                            <span class="text-primary">
-                                                                <i class="fas fa-user-md"></i> {% trans "Healthcare Professional" %}
-                                                            </span>
-                                                        {% endif %}
-                                                    {% else %}
-                                                        <span>
-                                                            <i class="fas fa-user"></i> {% trans "Patient" %}
-                                                        </span>
-                                                    {% endif %}
-                                                </td>
-                                                <td>{{ vital.recorded_at|date:"M d, Y H:i" }}</td>
-                                                <td>
-                                                    {% if vital.notes %}
-                                                        <span data-bs-toggle="tooltip" title="{{ vital.notes }}">
-                                                            {{ vital.notes|truncatechars:30 }}
-                                                        </span>
-                                                    {% else %}
-                                                        --
-                                                    {% endif %}
-                                                </td>
-                                            </tr>
-                                            {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </div>
-                                {% else %}
-                                <div class="alert alert-info">
-                                    {% trans "No vital records found for this patient." %}
-                                </div>
-                                {% endif %}
-                            </div>
-                            
-                            <!-- Goals Tab -->
-                            <div class="tab-pane fade" id="goals" role="tabpanel" aria-labelledby="goals-tab">
-                                <div class="row mb-4">
-                                    <div class="col-md-12">
-                                        <a href="{% url 'vitals:add-patient-goal' patient.id %}" class="btn btn-primary">
-                                            <i class="fas fa-plus-circle"></i> {% trans "Add New Goal" %}
-                                        </a>
-                                    </div>
-                                </div>
-                                
-                                {% if active_goals %}
-                                <h4>{% trans "Active Goals" %}</h4>
-                                <div class="table-responsive">
-                                    <table class="table table-hover table-center mb-4">
-                                        <thead>
-                                            <tr>
-                                                <th>{% trans "Vital Sign" %}</th>
-                                                <th>{% trans "Target" %}</th>
-                                                <th>{% trans "Current" %}</th>
-                                                <th>{% trans "Progress" %}</th>
-                                                <th>{% trans "Target Date" %}</th>
-                                                <th>{% trans "Set By" %}</th>
-                                                <th>{% trans "Notes" %}</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {% for goal in active_goals %}
-                                            <tr>
-                                                <td>
-                                                    <h2 class="table-avatar">
-                                                        <div class="avatar avatar-sm me-2" style="background-color: {{ goal.category.color }}">
-                                                            <i class="{{ goal.category.icon }} text-white"></i>
-                                                        </div>
-                                                        {{ goal.category.name }}
-                                                    </h2>
-                                                </td>
-                                                <td>{{ goal.target_value }} {{ goal.category.unit }}</td>
-                                                <td>
-                                                    {% if goal.category.id in latest_vitals %}
-                                                        {% with vital=latest_vitals|get_item:goal.category.id %}
-                                                            {{ vital.value }} {{ goal.category.unit }}
-                                                        {% endwith %}
-                                                    {% else %}
-                                                        --
-                                                    {% endif %}
-                                                </td>
-                                                <td>
-                                                    {% if goal.category.id in latest_vitals %}
-                                                        {% with vital=latest_vitals|get_item:goal.category.id %}
-                                                            {% if goal.category.name.lower == 'weight' or goal.category.name.lower == 'blood pressure' or goal.category.name.lower == 'cholesterol' %}
-                                                                {% if vital.value <= goal.target_value %}
-                                                                    <div class="progress" style="height: 5px;">
-                                                                        <div class="progress-bar bg-success" role="progressbar" style="width: 100%"></div>
-                                                                    </div>
-                                                                    <small class="text-success">{% trans "Goal reached!" %}</small>
-                                                                {% else %}
-                                                                    {% with progress=vital.value|calculate_progress:goal.target_value %}
-                                                                    <div class="progress" style="height: 5px;">
-                                                                        <div class="progress-bar bg-info" role="progressbar" style="width: {{ progress }}%"></div>
-                                                                    </div>
-                                                                    <small>{{ progress }}% {% trans "complete" %}</small>
-                                                                    {% endwith %}
-                                                                {% endif %}
-                                                            {% else %}
-                                                                {% if vital.value >= goal.target_value %}
-                                                                    <div class="progress" style="height: 5px;">
-                                                                        <div class="progress-bar bg-success" role="progressbar" style="width: 100%"></div>
-                                                                    </div>
-                                                                    <small class="text-success">{% trans "Goal reached!" %}</small>
-                                                                {% else %}
-                                                                    {% with progress=vital.value|calculate_progress:goal.target_value %}
-                                                                    <div class="progress" style="height: 5px;">
-                                                                        <div class="progress-bar bg-info" role="progressbar" style="width: {{ progress }}%"></div>
-                                                                    </div>
-                                                                    <small>{{ progress }}% {% trans "complete" %}</small>
-                                                                    {% endwith %}
-                                                                {% endif %}
-                                                            {% endif %}
-                                                        {% endwith %}
-                                                    {% else %}
-                                                        <div class="progress" style="height: 5px;">
-                                                            <div class="progress-bar bg-info" role="progressbar" style="width: 0%"></div>
-                                                        </div>
-                                                        <small>0% {% trans "complete" %}</small>
-                                                    {% endif %}
-                                                </td>
-                                                <td>
-                                                    {% if goal.target_date %}
-                                                        {{ goal.target_date|date:"M d, Y" }}
-                                                    {% else %}
-                                                        --
-                                                    {% endif %}
-                                                </td>
-                                                <td>
-                                                    {% if goal.set_by %}
-                                                        {% if goal.set_by.role == 'doctor' %}
-                                                            <span class="text-primary">
-                                                                <i class="fas fa-user-md"></i> Dr. {{ goal.set_by.get_full_name }}
-                                                            </span>
-                                                        {% else %}
-                                                            {{ goal.set_by.get_full_name }}
-                                                        {% endif %}
-                                                    {% else %}
-                                                        {% trans "Patient" %}
-                                                    {% endif %}
-                                                </td>
-                                                <td>
-                                                    {% if goal.notes %}
-                                                        <span data-bs-toggle="tooltip" title="{{ goal.notes }}">
-                                                            {{ goal.notes|truncatechars:30 }}
-                                                        </span>
-                                                    {% else %}
-                                                        --
-                                                    {% endif %}
-                                                </td>
-                                            </tr>
-                                            {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </div>
-                                {% else %}
-                                <div class="alert alert-info mb-4">
-                                    {% trans "This patient doesn't have any active health goals." %}
-                                </div>
-                                {% endif %}
-                            </div>
-                            
-                            <!-- Charts Tab -->
-                            <div class="tab-pane fade" id="charts" role="tabpanel" aria-labelledby="charts-tab">
-                                <div class="row mb-4">
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label for="chart-category">{% trans "Select Vital Sign" %}</label>
-                                            <select id="chart-category" class="form-select">
-                                                {% for category in categories %}
-                                                <option value="{{ category.id }}">{{ category.name }}</option>
-                                                {% endfor %}
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label for="chart-period">{% trans "Time Period" %}</label>
-                                            <select id="chart-period" class="form-select">
-                                                <option value="7">{% trans "Last 7 days" %}</option>
-                                                <option value="30" selected>{% trans "Last 30 days" %}</option>
-                                                <option value="90">{% trans "Last 3 months" %}</option>
-                                                <option value="180">{% trans "Last 6 months" %}</option>
-                                                <option value="365">{% trans "Last year" %}</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="chart-container">
-                                    <canvas id="vitalChart"></canvas>
-                                </div>
-                                
-                                <div class="row" id="chart-stats">
-                                    <div class="col-md-3">
-                                        <div class="card bg-light">
-                                            <div class="card-body text-center">
-                                                <h5>{% trans "Normal Range" %}</h5>
-                                                <p class="mb-0" id="normal-range">--</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="card bg-light">
-                                            <div class="card-body text-center">
-                                                <h5>{% trans "Average" %}</h5>
-                                                <p class="mb-0" id="average-value">--</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="card bg-light">
-                                            <div class="card-body text-center">
-                                                <h5>{% trans "Lowest" %}</h5>
-                                                <p class="mb-0" id="min-value">--</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="card bg-light">
-                                            <div class="card-body text-center">
-                                                <h5>{% trans "Highest" %}</h5>
-                                                <p class="mb-0" id="max-value">--</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+        <!-- Interactive Charts -->
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="chart-container">
+                    <h5 class="chart-title">
+                        <i class="fas fa-chart-line"></i>
+                        {% trans "Vital Signs Trends (Last 30 Days)" %}
+                    </h5>
+                    <canvas id="vitalTrendsChart" height="100"></canvas>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="chart-container">
+                    <h5 class="chart-title">
+                        <i class="fas fa-chart-pie"></i>
+                        {% trans "Status Distribution" %}
+                    </h5>
+                    <canvas id="statusDistributionChart" height="100"></canvas>
                 </div>
             </div>
         </div>
+
+        <!-- Latest Vitals Grid -->
+        <div class="chart-container">
+            <h5 class="chart-title">
+                <i class="fas fa-heartbeat"></i>
+                {% trans "Latest Vital Signs" %}
+            </h5>
+            <div class="row" id="vitalsGrid">
+                {% if latest_vitals %}
+                    {% for category in categories %}
+                        {% if category.id in latest_vitals %}
+                            {% with vital=latest_vitals|get_item:category.id %}
+                            <div class="col-md-6 col-lg-4 mb-4">
+                                <div class="vital-card">
+                                    <div class="card-body">
+                                        <div class="vital-icon">
+                                            <i class="{{ category.icon }}"></i>
+                                        </div>
+                                        <h5 class="vital-title">{{ category.name }}</h5>
+                                        <div class="vital-value">
+                                            <span class="value">{{ vital.value }}</span>
+                                            {% if vital.secondary_value %}
+                                            <span class="separator">/</span>
+                                            <span class="secondary-value">{{ vital.secondary_value }}</span>
+                                            {% endif %}
+                                            <span class="unit">{{ category.unit }}</span>
+                                        </div>
+                                        <div class="vital-status status-{{ vital.status }}">
+                                            <i class="fas fa-circle"></i>
+                                            {{ vital.status_display }}
+                                        </div>
+                                        <div class="vital-date">
+                                            <i class="fas fa-clock"></i>
+                                            {% trans "Recorded" %}: {{ vital.recorded_at|date:"M d, Y H:i" }}
+                                        </div>
+                                        {% if vital.is_professional_reading %}
+                                        <div class="recorded-by">
+                                            <small class="text-primary">
+                                                <i class="fas fa-user-md"></i> 
+                                                {% trans "Recorded by" %}: 
+                                                {% if vital.recorded_by %}
+                                                    {{ vital.recorded_by.get_full_name }}
+                                                {% else %}
+                                                    {% trans "Healthcare Professional" %}
+                                                {% endif %}
+                                            </small>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endwith %}
+                        {% endif %}
+                    {% endfor %}
+                {% else %}
+                    <div class="col-12 text-center py-5">
+                        <i class="fas fa-heartbeat fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">{% trans "No vital signs recorded yet" %}</h5>
+                        <p class="text-muted">{% trans "Start by recording the patient's vital signs" %}</p>
+                        <a href="{% url 'vitals:add-patient-vital' patient.id %}" class="action-btn">
+                            <i class="fas fa-plus"></i> {% trans "Record First Vital" %}
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Health Goals -->
+        {% if active_goals %}
+        <div class="chart-container">
+            <h5 class="chart-title">
+                <i class="fas fa-bullseye"></i>
+                {% trans "Active Health Goals" %}
+            </h5>
+            <div class="row">
+                {% for goal in active_goals %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="vital-card">
+                        <div class="card-body">
+                            <div class="vital-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                                <i class="fas fa-bullseye"></i>
+                            </div>
+                            <h5 class="vital-title">{{ goal.category.name }}</h5>
+                            <div class="vital-value">
+                                <span class="value">{{ goal.target_value }}</span>
+                                <span class="unit">{{ goal.category.unit }}</span>
+                            </div>
+                            <div class="vital-status status-normal">
+                                <i class="fas fa-target"></i>
+                                {% trans "Target Goal" %}
+                            </div>
+                            {% if goal.target_date %}
+                            <div class="vital-date">
+                                <i class="fas fa-calendar"></i>
+                                {% trans "Target Date" %}: {{ goal.target_date|date:"M d, Y" }}
+                            </div>
+                            {% endif %}
+                            {% if goal.notes %}
+                            <div class="mt-2">
+                                <small class="text-muted">{{ goal.notes }}</small>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
     </div>
 </div>
-{% endblock %}
 
-{% block scripts %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    $(document).ready(function() {
-        // Initialize tooltips
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl)
-        });
-        
-        // Initialize datatable
-        $('.datatable').DataTable({
-            order: [[4, 'desc']], // Sort by date column descending
-            language: {
-                search: "{% trans 'Search' %}:",
-                lengthMenu: "{% trans 'Show' %} _MENU_ {% trans 'entries' %}",
-                info: "{% trans 'Showing' %} _START_ {% trans 'to' %} _END_ {% trans 'of' %} _TOTAL_ {% trans 'entries' %}",
-                infoEmpty: "{% trans 'Showing 0 to 0 of 0 entries' %}",
-                infoFiltered: "({% trans 'filtered from' %} _MAX_ {% trans 'total entries' %})",
-                paginate: {
-                    first: "{% trans 'First' %}",
-                    last: "{% trans 'Last' %}",
-                    next: "{% trans 'Next' %}",
-                    previous: "{% trans 'Previous' %}"
-                }
-            }
-        });
-        
-        // Chart setup
-        var ctx = document.getElementById('vitalChart').getContext('2d');
-        var vitalChart;
-        
-        // Define normal range area plugin
-        var normalRangePlugin = {
-            id: 'normalRange',
-            beforeDraw: function(chart) {
-                if (chart.config.options.normalRange) {
-                    var ctx = chart.ctx;
-                    var yAxis = chart.scales.y;
-                    var minNormal = chart.config.options.normalRange.min;
-                    var maxNormal = chart.config.options.normalRange.max;
-                    
-                    if (minNormal !== null && maxNormal !== null) {
-                        var yMin = yAxis.getPixelForValue(minNormal);
-                        var yMax = yAxis.getPixelForValue(maxNormal);
-                        var width = chart.width;
-                        var height = yMin - yMax;
-                        
-                        ctx.save();
-                        ctx.fillStyle = 'rgba(46, 204, 113, 0.1)';
-                        ctx.fillRect(0, yMax, width, height);
-                        ctx.restore();
-                    }
-                }
-            }
-        };
-        
-        // Load chart data
-        function loadChartData() {
-            var categoryId = $('#chart-category').val();
-            var days = $('#chart-period').val();
-            
-            $.ajax({
-                url: "{% url 'vitals:vital-chart-data' 0 %}".replace('0', categoryId),
-                data: {
-                    patient_id: {{ patient.id }},
-                    days: days
+// Chart.js configurations
+const chartColors = {
+    primary: '#14b8a6',
+    secondary: '#0d9488',
+    success: '#10b981',
+    warning: '#f59e0b',
+    danger: '#ef4444',
+    info: '#3b82f6',
+    light: '#f3f4f6'
+};
+
+// Initialize charts when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    initializeCharts();
+    initializeRealTimeUpdates();
+    animateStatNumbers();
+});
+
+function initializeCharts() {
+    // Vital Trends Chart
+    const trendsCtx = document.getElementById('vitalTrendsChart');
+    if (trendsCtx) {
+        new Chart(trendsCtx, {
+            type: 'line',
+            data: {
+                labels: {{ chart_labels|safe }},
+                datasets: {{ chart_datasets|safe }}
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
                 },
-                success: function(data) {
-                    updateChart(data);
-                },
-                error: function() {
-                    alert("{% trans 'Error loading chart data' %}");
-                }
-            });
-        }
-        
-        // Update chart with new data
-        function updateChart(data) {
-            // Update stats
-            if (data.stats.count > 0) {
-                if (data.category.min_normal !== null && data.category.max_normal !== null) {
-                    $('#normal-range').text(data.category.min_normal + ' - ' + data.category.max_normal + ' ' + data.category.unit);
-                } else if (data.category.min_normal !== null) {
-                    $('#normal-range').text("{% trans 'Above' %} " + data.category.min_normal + ' ' + data.category.unit);
-                } else if (data.category.max_normal !== null) {
-                    $('#normal-range').text("{% trans 'Below' %} " + data.category.max_normal + ' ' + data.category.unit);
-                } else {
-                    $('#normal-range').text("{% trans 'Not specified' %}");
-                }
-                
-                $('#average-value').text(data.stats.avg.toFixed(1) + ' ' + data.category.unit);
-                $('#min-value').text(data.stats.min + ' ' + data.category.unit);
-                $('#max-value').text(data.stats.max + ' ' + data.category.unit);
-                
-                // Show stats
-                $('#chart-stats').show();
-            } else {
-                // Hide stats if no data
-                $('#normal-range').text('--');
-                $('#average-value').text('--');
-                $('#min-value').text('--');
-                $('#max-value').text('--');
-            }
-            
-            // Destroy existing chart if it exists
-            if (vitalChart) {
-                vitalChart.destroy();
-            }
-            
-            // Create new chart
-            vitalChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: data.dates,
-                    datasets: [{
-                        label: data.category.name,
-                        data: data.values,
-                        borderColor: data.category.color,
-                        backgroundColor: 'rgba(' + hexToRgb(data.category.color) + ', 0.1)',
-                        borderWidth: 2,
-                        pointRadius: 4,
-                        pointBackgroundColor: data.category.color,
-                        tension: 0.2,
-                        fill: false
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    normalRange: {
-                        min: data.category.min_normal,
-                        max: data.category.max_normal
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: false,
-                            title: {
-                                display: true,
-                                text: data.category.unit
-                            }
-                        },
-                        x: {
-                            title: {
-                                display: true,
-                                text: "{% trans 'Date and Time' %}"
-                            }
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 20
                         }
                     },
-                    plugins: {
-                        tooltip: {
-                            callbacks: {
-                                title: function(tooltipItems) {
-                                    return tooltipItems[0].label;
-                                },
-                                label: function(context) {
-                                    return data.category.name + ': ' + context.raw + ' ' + data.category.unit;
-                                }
-                            }
-                        },
-                        legend: {
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleColor: 'white',
+                        bodyColor: 'white',
+                        borderColor: chartColors.primary,
+                        borderWidth: 1
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: '#f1f5f9'
+                        }
+                    },
+                    x: {
+                        grid: {
                             display: false
                         }
                     }
-                },
-                plugins: [normalRangePlugin]
+                }
+            }
+        });
+    }
+
+    // Status Distribution Chart
+    const statusCtx = document.getElementById('statusDistributionChart');
+    if (statusCtx) {
+        new Chart(statusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Normal', 'Abnormal', 'Critical'],
+                datasets: [{
+                    data: [
+                        {{ normal_vitals|default:0 }},
+                        {{ abnormal_vitals|default:0 }},
+                        {{ critical_vitals|default:0 }}
+                    ],
+                    backgroundColor: [
+                        chartColors.success,
+                        chartColors.warning,
+                        chartColors.danger
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 20
+                        }
+                    }
+                }
+            }
+        });
+    }
+}
+
+function initializeRealTimeUpdates() {
+    // Simulate real-time updates every 30 seconds
+    setInterval(() => {
+        updateRealTimeData();
+    }, 30000);
+
+    // Update real-time indicator
+    setInterval(() => {
+        const indicator = document.getElementById('realTimeIndicator');
+        indicator.style.background = indicator.style.background === 'var(--success-color)' 
+            ? 'var(--warning-color)' 
+            : 'var(--success-color)';
+    }, 2000);
+}
+
+function updateRealTimeData() {
+    // Fetch latest vitals data via AJAX
+    fetch(`{% url 'vitals:vital-chart-data' 0 %}?patient_id={{ patient.id }}`)
+        .then(response => response.json())
+        .then(data => {
+            // Update statistics
+            updateStatNumbers(data.stats);
+            
+            // Update charts if needed
+            if (data.chart_data) {
+                updateCharts(data.chart_data);
+            }
+        })
+        .catch(error => {
+            console.error('Error updating real-time data:', error);
+        });
+}
+
+function updateStatNumbers(stats) {
+    animateNumber('totalVitals', stats.total);
+    animateNumber('normalVitals', stats.normal);
+    animateNumber('abnormalVitals', stats.abnormal);
+    animateNumber('criticalVitals', stats.critical);
+}
+
+function animateNumber(elementId, targetValue) {
+    const element = document.getElementById(elementId);
+    if (!element) return;
+
+    const currentValue = parseInt(element.textContent) || 0;
+    const increment = (targetValue - currentValue) / 20;
+    let current = currentValue;
+
+    const timer = setInterval(() => {
+        current += increment;
+        if ((increment > 0 && current >= targetValue) || 
+            (increment < 0 && current <= targetValue)) {
+            element.textContent = targetValue;
+            clearInterval(timer);
+        } else {
+            element.textContent = Math.floor(current);
+        }
+    }, 50);
+}
+
+function animateStatNumbers() {
+    const statNumbers = document.querySelectorAll('.stat-number');
+    statNumbers.forEach(stat => {
+        const finalValue = parseInt(stat.textContent) || 0;
+        let currentValue = 0;
+        const increment = finalValue / 30;
+        
+        const timer = setInterval(() => {
+            currentValue += increment;
+            if (currentValue >= finalValue) {
+                stat.textContent = finalValue;
+                clearInterval(timer);
+            } else {
+                stat.textContent = Math.floor(currentValue);
+            }
+        }, 30);
+    });
+}
+
+function updateCharts(chartData) {
+    // Update chart data if needed
+    console.log('Updating charts with new data:', chartData);
+}
+
+// Add smooth scrolling for better UX
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+            target.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
             });
         }
-        
-        // Helper function to convert hex to rgb
-        function hexToRgb(hex) {
-            // Remove # if present
-            hex = hex.replace('#', '');
-            
-            // Convert 3-digit hex to 6-digits
-            if (hex.length === 3) {
-                hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
-            }
-            
-            // Convert hex to rgb
-            var r = parseInt(hex.substring(0, 2), 16);
-            var g = parseInt(hex.substring(2, 4), 16);
-            var b = parseInt(hex.substring(4, 6), 16);
-            
-            return r + ',' + g + ',' + b;
-        }
-        
-        // Load initial chart data
-        loadChartData();
-        
-        // Reload chart when category or period changes
-        $('#chart-category, #chart-period').on('change', function() {
-            loadChartData();
-        });
     });
+});
+
+// Add loading states for actions
+document.querySelectorAll('.action-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const originalText = this.innerHTML;
+        this.innerHTML = '<span class="loading-spinner"></span> Loading...';
+        this.disabled = true;
+        
+        // Re-enable after a delay (in real implementation, this would be after the action completes)
+        setTimeout(() => {
+            this.innerHTML = originalText;
+            this.disabled = false;
+        }, 2000);
+    });
+});
 </script>
 {% endblock %}

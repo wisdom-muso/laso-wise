@@ -20,10 +20,7 @@ from accounts.views.admin_views import (
 )
 
 # Django Unfold will handle the admin styling
-# These settings are kept for backward compatibility
-admin.site.site_header = "Laso Digital Health Admin"
-admin.site.site_title = "Laso Digital Health Admin Portal"
-admin.site.index_title = "Welcome to Laso Digital Health Admin Portal"
+# Admin site configuration is now handled in core/apps.py to avoid AppRegistryNotReady error
 
 
 urlpatterns = (

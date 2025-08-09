@@ -17,7 +17,7 @@
   --laso-success: #10b981;
   --laso-warning: #f59e0b;
   --laso-danger: #ef4444;
-  --laso-info: #3b82f6;
+  --laso-info: #12bab8;
   
   /* Neutral Colors */
   --laso-gray-50: #f9fafb;
@@ -375,7 +375,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .alert-info {
-  background-color: rgba(59, 130, 246, 0.1);
+  background-color: rgba(18, 186, 184, 0.1);
   color: var(--laso-info);
 }
 
@@ -490,7 +490,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .appointment-completed {
-  color: var(--laso-info) !important;
+  color: var(--laso-primary) !important;
 }
 
 /* Footer */

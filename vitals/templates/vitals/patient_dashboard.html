@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load i18n %}
+{% load vital_filters %}
 
 {% block title %}{% trans "Vitals Dashboard" %}{% endblock %}
 
@@ -31,7 +32,26 @@
             <!-- /Profile Sidebar -->
 
             <div class="col-md-7 col-lg-8 col-xl-9">
-                <!-- Notifications -->
+                <!-- Vitals Navigation Tabs -->
+                <div class="card">
+                    <div class="card-header">
+                        <ul class="nav nav-tabs card-header-tabs" id="vitalsTab" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="vitals-tab" data-bs-toggle="tab" data-bs-target="#vitals" type="button" role="tab" aria-controls="vitals" aria-selected="true">
+                                    <i class="fas fa-heartbeat me-2"></i>{% trans "Vitals Dashboard" %}
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="mobile-clinic-tab" data-bs-toggle="tab" data-bs-target="#mobile-clinic" type="button" role="tab" aria-controls="mobile-clinic" aria-selected="false">
+                                    <i class="fas fa-ambulance me-2"></i>{% trans "Mobile Clinic" %}
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <div class="tab-content" id="vitalsTabContent">
+                            <div class="tab-pane fade show active" id="vitals" role="tabpanel" aria-labelledby="vitals-tab">
+                                <!-- Notifications -->
                 {% if notifications %}
                 <div class="card">
                     <div class="card-header">
@@ -260,6 +280,39 @@
                     </div>
                 </div>
                 {% endif %}
+                            </div>
+                            <!-- Mobile Clinic Tab -->
+                            <div class="tab-pane fade" id="mobile-clinic" role="tabpanel" aria-labelledby="mobile-clinic-tab">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="card">
+                                            <div class="card-header">
+                                                <h4 class="card-title">{% trans "Mobile Clinic Requests" %}</h4>
+                                                <a href="{% url 'mobile_clinic:request' %}" class="btn btn-primary btn-sm float-end">
+                                                    <i class="fas fa-plus"></i> {% trans "New Request" %}
+                                                </a>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="alert alert-info">
+                                                    <i class="fas fa-info-circle me-2"></i>
+                                                    {% trans "Request a mobile clinic visit to your location for convenient healthcare services." %}
+                                                </div>
+                                                <div class="text-center">
+                                                    <iframe src="{% url 'mobile_clinic:my_requests' %}" 
+                                                            width="100%" 
+                                                            height="600" 
+                                                            frameborder="0" 
+                                                            style="border-radius: 8px;">
+                                                    </iframe>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

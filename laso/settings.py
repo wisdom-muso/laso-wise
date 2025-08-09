@@ -15,7 +15,7 @@ DEBUG = os.getenv("DEBUG", "False").lower() in ("true", "1", "t")
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "*").split(",")
 
 # CSRF settings
-csrf_origins = os.getenv("CSRF_TRUSTED_ORIGINS", "https://work-1-ocvowvcuvhzbztbx.prod-runtime.all-hands.dev,https://work-2-ocvowvcuvhzbztbx.prod-runtime.all-hands.dev")
+csrf_origins = os.getenv("CSRF_TRUSTED_ORIGINS", "https://work-1-dwrrnobogrrhzpma.prod-runtime.all-hands.dev,https://work-2-dwrrnobogrrhzpma.prod-runtime.all-hands.dev")
 CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in csrf_origins.split(",") if origin.strip()]
 
 # For development, disable secure cookies if DEBUG is True
@@ -47,7 +47,7 @@ INSTALLED_APPS = [
     "whitenoise.runserver_nostatic",  # For serving static files in development
     
     # Project apps
-    "core",
+    "core.apps.CoreConfig",
     "accounts",
     "doctors",
     "patients",
@@ -238,9 +238,3 @@ DEBUG_TOOLBAR_CONFIG = {
 ADMIN_SITE_HEADER = "Laso Digital Health Administration"
 ADMIN_SITE_TITLE = "Laso Digital Health Admin Portal"
 ADMIN_INDEX_TITLE = "Welcome to Laso Digital Health Admin Portal"
-
-# Custom admin site configuration
-from django.contrib import admin
-admin.site.site_header = ADMIN_SITE_HEADER
-admin.site.site_title = ADMIN_SITE_TITLE
-admin.site.index_title = ADMIN_INDEX_TITLE

@@ -5,7 +5,6 @@ from django.utils.translation import gettext_lazy as _
 from django.http import HttpResponse
 import csv
 import io
-import pandas as pd
 from datetime import datetime
 
 from accounts.decorators import AdminRequiredMixin
