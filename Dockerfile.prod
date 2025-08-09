@@ -1,37 +1,89 @@
-FROM python:3.11-alpine
+# Multi-stage build for production optimization
+FROM python:3.11-alpine AS builder
 
-WORKDIR /usr/src/app
+# Set build arguments
+ARG BUILD_DATE
+ARG VCS_REF
+ARG VERSION
 
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+# Add metadata labels
+LABEL maintainer="LASO Digital Health" \
+      org.label-schema.build-date=$BUILD_DATE \
+      org.label-schema.vcs-ref=$VCS_REF \
+      org.label-schema.version=$VERSION \
+      org.label-schema.schema-version="1.0"
 
-# Copy only requirements first to leverage Docker cache
-COPY requirements.txt .
-
-# Install system dependencies and Python packages in a single layer
-RUN apk update \
-    && apk add --no-cache \
-        nano \
+# Install build dependencies
+RUN apk add --no-cache --virtual .build-deps \
+        gcc \
+        musl-dev \
+        libffi-dev \
         gobject-introspection-dev \
         pango-dev \
         cairo-dev \
-        libffi-dev \
-        libmagic \
         libxml2-dev \
         libxslt-dev \
-        wget \
-    && python -m pip install --upgrade pip \
-    && pip install -r requirements.txt
+        jpeg-dev \
+        zlib-dev \
+        freetype-dev \
+        lcms2-dev \
+        openjpeg-dev \
+        tiff-dev \
+        tk-dev \
+        tcl-dev
 
-# Copy the rest of the application
-COPY . .
+# Copy requirements and install Python packages
+COPY requirements.txt /tmp/requirements.txt
+RUN python -m pip install --upgrade pip setuptools wheel && \
+    pip install --no-cache-dir --user -r /tmp/requirements.txt
 
-ENV APP_HOME=/usr/src/app
-# Create necessary directories
-RUN mkdir -p $APP_HOME/staticfiles && mkdir -p $APP_HOME/media
+# Production stage
+FROM python:3.11-alpine AS production
 
-# Set proper permissions
-RUN chmod +x manage.py
+# Security: Create non-root user
+RUN addgroup -g 1001 -S appgroup && \
+    adduser -u 1001 -S appuser -G appgroup
+
+# Install runtime dependencies only
+RUN apk add --no-cache \
+        libffi \
+        gobject-introspection \
+        pango \
+        cairo \
+        libmagic \
+        libxml2 \
+        libxslt \
+        jpeg \
+        zlib \
+        freetype \
+        lcms2 \
+        openjpeg \
+        tiff \
+        tk \
+        tcl \
+        curl \
+        dumb-init
+
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONHASHSEED=random \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    APP_HOME=/home/appuser/app
+
+# Copy Python packages from builder stage
+COPY --from=builder /root/.local /home/appuser/.local
+
+# Create application directory and set permissions
+RUN mkdir -p $APP_HOME/staticfiles $APP_HOME/media $APP_HOME/logs && \
+    chown -R appuser:appgroup $APP_HOME
+
+# Set working directory
+WORKDIR $APP_HOME
+
+# Copy application code with proper ownership
+COPY --chown=appuser:appgroup . .
 
 # Remove duplicate static files to prevent conflicts
 RUN echo "Removing duplicate static files..." && \
@@ -44,12 +96,28 @@ RUN echo "Removing duplicate static files..." && \
     if [ -d "static/unfold" ]; then echo "- Removing static/unfold" && rm -rf static/unfold; fi && \
     if [ -d "static/admin" ]; then echo "- Removing static/admin" && rm -rf static/admin; fi
 
-# Collect static files with better error handling
+# Set execute permissions and switch to non-root user
+RUN chmod +x manage.py && \
+    chown -R appuser:appgroup $APP_HOME
+USER appuser
+
+# Add local Python packages to PATH
+ENV PATH=/home/appuser/.local/bin:$PATH
+
+# Collect static files
 RUN python manage.py collectstatic --noinput --clear --verbosity 1
 
-# Expose the port
+# Create entrypoint script
+COPY --chown=appuser:appgroup deployment/entrypoint.sh /home/appuser/entrypoint.sh
+RUN chmod +x /home/appuser/entrypoint.sh
+
+# Expose port
 EXPOSE 8005
 
-# Health check with longer timeout for startup
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD wget --no-verbose --tries=1 --spider http://localhost:8005/ || exit 1
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD curl -f http://localhost:8005/health/ || exit 1
+
+# Use dumb-init to handle signals properly
+ENTRYPOINT ["/usr/bin/dumb-init", "--"]
+CMD ["/home/appuser/entrypoint.sh"]

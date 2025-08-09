@@ -1,48 +1,227 @@
 version: '3.8'
 
+networks:
+  app-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
 services:
+  # PostgreSQL Database (optional - uncomment if using external database)
+  # db:
+  #   image: postgres:15-alpine
+  #   restart: unless-stopped
+  #   environment:
+  #     POSTGRES_DB: ${POSTGRES_DB:-laso_db}
+  #     POSTGRES_USER: ${POSTGRES_USER:-laso_user}
+  #     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-secure_password}
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #     - ./deployment/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+  #   networks:
+  #     - app-network
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-laso_user}"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+
+  # Redis for caching (optional)
+  # redis:
+  #   image: redis:7-alpine
+  #   restart: unless-stopped
+  #   command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-redis_password}
+  #   volumes:
+  #     - redis_data:/data
+  #   networks:
+  #     - app-network
+  #   healthcheck:
+  #     test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+  #     interval: 10s
+  #     timeout: 3s
+  #     retries: 5
+
+  # Main Django Application
   web:
-    restart: always
+    restart: unless-stopped
     build:
       context: .
       dockerfile: Dockerfile.prod
+      args:
+        BUILD_DATE: ${BUILD_DATE:-$(date -u +'%Y-%m-%dT%H:%M:%SZ')}
+        VCS_REF: ${VCS_REF:-$(git rev-parse --short HEAD)}
+        VERSION: ${VERSION:-latest}
     expose:
       - 8005
     volumes:
-      - static_volume:/usr/src/app/staticfiles
-      - media_volume:/usr/src/app/media
+      - static_volume:/home/appuser/app/staticfiles:ro
+      - media_volume:/home/appuser/app/media
+      - app_logs:/home/appuser/app/logs
     environment:
+      # Core Django Settings
       - DEBUG=False
-      - SECRET_KEY=${SECRET_KEY:-g!y0otek@9t^b+b*7)&q2a5^=8_9&xcdii8@6h^_*wphl-(fu9}
-      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-*,65.108.91.110,localhost,127.0.0.1}
-      - CSRF_TRUSTED_ORIGINS=${CSRF_TRUSTED_ORIGINS:-http://65.108.91.110,http://65.108.91.110:12000,http://localhost:12000,http://127.0.0.1:12000}
+      - SECRET_KEY=${SECRET_KEY:?SECRET_KEY is required}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-localhost,127.0.0.1}
+      - CSRF_TRUSTED_ORIGINS=${CSRF_TRUSTED_ORIGINS:-https://localhost}
       - CSRF_COOKIE_SECURE=True
       - SESSION_COOKIE_SECURE=True
-    command: gunicorn laso.wsgi:application --bind 0.0.0.0:8005 --workers 2 --timeout 120
+      
+      # Database Configuration (if using external database)
+      # - DATABASE_URL=${DATABASE_URL:-sqlite:///home/appuser/app/db.sqlite3}
+      
+      # Redis Configuration (if using Redis)
+      # - REDIS_URL=${REDIS_URL:-redis://redis:6379/0}
+      
+      # Gunicorn Configuration
+      - GUNICORN_WORKERS=${GUNICORN_WORKERS:-3}
+      - GUNICORN_WORKER_CLASS=${GUNICORN_WORKER_CLASS:-sync}
+      - GUNICORN_TIMEOUT=${GUNICORN_TIMEOUT:-120}
+      - GUNICORN_KEEPALIVE=${GUNICORN_KEEPALIVE:-2}
+      - GUNICORN_MAX_REQUESTS=${GUNICORN_MAX_REQUESTS:-1000}
+      - GUNICORN_MAX_REQUESTS_JITTER=${GUNICORN_MAX_REQUESTS_JITTER:-50}
+      - GUNICORN_LOG_LEVEL=${GUNICORN_LOG_LEVEL:-info}
+      
+      # Email Configuration
+      - EMAIL_BACKEND=${EMAIL_BACKEND:-django.core.mail.backends.console.EmailBackend}
+      - EMAIL_HOST=${EMAIL_HOST:-}
+      - EMAIL_PORT=${EMAIL_PORT:-587}
+      - EMAIL_USE_TLS=${EMAIL_USE_TLS:-True}
+      - EMAIL_HOST_USER=${EMAIL_HOST_USER:-}
+      - EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD:-}
+      
+      # Superuser Creation (optional)
+      - DJANGO_SUPERUSER_USERNAME=${DJANGO_SUPERUSER_USERNAME:-}
+      - DJANGO_SUPERUSER_EMAIL=${DJANGO_SUPERUSER_EMAIL:-}
+      - DJANGO_SUPERUSER_PASSWORD=${DJANGO_SUPERUSER_PASSWORD:-}
+      
+      # Application Configuration
+      - LOAD_FIXTURES=${LOAD_FIXTURES:-false}
+    # depends_on:
+    #   - db
+    #   - redis
+    networks:
+      - app-network
     deploy:
       resources:
         limits:
           memory: 1G
+          cpus: '1.0'
         reservations:
           memory: 512M
+          cpus: '0.5'
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8005/"]
+      test: ["CMD", "curl", "-f", "http://localhost:8005/health/"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 60s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.web.rule=Host(`${DOMAIN:-localhost`)"
+      - "traefik.http.routers.web.tls=true"
+      - "traefik.http.routers.web.tls.certresolver=letsencrypt"
 
+  # Nginx Reverse Proxy
   nginx:
-    restart: always
-    build: ./deployment/nginx/
+    restart: unless-stopped
+    build: 
+      context: ./deployment/nginx/
+      args:
+        NGINX_VERSION: 1.24-alpine
     ports:
-      - "12000:80"
+      - "${HTTP_PORT:-80}:80"
+      - "${HTTPS_PORT:-443}:443"
     volumes:
-      - static_volume:/usr/src/app/staticfiles
-      - media_volume:/usr/src/app/media
+      - static_volume:/usr/src/app/staticfiles:ro
+      - media_volume:/usr/src/app/media:ro
+      - nginx_logs:/var/log/nginx
+      - ./deployment/nginx/ssl:/etc/nginx/ssl:ro
+    environment:
+      - DOMAIN=${DOMAIN:-localhost}
+      - SSL_ENABLED=${SSL_ENABLED:-false}
     depends_on:
-      - web
+      web:
+        condition: service_healthy
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Watchtower for automatic updates (optional)
+  watchtower:
+    image: containrrr/watchtower:latest
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_POLL_INTERVAL=3600
+      - WATCHTOWER_INCLUDE_STOPPED=true
+      - WATCHTOWER_REVIVE_STOPPED=false
+    networks:
+      - app-network
+    profiles:
+      - watchtower
+
+  # Monitoring with Prometheus and Grafana (optional)
+  prometheus:
+    image: prom/prometheus:latest
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./deployment/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    networks:
+      - app-network
+    profiles:
+      - monitoring
+
+  grafana:
+    image: grafana/grafana:latest
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./deployment/monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    networks:
+      - app-network
+    profiles:
+      - monitoring
 
 volumes:
   static_volume:
   media_volume:
+  app_logs:
+  nginx_logs:
+  # postgres_data:
+  # redis_data:
+  prometheus_data:
+  grafana_data:
