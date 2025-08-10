@@ -19,12 +19,21 @@ from .views import (
     PrescriptionCreateView,
     PrescriptionDetailView,
 )
+from .api import (
+    DoctorDashboardAPI,
+    DoctorAppointmentActionAPI,
+    DoctorScheduleAPI,
+)
 
 app_name = "doctors"
 
 urlpatterns = [
     path("", DoctorsListView.as_view(), name="list"),
     path("dashboard/", DoctorDashboardView.as_view(), name="dashboard"),
+    # JSON APIs for React frontend
+    path("api/dashboard/", DoctorDashboardAPI.as_view(), name="api-dashboard"),
+    path("api/appointments/<int:pk>/<str:action>/", DoctorAppointmentActionAPI.as_view(), name="api-appointment-action"),
+    path("api/schedule/", DoctorScheduleAPI.as_view(), name="api-schedule"),
     path("schedule-timings/", schedule_timings, name="schedule-timings"),
     path(
         "profile-settings/",

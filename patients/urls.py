@@ -14,6 +14,12 @@ from .views import (
     PrescriptionPrintView,
     MedicalRecordsView,
 )
+from .api import (
+    PatientDashboardAPI,
+    PatientAppointmentsAPI,
+    PatientPrescriptionsAPI,
+    PatientAppointmentCancelAPI,
+)
 
 app_name = "patients"
 
@@ -22,6 +28,11 @@ urlpatterns = [
     path("", RedirectView.as_view(pattern_name='patients:dashboard'), name="patient-home"),
     
     path("dashboard/", PatientDashboardView.as_view(), name="dashboard"),
+    # JSON APIs for React frontend
+    path("api/dashboard/", PatientDashboardAPI.as_view(), name="api-dashboard"),
+    path("api/appointments/", PatientAppointmentsAPI.as_view(), name="api-appointments"),
+    path("api/prescriptions/", PatientPrescriptionsAPI.as_view(), name="api-prescriptions"),
+    path("api/appointments/<int:pk>/cancel/", PatientAppointmentCancelAPI.as_view(), name="api-appointment-cancel"),
     path(
         "profile-settings/",
         PatientProfileUpdateView.as_view(),

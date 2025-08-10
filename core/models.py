@@ -1,6 +1,8 @@
 from django.db import models
 from django.urls import reverse
 from django.utils.text import slugify
+from django.core.exceptions import ValidationError
+from django.utils import timezone
 
 
 class Speciality(models.Model):
@@ -72,6 +74,200 @@ class Review(models.Model):
     @property
     def rating_percent(self):
         return (self.rating / 5) * 100
+
+
+class SoapNote(models.Model):
+    """
+    SOAP Notes for patient appointments
+    S - Subjective: Patient-reported symptoms, history, and concerns
+    O - Objective: Observations, test results, vital signs
+    A - Assessment: Doctor's diagnosis, impressions
+    P - Plan: Treatment plan, follow-up instructions
+    """
+    patient = models.ForeignKey(
+        "accounts.User",
+        on_delete=models.CASCADE,
+        related_name="soap_notes",
+        limit_choices_to={"role": "patient"}
+    )
+    appointment = models.ForeignKey(
+        "bookings.Booking",
+        on_delete=models.CASCADE,
+        related_name="soap_notes"
+    )
+    created_by = models.ForeignKey(
+        "accounts.User",
+        on_delete=models.CASCADE,
+        related_name="soap_notes_created",
+        limit_choices_to={"role": "doctor"}
+    )
+    
+    # SOAP Components
+    subjective = models.TextField(
+        help_text="Patient-reported symptoms, history, and concerns"
+    )
+    objective = models.TextField(
+        help_text="Observations, test results, vital signs"
+    )
+    assessment = models.TextField(
+        help_text="Doctor's diagnosis, impressions"
+    )
+    plan = models.TextField(
+        help_text="Treatment plan, follow-up instructions"
+    )
+    
+    # Metadata
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    is_draft = models.BooleanField(default=False)
+    
+    class Meta:
+        ordering = ["-created_at"]
+        unique_together = ["appointment", "created_by"]
+        verbose_name = "SOAP Note"
+        verbose_name_plural = "SOAP Notes"
+
+    def __str__(self):
+        return f"SOAP Note for {self.patient.get_full_name()} - {self.appointment.appointment_date}"
+
+    def clean(self):
+        """Validate that the appointment belongs to the patient and doctor"""
+        if self.appointment and self.patient:
+            if self.appointment.patient != self.patient:
+                raise ValidationError("Appointment must belong to the specified patient")
+        
+        if self.appointment and self.created_by:
+            if self.appointment.doctor != self.created_by:
+                raise ValidationError("Only the assigned doctor can create SOAP notes for this appointment")
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
+
+
+class EHRRecord(models.Model):
+    """
+    Electronic Health Record for patients
+    """
+    patient = models.OneToOneField(
+        "accounts.User",
+        on_delete=models.CASCADE,
+        related_name="ehr_record",
+        limit_choices_to={"role": "patient"}
+    )
+    
+    # Medical Information
+    allergies = models.TextField(blank=True, help_text="Known allergies and reactions")
+    medications = models.TextField(blank=True, help_text="Current medications and dosages")
+    medical_history = models.TextField(blank=True, help_text="Past medical conditions and surgeries")
+    immunizations = models.TextField(blank=True, help_text="Immunization history")
+    
+    # Lab and Imaging Results (using JSONField for flexibility)
+    lab_results = models.JSONField(default=dict, blank=True, help_text="Laboratory test results")
+    imaging_results = models.JSONField(default=dict, blank=True, help_text="Imaging study results")
+    
+    # Vital Signs History
+    vital_signs_history = models.JSONField(default=list, blank=True, help_text="Historical vital signs")
+    
+    # Emergency Contacts
+    emergency_contacts = models.JSONField(default=list, blank=True, help_text="Emergency contact information")
+    
+    # Insurance Information
+    insurance_info = models.JSONField(default=dict, blank=True, help_text="Insurance details")
+    
+    # Metadata
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    last_updated_by = models.ForeignKey(
+        "accounts.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="ehr_records_updated"
+    )
+
+    class Meta:
+        verbose_name = "EHR Record"
+        verbose_name_plural = "EHR Records"
+
+    def __str__(self):
+        return f"EHR Record for {self.patient.get_full_name()}"
+
+    def get_soap_notes(self):
+        """Get all SOAP notes for this patient"""
+        return self.patient.soap_notes.all()
+
+    def get_recent_soap_notes(self, limit=10):
+        """Get recent SOAP notes for this patient"""
+        return self.patient.soap_notes.all()[:limit]
+
+    def add_vital_signs(self, vital_signs_data):
+        """Add new vital signs to history"""
+        if not isinstance(self.vital_signs_history, list):
+            self.vital_signs_history = []
+        
+        vital_signs_data['timestamp'] = timezone.now().isoformat()
+        self.vital_signs_history.append(vital_signs_data)
+        self.save()
+
+    def add_lab_result(self, test_name, result_data):
+        """Add new lab result"""
+        if not isinstance(self.lab_results, dict):
+            self.lab_results = {}
+        
+        if test_name not in self.lab_results:
+            self.lab_results[test_name] = []
+        
+        result_data['timestamp'] = timezone.now().isoformat()
+        self.lab_results[test_name].append(result_data)
+        self.save()
+
+    def add_imaging_result(self, study_type, result_data):
+        """Add new imaging result"""
+        if not isinstance(self.imaging_results, dict):
+            self.imaging_results = {}
+        
+        if study_type not in self.imaging_results:
+            self.imaging_results[study_type] = []
+        
+        result_data['timestamp'] = timezone.now().isoformat()
+        self.imaging_results[study_type].append(result_data)
+        self.save()
+
+
+class AuditLog(models.Model):
+    """
+    Audit log for tracking changes to sensitive medical data
+    """
+    ACTION_CHOICES = [
+        ('create', 'Create'),
+        ('update', 'Update'),
+        ('delete', 'Delete'),
+        ('view', 'View'),
+    ]
+    
+    user = models.ForeignKey(
+        "accounts.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="audit_logs"
+    )
+    action = models.CharField(max_length=10, choices=ACTION_CHOICES)
+    model_name = models.CharField(max_length=100)
+    object_id = models.IntegerField()
+    object_repr = models.CharField(max_length=200)
+    changes = models.JSONField(default=dict, blank=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    user_agent = models.TextField(blank=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-timestamp"]
+        verbose_name = "Audit Log"
+        verbose_name_plural = "Audit Logs"
+
+    def __str__(self):
+        return f"{self.action} {self.model_name} by {self.user} at {self.timestamp}"
 
 
 class HospitalSettings(models.Model):

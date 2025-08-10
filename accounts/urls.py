@@ -1,6 +1,7 @@
 from django.urls import path
 
 from .views.common_views import *
+from .api import MeAPI, MeUpdateAPI, MeDeleteAPI
 
 app_name = "accounts"
 
@@ -22,4 +23,8 @@ urlpatterns = [
         UpdateBasicUserInformationAPIView.as_view(),
         name="update-basic-information",
     ),
+    # JSON profile APIs
+    path("api/me/", MeAPI.as_view(), name="api-me"),
+    path("api/me/update/", MeUpdateAPI.as_view(), name="api-me-update"),
+    path("api/me/delete/", MeDeleteAPI.as_view(), name="api-me-delete"),
 ]
