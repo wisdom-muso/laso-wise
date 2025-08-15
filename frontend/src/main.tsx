@@ -6,6 +6,12 @@ import { QueryClient, QueryClientProvider } from 'react-query'
 import { Toaster } from 'react-hot-toast'
 import './styles/index.css'
 import { AuthProvider } from './hooks/useAuth'
+import ErrorBoundary from './components/ErrorBoundary'
+
+// Add console log for debugging
+console.log('React app starting...')
+console.log('Environment:', import.meta.env)
+console.log('API Base:', import.meta.env.VITE_API_BASE)
 import AppLayout from './modules/layout/AppLayout'
 import LoginPage from './modules/auth/LoginPage'
 import RegisterPage from './modules/auth/RegisterPage'
@@ -53,23 +59,25 @@ const router = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <NextUIProvider>
-        <AuthProvider>
-          <RouterProvider router={router} />
-          <Toaster 
-            position="top-right"
-            toastOptions={{
-              duration: 4000,
-              style: {
-                background: '#363636',
-                color: '#fff',
-              },
-            }}
-          />
-        </AuthProvider>
-      </NextUIProvider>
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <NextUIProvider>
+          <AuthProvider>
+            <RouterProvider router={router} />
+            <Toaster 
+              position="top-right"
+              toastOptions={{
+                duration: 4000,
+                style: {
+                  background: '#363636',
+                  color: '#fff',
+                },
+              }}
+            />
+          </AuthProvider>
+        </NextUIProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   </React.StrictMode>,
 )
 
