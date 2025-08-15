@@ -13,9 +13,10 @@ import PatientDashboard from './modules/patient/PatientDashboard'
 import DoctorDashboard from './modules/doctor/DoctorDashboard'
 import ProfilePage from './modules/account/ProfilePage'
 import { SchedulePage } from './modules/doctor/SchedulePage'
-import ConsultationRoom from './modules/telemedicine/ConsultationRoom'
+import { ConsultationRoom } from './modules/telemedicine/ConsultationRoom'
 import ConsultationsList from './modules/telemedicine/ConsultationsList'
 import CreateConsultation from './modules/telemedicine/CreateConsultation'
+import { AppointmentBooking } from './components/AppointmentBooking'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -39,7 +40,10 @@ const router = createBrowserRouter([
       { path: 'doctors/dashboard', element: <DoctorDashboard /> },
       { path: 'doctors/schedule', element: <SchedulePage /> },
       
-      // Telemedicine routes
+      // Appointment and Telemedicine routes
+      { path: 'appointments', element: <PatientDashboard /> }, // Will show appointments list
+      { path: 'appointments/book', element: <AppointmentBooking /> },
+      { path: 'appointments/book/:doctorId', element: <AppointmentBooking /> },
       { path: 'consultations', element: <ConsultationsList /> },
       { path: 'consultations/create', element: <CreateConsultation /> },
       { path: 'consultations/:consultationId', element: <ConsultationRoom /> },

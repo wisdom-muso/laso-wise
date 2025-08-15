@@ -16,7 +16,6 @@ import {
   DropdownTrigger,
   DropdownMenu,
   DropdownItem,
-  DropdownContent,
   Switch,
   User,
   Chip
