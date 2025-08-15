@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "8005:8005"
+      - "12000:8005"
     volumes:
       - .:/usr/src/app
       - static_volume:/usr/src/app/staticfiles
@@ -15,7 +15,7 @@ services:
       - DEBUG=True
       - SECRET_KEY=g!y0otek@9t^b+b*7)&q2a5^=8_9&xcdii8@6h^_*wphl-(fu9
       - ALLOWED_HOSTS=*,localhost,127.0.0.1,65.108.91.110
-      - CSRF_TRUSTED_ORIGINS=http://localhost:8005,http://127.0.0.1:8005,http://65.108.91.110:8005,http://localhost:3000,http://127.0.0.1:3000,http://65.108.91.110:3000
+      - CSRF_TRUSTED_ORIGINS=http://localhost:12000,http://127.0.0.1:12000,http://65.108.91.110:12000,http://localhost:3000,http://127.0.0.1:3000,http://65.108.91.110:3000
       - CSRF_COOKIE_SECURE=False
       - SESSION_COOKIE_SECURE=False
       - CURRENCY=USD
@@ -35,7 +35,7 @@ services:
     depends_on:
       - web
     environment:
-      - VITE_API_BASE=${FRONTEND_API_BASE:-http://localhost:8005}
+      - VITE_API_BASE=${FRONTEND_API_BASE:-http://65.108.91.110:12000}
       - NODE_ENV=production
     ports:
       - "3000:3000"

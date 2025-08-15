@@ -283,7 +283,10 @@ TELEMEDICINE_CONFIG = {
 
 # CORS settings for React frontend
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",  # React dev server
+    "http://localhost:3000",  # React dev server (local)
+    "http://127.0.0.1:3000",
+    "http://65.108.91.110:3000",  # React frontend on server
+    "http://localhost:5173",  # Vite dev server
     "http://127.0.0.1:5173",
 ]
 
