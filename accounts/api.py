@@ -162,7 +162,7 @@ class MeAPI(APIView):
       'last_name': u.last_name,
       'role': u.role,
       'profile': {
-        'avatar': p.image,
+        'avatar': p.avatar.url if p.avatar else None,
         'phone': p.phone,
         'dob': p.dob,
         'about': p.about,

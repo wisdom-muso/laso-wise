@@ -1,5 +1,5 @@
 import { useState, useEffect, createContext, useContext } from 'react';
-import { api, endpoints } from '../lib/api';
+import { api, endpoints, validateToken } from '../lib/api';
 import toast from 'react-hot-toast';
 
 interface User {
@@ -49,12 +49,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const fetchUser = async () => {
+    const token = localStorage.getItem('authToken');
+    
+    if (!token) {
+      setLoading(false);
+      return;
+    }
+    
     try {
+      // Validate token first
+      const isValid = await validateToken(token);
+      if (!isValid) {
+        localStorage.removeItem('authToken');
+        setUser(null);
+        setLoading(false);
+        return;
+      }
+      
       const response = await api.get(endpoints.me);
-      setUser(response.data);
-    } catch (error) {
+      setUser(response);
+    } catch (error: any) {
       console.error('Error fetching user:', error);
-      localStorage.removeItem('authToken');
+      
+      // If it's an authentication error, clear the token
+      if (error.response?.status === 401) {
+        localStorage.removeItem('authToken');
+        setUser(null);
+      } else {
+        // For other errors, show user-friendly message
+        toast.error('Failed to load user profile. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -63,18 +87,44 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
       setLoading(true);
+      
+      // Clear any existing token first
+      localStorage.removeItem('authToken');
+      
       const response = await api.post(endpoints.login, { email, password });
       
-      if (response.data.token) {
-        localStorage.setItem('authToken', response.data.token);
+      if (response.token) {
+        localStorage.setItem('authToken', response.token);
+        
+        // Set user data immediately if available in response
+        if (response.user) {
+          setUser(response.user);
+        } else {
+          // Fetch user data if not in response
+          await fetchUser();
+        }
+        
+        toast.success('Login successful!');
+        return true;
+      } else {
+        toast.error('Invalid response from server');
+        return false;
       }
-      
-      await fetchUser();
-      toast.success('Login successful!');
-      return true;
     } catch (error: any) {
       console.error('Login error:', error);
-      const message = error.response?.data?.message || 'Login failed. Please try again.';
+      
+      let message = 'Login failed. Please try again.';
+      
+      if (error.response?.status === 401) {
+        message = 'Invalid email or password';
+      } else if (error.response?.status === 400) {
+        message = error.response.data?.message || 'Please check your input and try again';
+      } else if (error.response?.status >= 500) {
+        message = 'Server error. Please try again later.';
+      } else if (error.code === 'NETWORK_ERROR') {
+        message = 'Network error. Please check your connection.';
+      }
+      
       toast.error(message);
       return false;
     } finally {

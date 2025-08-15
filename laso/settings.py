@@ -285,6 +285,11 @@ TELEMEDICINE_CONFIG = {
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",  # React dev server
     "http://127.0.0.1:5173",
+    "http://localhost:3000",  # React production server
+    "http://127.0.0.1:3000",
+    "http://65.108.91.110:3000",  # Production React frontend
+    "http://65.108.91.110:12000",  # Production nginx
+    "http://65.108.91.110:8005",  # Production Django
 ]
 
 CORS_ALLOW_CREDENTIALS = True
