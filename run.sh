@@ -243,8 +243,8 @@ run_development() {
     ./setup_app.sh
     
     print_status "Building and starting development containers..."
-    print_status "Backend API: http://localhost:8005"
-    print_status "Frontend: http://localhost:3000"
+    print_status "Backend API: http://65.108.91.110:8005"
+    print_status "Frontend: http://65.108.91.110:3000"
     
     export COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME}-dev"
     
@@ -257,8 +257,8 @@ run_development() {
     
     # Show access URL
     print_success "Application started in development mode!"
-    print_status "Backend API: http://localhost:8005"
-    print_status "Frontend: http://localhost:3000"
+    print_status "Backend API: http://65.108.91.110:8005"
+    print_status "Frontend: http://65.108.91.110:3000"
 }
 
 # Function to run in production mode
@@ -312,9 +312,9 @@ run_production() {
     $compose_cmd -f docker-compose.prod.yml ps
     
     # Show service URLs
-    local http_port="${HTTP_PORT:-80}"
+    local http_port="${HTTP_PORT:-12000}"
     local https_port="${HTTPS_PORT:-443}"
-    local domain="${DOMAIN:-localhost}"
+    local domain="${DOMAIN:-65.108.91.110}"
     
     print_success "Application started in production mode!"
     print_status "Access URLs:"

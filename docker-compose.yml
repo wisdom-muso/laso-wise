@@ -35,7 +35,7 @@ services:
     depends_on:
       - web
     environment:
-      - VITE_API_BASE=${FRONTEND_API_BASE:-http://localhost:8005}
+      - VITE_API_BASE=${VITE_API_BASE:-http://65.108.91.110:8005}
       - NODE_ENV=production
     ports:
       - "3000:3000"
