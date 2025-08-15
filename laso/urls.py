@@ -109,7 +109,7 @@ urlpatterns = (
         path("vitals/", include("vitals.urls")),
         path("dashboard/", include("dashboard.urls")),
         path("sync-monitor/", include("sync_monitor.urls")),
-        path("telemedicine/", include("telemedicine.urls")),  # New telemedicine URLs
+        path("telemedicine/", include("telemedicine.enhanced_urls")),  # Enhanced telemedicine URLs
         path("", include("core.urls")),
         path("__debug__/", include(debug_toolbar.urls)),
         path("ckeditor/", include("ckeditor_uploader.urls")),
