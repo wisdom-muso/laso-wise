@@ -1,0 +1,598 @@
+/* Mobile-First Responsive Styles for Telemedicine Interface */
+
+/* Base Mobile Styles (320px and up) */
+@media (max-width: 767px) {
+  /* Consultation Room Mobile Layout */
+  .consultation-room {
+    @apply flex flex-col h-screen;
+  }
+
+  .consultation-video-grid {
+    @apply flex-1 flex flex-col gap-2 p-2;
+  }
+
+  .consultation-main-video {
+    @apply relative aspect-video bg-gray-900 rounded-lg overflow-hidden;
+    min-height: 200px;
+  }
+
+  .consultation-participant-video {
+    @apply w-20 h-20 rounded-lg overflow-hidden bg-gray-800;
+  }
+
+  .consultation-participants-grid {
+    @apply flex gap-2 overflow-x-auto pb-2;
+  }
+
+  /* Mobile Chat Interface */
+  .consultation-chat {
+    @apply fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg;
+    height: 40vh;
+    transition: transform 0.3s ease-in-out;
+  }
+
+  .consultation-chat.hidden {
+    transform: translateY(100%);
+  }
+
+  .consultation-chat-header {
+    @apply flex items-center justify-between p-3 border-b bg-gray-50;
+  }
+
+  .consultation-chat-messages {
+    @apply flex-1 overflow-y-auto p-3 space-y-2;
+    max-height: calc(40vh - 120px);
+  }
+
+  .consultation-chat-input {
+    @apply p-3 border-t bg-white;
+  }
+
+  /* Mobile Controls */
+  .consultation-controls {
+    @apply fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50;
+  }
+
+  .consultation-controls-main {
+    @apply flex items-center gap-3 bg-black bg-opacity-80 rounded-full px-4 py-3;
+  }
+
+  .consultation-control-button {
+    @apply rounded-full p-3 text-white transition-colors;
+  }
+
+  .consultation-control-button.active {
+    @apply bg-red-500;
+  }
+
+  .consultation-control-button.inactive {
+    @apply bg-gray-600;
+  }
+
+  /* Mobile Waiting Room */
+  .waiting-room-mobile {
+    @apply p-4 space-y-4;
+  }
+
+  .waiting-room-video-preview {
+    @apply aspect-video bg-gray-900 rounded-lg relative overflow-hidden;
+  }
+
+  .waiting-room-controls {
+    @apply absolute bottom-4 left-1/2 transform -translate-x-1/2;
+  }
+
+  .waiting-room-info-grid {
+    @apply space-y-4;
+  }
+
+  .waiting-room-card {
+    @apply bg-white rounded-lg p-4 shadow;
+  }
+
+  /* Mobile System Checks */
+  .system-check-item {
+    @apply flex items-center justify-between py-2;
+  }
+
+  .system-check-icon {
+    @apply h-4 w-4;
+  }
+
+  /* Mobile Comfort Features */
+  .comfort-features-mobile {
+    @apply grid grid-cols-1 gap-3;
+  }
+
+  .comfort-feature-item {
+    @apply flex items-center justify-between p-3 bg-gray-50 rounded-lg;
+  }
+
+  /* Mobile Queue Status */
+  .queue-status-mobile {
+    @apply text-center p-4;
+  }
+
+  .queue-position-display {
+    @apply text-4xl font-bold text-blue-600 mb-2;
+  }
+
+  .queue-progress {
+    @apply w-full mt-4;
+  }
+
+  /* Mobile Consultation List */
+  .consultations-list-mobile {
+    @apply space-y-3 p-4;
+  }
+
+  .consultation-card-mobile {
+    @apply bg-white rounded-lg p-4 shadow;
+  }
+
+  .consultation-card-header {
+    @apply flex items-center justify-between mb-3;
+  }
+
+  .consultation-card-body {
+    @apply space-y-2;
+  }
+
+  .consultation-card-footer {
+    @apply flex justify-between items-center mt-3 pt-3 border-t;
+  }
+
+  /* Mobile Navigation */
+  .mobile-nav {
+    @apply fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg z-40;
+  }
+
+  .mobile-nav-items {
+    @apply flex justify-around py-2;
+  }
+
+  .mobile-nav-item {
+    @apply flex flex-col items-center p-2 text-xs;
+  }
+
+  .mobile-nav-icon {
+    @apply h-6 w-6 mb-1;
+  }
+
+  /* Mobile Modal Adjustments */
+  .mobile-modal {
+    @apply fixed inset-0 z-50 bg-white;
+  }
+
+  .mobile-modal-header {
+    @apply flex items-center justify-between p-4 border-b;
+  }
+
+  .mobile-modal-content {
+    @apply flex-1 overflow-y-auto p-4;
+  }
+
+  .mobile-modal-footer {
+    @apply p-4 border-t bg-gray-50;
+  }
+
+  /* Touch-Friendly Buttons */
+  .touch-button {
+    @apply min-h-[44px] min-w-[44px] flex items-center justify-center;
+  }
+
+  /* Mobile Forms */
+  .mobile-form {
+    @apply space-y-4 p-4;
+  }
+
+  .mobile-form-group {
+    @apply space-y-2;
+  }
+
+  .mobile-form-input {
+    @apply w-full p-3 border rounded-lg text-base;
+  }
+
+  .mobile-form-select {
+    @apply w-full p-3 border rounded-lg text-base appearance-none;
+  }
+
+  /* Mobile Video Controls Overlay */
+  .video-controls-overlay {
+    @apply absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center;
+    transition: opacity 0.3s ease-in-out;
+  }
+
+  .video-controls-overlay.hidden {
+    @apply opacity-0 pointer-events-none;
+  }
+
+  .video-controls-center {
+    @apply flex items-center gap-4;
+  }
+
+  .video-control-large {
+    @apply rounded-full p-4 bg-white bg-opacity-20 text-white;
+  }
+
+  /* Mobile Landscape Adjustments */
+  @media (orientation: landscape) and (max-height: 500px) {
+    .consultation-room {
+      @apply flex-row;
+    }
+
+    .consultation-video-grid {
+      @apply flex-1;
+    }
+
+    .consultation-chat {
+      @apply relative w-80 h-full;
+      transform: none;
+    }
+
+    .consultation-controls {
+      @apply bottom-2;
+    }
+
+    .waiting-room-mobile {
+      @apply grid grid-cols-2 gap-4 p-2;
+    }
+
+    .waiting-room-video-preview {
+      @apply col-span-2;
+    }
+  }
+}
+
+/* Tablet Styles (768px to 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .consultation-room {
+    @apply grid grid-cols-3 h-screen gap-4 p-4;
+  }
+
+  .consultation-video-area {
+    @apply col-span-2 flex flex-col gap-4;
+  }
+
+  .consultation-main-video {
+    @apply flex-1 rounded-lg overflow-hidden bg-gray-900;
+  }
+
+  .consultation-participants-strip {
+    @apply flex gap-2 overflow-x-auto;
+  }
+
+  .consultation-participant-video {
+    @apply w-24 h-24 rounded-lg overflow-hidden bg-gray-800 flex-shrink-0;
+  }
+
+  .consultation-sidebar {
+    @apply flex flex-col gap-4;
+  }
+
+  .consultation-chat {
+    @apply flex-1 bg-white rounded-lg shadow border;
+  }
+
+  .consultation-controls {
+    @apply fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50;
+  }
+
+  /* Tablet Waiting Room */
+  .waiting-room-tablet {
+    @apply grid grid-cols-2 lg:grid-cols-3 gap-6 p-6;
+  }
+
+  .waiting-room-video-section {
+    @apply col-span-2 lg:col-span-1;
+  }
+
+  /* Tablet Forms */
+  .tablet-form {
+    @apply max-w-2xl mx-auto p-6;
+  }
+
+  .tablet-form-grid {
+    @apply grid grid-cols-2 gap-4;
+  }
+
+  .tablet-form-full {
+    @apply col-span-2;
+  }
+}
+
+/* Large Mobile/Small Tablet (480px to 767px) */
+@media (min-width: 480px) and (max-width: 767px) {
+  .consultation-participants-grid {
+    @apply grid grid-cols-4 gap-2;
+  }
+
+  .consultation-participant-video {
+    @apply w-full aspect-square rounded-lg overflow-hidden bg-gray-800;
+  }
+
+  .waiting-room-info-grid {
+    @apply grid grid-cols-2 gap-4;
+  }
+
+  .consultations-list-mobile {
+    @apply grid grid-cols-1 gap-4 p-4;
+  }
+
+  .mobile-form-grid {
+    @apply grid grid-cols-2 gap-4;
+  }
+
+  .mobile-form-full {
+    @apply col-span-2;
+  }
+}
+
+/* High DPI/Retina Displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .consultation-video,
+  .waiting-room-video-preview {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+}
+
+/* Dark Mode Mobile Adjustments */
+@media (prefers-color-scheme: dark) {
+  .consultation-chat {
+    @apply bg-gray-900 border-gray-700;
+  }
+
+  .consultation-chat-header {
+    @apply bg-gray-800 border-gray-700;
+  }
+
+  .consultation-chat-input {
+    @apply bg-gray-900 border-gray-700;
+  }
+
+  .waiting-room-card {
+    @apply bg-gray-800 text-white;
+  }
+
+  .mobile-modal {
+    @apply bg-gray-900 text-white;
+  }
+
+  .mobile-nav {
+    @apply bg-gray-900 border-gray-700;
+  }
+
+  .comfort-feature-item {
+    @apply bg-gray-800;
+  }
+}
+
+/* Accessibility Enhancements */
+@media (prefers-reduced-motion: reduce) {
+  .consultation-chat,
+  .video-controls-overlay,
+  .mobile-modal {
+    transition: none;
+  }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  .consultation-control-button {
+    @apply border-2 border-white;
+  }
+
+  .mobile-nav-item {
+    @apply border border-gray-400;
+  }
+
+  .consultation-participant-video {
+    @apply border-2 border-white;
+  }
+}
+
+/* Touch Device Optimizations */
+@media (pointer: coarse) {
+  .consultation-control-button {
+    @apply min-h-[48px] min-w-[48px];
+  }
+
+  .mobile-nav-item {
+    @apply min-h-[48px] min-w-[48px];
+  }
+
+  .touch-button {
+    @apply min-h-[48px] min-w-[48px];
+  }
+
+  /* Larger tap targets for better usability */
+  .system-check-item button {
+    @apply min-h-[44px] min-w-[44px];
+  }
+
+  .comfort-feature-item button {
+    @apply min-h-[44px] min-w-[44px];
+  }
+}
+
+/* iOS Safari Specific Fixes */
+@supports (-webkit-touch-callout: none) {
+  .consultation-room {
+    height: 100vh;
+    height: -webkit-fill-available;
+  }
+
+  .consultation-video-grid {
+    height: 100vh;
+    height: -webkit-fill-available;
+  }
+
+  .mobile-modal {
+    height: 100vh;
+    height: -webkit-fill-available;
+  }
+
+  /* Fix for iOS Safari bottom safe area */
+  .mobile-nav {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .consultation-controls {
+    bottom: calc(1rem + env(safe-area-inset-bottom));
+  }
+
+  .consultation-chat {
+    bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* Android Specific Adjustments */
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+  .consultation-video,
+  .waiting-room-video-preview {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+}
+
+/* Foldable Device Support */
+@media (spanning: single-fold-vertical) {
+  .consultation-room {
+    @apply grid grid-cols-2;
+  }
+
+  .consultation-video-area {
+    @apply col-span-1;
+  }
+
+  .consultation-sidebar {
+    @apply col-span-1;
+  }
+}
+
+@media (spanning: single-fold-horizontal) {
+  .consultation-room {
+    @apply grid grid-rows-2;
+  }
+
+  .consultation-video-area {
+    @apply row-span-1;
+  }
+
+  .consultation-sidebar {
+    @apply row-span-1;
+  }
+}
+
+/* Print Styles for Consultation Records */
+@media print {
+  .consultation-controls,
+  .mobile-nav,
+  .consultation-chat-input,
+  .video-controls-overlay {
+    @apply hidden;
+  }
+
+  .consultation-room {
+    @apply block bg-white text-black;
+  }
+
+  .waiting-room-mobile {
+    @apply block;
+  }
+}
+
+/* Animation Classes for Mobile */
+.slide-up-enter {
+  transform: translateY(100%);
+}
+
+.slide-up-enter-active {
+  transform: translateY(0%);
+  transition: transform 0.3s ease-out;
+}
+
+.slide-up-exit {
+  transform: translateY(0%);
+}
+
+.slide-up-exit-active {
+  transform: translateY(100%);
+  transition: transform 0.3s ease-in;
+}
+
+.fade-enter {
+  opacity: 0;
+}
+
+.fade-enter-active {
+  opacity: 1;
+  transition: opacity 0.3s ease-in;
+}
+
+.fade-exit {
+  opacity: 1;
+}
+
+.fade-exit-active {
+  opacity: 0;
+  transition: opacity 0.3s ease-out;
+}
+
+/* Utility Classes for Mobile */
+.mobile-only {
+  @apply block;
+}
+
+.desktop-only {
+  @apply hidden;
+}
+
+@media (min-width: 768px) {
+  .mobile-only {
+    @apply hidden;
+  }
+
+  .desktop-only {
+    @apply block;
+  }
+}
+
+/* Mobile-First Component Classes */
+.consultation-card {
+  @apply bg-white rounded-lg shadow p-4 mb-4;
+}
+
+@media (min-width: 768px) {
+  .consultation-card {
+    @apply p-6 mb-6;
+  }
+}
+
+.video-container {
+  @apply relative aspect-video bg-gray-900 rounded-lg overflow-hidden;
+}
+
+@media (min-width: 768px) {
+  .video-container {
+    @apply aspect-auto;
+  }
+}
+
+.responsive-grid {
+  @apply grid grid-cols-1 gap-4;
+}
+
+@media (min-width: 640px) {
+  .responsive-grid {
+    @apply grid-cols-2;
+  }
+}
+
+@media (min-width: 1024px) {
+  .responsive-grid {
+    @apply grid-cols-3;
+  }
+}
