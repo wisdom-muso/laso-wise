@@ -43,6 +43,9 @@ INSTALLED_APPS = [
     # Third-party apps
     "debug_toolbar",
     "rest_framework",
+    "rest_framework.authtoken",
+    "channels",
+    "corsheaders",
     "ckeditor",
     "whitenoise.runserver_nostatic",  # For serving static files in development
     
@@ -56,7 +59,33 @@ INSTALLED_APPS = [
     "vitals",
     "dashboard",
     "sync_monitor",
+    "telemedicine",  # New telemedicine app
 ]
+
+# Django REST Framework settings
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 20,
+}
+
+# Channels settings for WebSocket support
+ASGI_APPLICATION = 'laso.asgi.application'
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    },
+}
 
 # Django Unfold settings
 UNFOLD = {
@@ -101,6 +130,7 @@ UNFOLD = {
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -239,3 +269,36 @@ DEBUG_TOOLBAR_CONFIG = {
 ADMIN_SITE_HEADER = "Laso Digital Health Administration"
 ADMIN_SITE_TITLE = "Laso Digital Health Admin Portal"
 ADMIN_INDEX_TITLE = "Welcome to Laso Digital Health Admin Portal"
+
+# Telemedicine Configuration
+TELEMEDICINE_CONFIG = {
+    'ZOOM_API_KEY': os.getenv('ZOOM_API_KEY', ''),
+    'ZOOM_API_SECRET': os.getenv('ZOOM_API_SECRET', ''),
+    'GOOGLE_MEET_CLIENT_ID': os.getenv('GOOGLE_MEET_CLIENT_ID', ''),
+    'GOOGLE_MEET_CLIENT_SECRET': os.getenv('GOOGLE_MEET_CLIENT_SECRET', ''),
+    'JITSI_DOMAIN': os.getenv('JITSI_DOMAIN', 'meet.jit.si'),
+    'RECORDING_ENABLED': os.getenv('RECORDING_ENABLED', 'True').lower() in ('true', '1', 't'),
+    'MAX_CONSULTATION_DURATION': int(os.getenv('MAX_CONSULTATION_DURATION', '60')),  # minutes
+}
+
+# CORS settings for React frontend
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",  # React dev server
+    "http://127.0.0.1:5173",
+]
+
+CORS_ALLOW_CREDENTIALS = True
+
+# WebSocket CORS settings
+CORS_ALLOW_ALL_ORIGINS = DEBUG  # Only for development
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
