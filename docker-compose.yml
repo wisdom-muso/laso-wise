@@ -23,7 +23,7 @@ services:
       sh -c "python manage.py runserver 0.0.0.0:8005"
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8005/"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8005/admin/"]
       interval: 30s
       timeout: 10s
       retries: 3
