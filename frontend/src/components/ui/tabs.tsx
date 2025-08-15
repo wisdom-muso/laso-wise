@@ -38,3 +38,5 @@ export function Tabs({ tabs, initialId }: { tabs: Tab[]; initialId?: string }) {
 
 
 
+
+

@@ -205,7 +205,10 @@ class AuditLogAdmin(admin.ModelAdmin):
         "user__first_name", "user__last_name", "user__username",
         "model_name", "object_repr", "ip_address"
     ]
-    readonly_fields = "__all__"
+    readonly_fields = [
+        "user", "action", "model_name", "object_id", "object_repr", 
+        "changes", "ip_address", "user_agent", "timestamp"
+    ]
     ordering = ["-timestamp"]
     date_hierarchy = "timestamp"
 
