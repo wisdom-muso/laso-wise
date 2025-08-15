@@ -124,9 +124,46 @@ services:
         max-file: "3"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.web.rule=Host(`${DOMAIN:-localhost`)"
+      - "traefik.http.routers.web.rule=Host(`${DOMAIN:-localhost}`) && PathPrefix(`/api`)"
       - "traefik.http.routers.web.tls=true"
       - "traefik.http.routers.web.tls.certresolver=letsencrypt"
+
+  # React Frontend
+  frontend:
+    restart: unless-stopped
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+      args:
+        BUILD_DATE: ${BUILD_DATE:-$(date -u +'%Y-%m-%dT%H:%M:%SZ')}
+        VCS_REF: ${VCS_REF:-$(git rev-parse --short HEAD)}
+        VERSION: ${VERSION:-latest}
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_API_BASE=${FRONTEND_API_BASE:-http://localhost:8005}
+      - NODE_ENV=production
+    depends_on:
+      web:
+        condition: service_healthy
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=Host(`${DOMAIN:-localhost}`) && !PathPrefix(`/api`)"
+      - "traefik.http.routers.frontend.tls=true"
+      - "traefik.http.routers.frontend.tls.certresolver=letsencrypt"
 
   # Nginx Reverse Proxy
   nginx:
@@ -148,6 +185,8 @@ services:
       - SSL_ENABLED=${SSL_ENABLED:-false}
     depends_on:
       web:
+        condition: service_healthy
+      frontend:
         condition: service_healthy
     networks:
       - app-network

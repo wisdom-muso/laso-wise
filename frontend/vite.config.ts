@@ -10,30 +10,42 @@ export default defineConfig({
     },
   },
   define: {
-    'import.meta.env.VITE_API_BASE': JSON.stringify(process.env.VITE_API_BASE || ''),
+    'import.meta.env.VITE_API_BASE': JSON.stringify(process.env.VITE_API_BASE || 'http://localhost:8005'),
   },
   server: {
-    port: 5173,
+    port: 3000,
     host: true,
     proxy: {
       '/doctors': {
-        target: 'http://localhost:8000',
+        target: 'http://web:8005',
         changeOrigin: true,
       },
       '/accounts': {
-        target: 'http://localhost:8000',
+        target: 'http://web:8005',
         changeOrigin: true,
       },
       '/patients': {
-        target: 'http://localhost:8000',
+        target: 'http://web:8005',
         changeOrigin: true,
       },
       '/vitals': {
-        target: 'http://localhost:8000',
+        target: 'http://web:8005',
         changeOrigin: true,
       },
       '/api': {
-        target: 'http://localhost:8000',
+        target: 'http://web:8005',
+        changeOrigin: true,
+      },
+      '/admin': {
+        target: 'http://web:8005',
+        changeOrigin: true,
+      },
+      '/static': {
+        target: 'http://web:8005',
+        changeOrigin: true,
+      },
+      '/media': {
+        target: 'http://web:8005',
         changeOrigin: true,
       },
     },

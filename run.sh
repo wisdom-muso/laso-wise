@@ -243,7 +243,8 @@ run_development() {
     ./setup_app.sh
     
     print_status "Building and starting development containers..."
-    print_status "Access the application at: http://65.108.91.110:12000"
+    print_status "Backend will be available at: http://localhost:8005"
+    print_status "Frontend will be available at: http://localhost:3000"
     
     export COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME}-dev"
     
@@ -254,9 +255,12 @@ run_development() {
     print_status "Running containers:"
     $compose_cmd ps
     
-    # Show access URL
+    # Show access URLs
     print_success "Application started in development mode!"
-    print_status "Access the application at: http://65.108.91.110:12000"
+    print_status "Access URLs:"
+    echo -e "  ${GREEN}Backend:${NC} http://localhost:8005"
+    echo -e "  ${GREEN}Frontend:${NC} http://localhost:3000"
+    echo -e "  ${GREEN}Admin Panel:${NC} http://localhost:8005/admin"
 }
 
 # Function to run in production mode
@@ -330,6 +334,10 @@ run_production() {
     else
         echo -e "  ${GREEN}HTTP:${NC} http://$domain:$http_port"
     fi
+    
+    echo -e "  ${GREEN}Frontend:${NC} http://$domain:3000"
+    echo -e "  ${GREEN}Backend API:${NC} http://$domain:8005"
+    echo -e "  ${GREEN}Admin Panel:${NC} http://$domain:8005/admin"
     
     print_status "Useful commands:"
     echo -e "  View logs: ${CYAN}$compose_cmd -f docker-compose.prod.yml logs -f${NC}"
