@@ -10,3 +10,7 @@ export { Education } from './education.entity';
 export { Experience } from './experience.entity';
 export { Review } from './review.entity';
 export { Specialty } from './specialty.entity';
+export { SoapNote } from './soap-note.entity';
+export { EHRRecord } from './ehr-record.entity';
+export { MobileClinicRequest, MobileClinicNotification, MobileClinicStatus } from './mobile-clinic.entity';
+export { AuditLog, AuditAction } from './audit-log.entity';

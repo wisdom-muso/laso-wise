@@ -1,27 +1,28 @@
 version: '3.8'
 
 services:
-  # MySQL Database
-  mysql:
-    image: mysql:8.0
-    container_name: laso-mysql
+  # PostgreSQL Database
+  postgres:
+    image: postgres:17-alpine
+    container_name: laso-postgres
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: laso_medical
-      MYSQL_USER: laso_user
-      MYSQL_PASSWORD: laso_password
+      POSTGRES_DB: laso_medical
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: laso_password
+      PGDATA: /var/lib/postgresql/data/pgdata
     ports:
-      - "3306:3306"
+      - "5432:5432"
     volumes:
-      - mysql_data:/var/lib/mysql
-      - ./mysql-init:/docker-entrypoint-initdb.d
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgres-init:/docker-entrypoint-initdb.d
     networks:
       - laso-network
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      timeout: 20s
-      retries: 10
+      test: ["CMD-SHELL", "pg_isready -U postgres -d laso_medical"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   # NestJS Backend
   nestjs-backend:
@@ -33,9 +34,9 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3001
-      - DB_HOST=mysql
-      - DB_PORT=3306
-      - DB_USERNAME=laso_user
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USERNAME=postgres
       - DB_PASSWORD=laso_password
       - DB_DATABASE=laso_medical
       - JWT_SECRET=your-super-secret-jwt-key-change-in-production
@@ -44,12 +45,13 @@ services:
     ports:
       - "3001:3001"
     depends_on:
-      mysql:
+      postgres:
         condition: service_healthy
     networks:
       - laso-network
     volumes:
       - ./backend/uploads:/usr/src/app/uploads
+      - ./backend/logs:/usr/src/app/logs
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3001/"]
       interval: 30s
@@ -86,5 +88,5 @@ networks:
     driver: bridge
 
 volumes:
-  mysql_data:
+  postgres_data:
     driver: local

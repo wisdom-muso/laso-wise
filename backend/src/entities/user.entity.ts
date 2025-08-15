@@ -18,6 +18,10 @@ import { Education } from './education.entity';
 import { Experience } from './experience.entity';
 import { Review } from './review.entity';
 import { Specialty } from './specialty.entity';
+import { SoapNote } from './soap-note.entity';
+import { EHRRecord } from './ehr-record.entity';
+import { MobileClinicRequest } from './mobile-clinic.entity';
+import { AuditLog } from './audit-log.entity';
 
 export enum UserRole {
   DOCTOR = 'doctor',
@@ -87,6 +91,9 @@ export class User {
   @OneToOne(() => Profile, (profile) => profile.user, { cascade: true })
   profile: Profile;
 
+  @OneToOne(() => EHRRecord, (ehrRecord) => ehrRecord.patient)
+  ehrRecord: EHRRecord;
+
   @OneToMany(() => Booking, (booking) => booking.doctor)
   appointments: Booking[];
 
@@ -117,6 +124,25 @@ export class User {
   @OneToMany(() => Review, (review) => review.patient)
   patientReviews: Review[];
 
+  // SOAP Notes relationships
+  @OneToMany(() => SoapNote, (soapNote) => soapNote.patient)
+  soapNotesAsPatient: SoapNote[];
+
+  @OneToMany(() => SoapNote, (soapNote) => soapNote.createdBy)
+  soapNotesCreated: SoapNote[];
+
+  // EHR relationships
+  @OneToMany(() => EHRRecord, (ehrRecord) => ehrRecord.lastUpdatedBy)
+  ehrRecordsUpdated: EHRRecord[];
+
+  // Mobile Clinic relationships
+  @OneToMany(() => MobileClinicRequest, (request) => request.patient)
+  mobileClinicRequests: MobileClinicRequest[];
+
+  // Audit Log relationships
+  @OneToMany(() => AuditLog, (auditLog) => auditLog.user)
+  auditLogs: AuditLog[];
+
   @ManyToMany(() => Specialty, (specialty) => specialty.doctors)
   @JoinTable({
     name: 'user_specialties',
@@ -144,5 +170,43 @@ export class User {
 
   getRatingCount(): number {
     return this.doctorReviews ? this.doctorReviews.length : 0;
+  }
+
+  isDoctor(): boolean {
+    return this.role === UserRole.DOCTOR;
+  }
+
+  isPatient(): boolean {
+    return this.role === UserRole.PATIENT;
+  }
+
+  isAdmin(): boolean {
+    return this.role === UserRole.ADMIN;
+  }
+
+  canAccessPatientData(patientId: number): boolean {
+    if (this.isAdmin()) {
+      return true;
+    }
+    if (this.isPatient()) {
+      return this.id === patientId;
+    }
+    if (this.isDoctor()) {
+      // Doctors can access patient data if they have appointments or created SOAP notes
+      return true; // This should be refined based on specific business rules
+    }
+    return false;
+  }
+
+  canCreateSoapNotes(): boolean {
+    return this.isDoctor();
+  }
+
+  canViewSoapNotes(patientId: number): boolean {
+    return this.canAccessPatientData(patientId);
+  }
+
+  canUpdateEHR(): boolean {
+    return this.isDoctor() || this.isAdmin();
   }
 }

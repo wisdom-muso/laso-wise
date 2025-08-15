@@ -14,6 +14,7 @@ import { User } from './user.entity';
 import { Consultation } from './consultation.entity';
 import { Prescription } from './prescription.entity';
 import { ProgressNote } from './progress-note.entity';
+import { SoapNote } from './soap-note.entity';
 
 export enum AppointmentType {
   IN_PERSON = 'in_person',
@@ -99,6 +100,9 @@ export class Booking {
   @OneToMany(() => ProgressNote, (progressNote) => progressNote.booking)
   progressNotes: ProgressNote[];
 
+  @OneToMany(() => SoapNote, (soapNote) => soapNote.appointment)
+  soapNotes: SoapNote[];
+
   // Virtual properties
   isVirtual(): boolean {
     return this.appointmentType === AppointmentType.VIRTUAL;
@@ -106,6 +110,10 @@ export class Booking {
 
   hasConsultation(): boolean {
     return !!this.consultation;
+  }
+
+  hasSoapNotes(): boolean {
+    return this.soapNotes && this.soapNotes.length > 0;
   }
 
   getAppointmentDateTime(): Date {
@@ -126,5 +134,20 @@ export class Booking {
       now >= fifteenMinutesBefore &&
       now <= oneHourAfter
     );
+  }
+
+  canCreateSoapNotes(): boolean {
+    return this.status === AppointmentStatus.COMPLETED || this.status === AppointmentStatus.CONFIRMED;
+  }
+
+  getStatusColor(): string {
+    const statusColors = {
+      [AppointmentStatus.PENDING]: '#f39c12',      // Orange
+      [AppointmentStatus.CONFIRMED]: '#2ecc71',    // Green
+      [AppointmentStatus.COMPLETED]: '#3498db',    // Blue
+      [AppointmentStatus.CANCELLED]: '#e74c3c',    // Red
+      [AppointmentStatus.NO_SHOW]: '#95a5a6',      // Gray
+    };
+    return statusColors[this.status] || '#95a5a6';
   }
 }
