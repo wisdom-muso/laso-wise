@@ -35,13 +35,13 @@ services:
     depends_on:
       - web
     environment:
-      - VITE_API_BASE=${VITE_API_BASE:-http://65.108.91.110:8005}
-      - NODE_ENV=production
+      - VITE_API_BASE=${VITE_API_BASE:-http://65.108.91.110:12000}
+      - NODE_ENV=development
     ports:
       - "3000:3000"
     volumes:
       - .:/usr/src/app
-    command: sh -c "npm install --no-audit --no-fund && npm run build && npm run preview -- --host 0.0.0.0 --port 3000"
+    command: sh -c "cd /usr/src/app/frontend && npm install --no-audit --no-fund && npm run build && npm run preview -- --host 0.0.0.0 --port 3000"
     restart: unless-stopped
 
 volumes:
