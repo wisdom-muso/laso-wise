@@ -34,8 +34,8 @@ A Django-based healthcare platform for managing doctors, patients, and appointme
    ```
 
 3. Access the application:
-   - Development: http://localhost:8005
-   - Production (default mapping): http://localhost:12000
+   - Development: http://65.108.91.110:8005 (Django API) + http://65.108.91.110:3000 (React Frontend)
+   - Production (default mapping): http://65.108.91.110:12000
 
 ### Manual Setup
 

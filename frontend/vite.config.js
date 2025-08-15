@@ -16,23 +16,23 @@ export default defineConfig({
         host: true,
         proxy: {
             '/doctors': {
-                target: 'http://localhost:8005',
+                target: process.env.VITE_API_BASE || 'http://65.108.91.110:8005',
                 changeOrigin: true,
             },
             '/accounts': {
-                target: 'http://localhost:8005',
+                target: process.env.VITE_API_BASE || 'http://65.108.91.110:8005',
                 changeOrigin: true,
             },
             '/patients': {
-                target: 'http://localhost:8005',
+                target: process.env.VITE_API_BASE || 'http://65.108.91.110:8005',
                 changeOrigin: true,
             },
             '/vitals': {
-                target: 'http://localhost:8005',
+                target: process.env.VITE_API_BASE || 'http://65.108.91.110:8005',
                 changeOrigin: true,
             },
             '/api': {
-                target: 'http://localhost:8005',
+                target: process.env.VITE_API_BASE || 'http://65.108.91.110:8005',
                 changeOrigin: true,
             },
         },

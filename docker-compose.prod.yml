@@ -137,7 +137,7 @@ services:
       web:
         condition: service_healthy
     environment:
-      - VITE_API_BASE=http://localhost:8005
+      - VITE_API_BASE=${VITE_API_BASE:-http://65.108.91.110:12000}
       - NODE_ENV=production
     ports:
       - "3000:3000"
@@ -166,7 +166,7 @@ services:
       args:
         NGINX_VERSION: 1.24-alpine
     ports:
-      - "${HTTP_PORT:-8005}:80"
+      - "${HTTP_PORT:-12000}:80"
       - "${HTTPS_PORT:-443}:443"
     volumes:
       - static_volume:/usr/src/app/staticfiles:ro
