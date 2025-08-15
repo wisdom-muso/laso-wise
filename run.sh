@@ -243,7 +243,8 @@ run_development() {
     ./setup_app.sh
     
     print_status "Building and starting development containers..."
-    print_status "Access the application at: http://65.108.91.110:12000"
+    print_status "Backend API: http://localhost:8005"
+    print_status "Frontend: http://localhost:3000"
     
     export COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME}-dev"
     
@@ -256,7 +257,8 @@ run_development() {
     
     # Show access URL
     print_success "Application started in development mode!"
-    print_status "Access the application at: http://65.108.91.110:12000"
+    print_status "Backend API: http://localhost:8005"
+    print_status "Frontend: http://localhost:3000"
 }
 
 # Function to run in production mode

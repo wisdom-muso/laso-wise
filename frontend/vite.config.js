@@ -16,23 +16,23 @@ export default defineConfig({
         host: true,
         proxy: {
             '/doctors': {
-                target: 'http://localhost:8000',
+                target: 'http://localhost:8005',
                 changeOrigin: true,
             },
             '/accounts': {
-                target: 'http://localhost:8000',
+                target: 'http://localhost:8005',
                 changeOrigin: true,
             },
             '/patients': {
-                target: 'http://localhost:8000',
+                target: 'http://localhost:8005',
                 changeOrigin: true,
             },
             '/vitals': {
-                target: 'http://localhost:8000',
+                target: 'http://localhost:8005',
                 changeOrigin: true,
             },
             '/api': {
-                target: 'http://localhost:8000',
+                target: 'http://localhost:8005',
                 changeOrigin: true,
             },
         },
