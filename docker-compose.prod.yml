@@ -36,7 +36,7 @@ services:
     restart: unless-stopped
     build:
       context: .
-      dockerfile: Dockerfile.django
+      dockerfile: Dockerfile
       args:
         BUILD_DATE: ${BUILD_DATE:-$(date -u +'%Y-%m-%dT%H:%M:%SZ')}
         VCS_REF: ${VCS_REF:-$(git rev-parse --short HEAD)}
@@ -78,7 +78,7 @@ services:
     restart: unless-stopped
     build:
       context: ./frontend
-      dockerfile: Dockerfile.react
+      dockerfile: Dockerfile
       args:
         VITE_API_BASE: http://65.108.91.110
         NODE_ENV: production
