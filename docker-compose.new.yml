@@ -1,0 +1,92 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:17-alpine
+    container_name: laso-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: laso_medical
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: laso_password
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgres-init:/docker-entrypoint-initdb.d
+    networks:
+      - laso-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d laso_medical"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # NestJS Backend
+  nestjs-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: laso-nestjs-backend
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=laso_password
+      - DB_DATABASE=laso_medical
+      - JWT_SECRET=your-super-secret-jwt-key-change-in-production
+      - JWT_EXPIRES_IN=7d
+      - FRONTEND_URL=http://localhost:3000
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - laso-network
+    volumes:
+      - ./backend/uploads:/usr/src/app/uploads
+      - ./backend/logs:/usr/src/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # React Frontend
+  react-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: laso-react-frontend
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - VITE_API_BASE=http://localhost:3001
+    ports:
+      - "3000:3000"
+    depends_on:
+      nestjs-backend:
+        condition: service_healthy
+    networks:
+      - laso-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+networks:
+  laso-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
