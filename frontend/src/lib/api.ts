@@ -1,16 +1,16 @@
 import axios, { AxiosResponse, AxiosError } from 'axios';
 
-// Get API base URL from environment variable, fallback to production backend port
-const API_BASE_URL = import.meta.env.VITE_API_BASE || 'http://65.108.91.110:12000';
+// Get API base URL from environment variable, with fallback for Docker development
+const API_BASE_URL = import.meta.env.VITE_API_BASE || 'http://localhost:8005';
 
 // Create axios instance with default configuration
 export const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 30000, // Increased timeout for better reliability
+  timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
   },
-  withCredentials: true, // Enable cookies for CORS
+  withCredentials: true, // Enable cookies for CSRF
 });
 
 // Request retry configuration
@@ -20,18 +20,26 @@ const RETRY_DELAY = 1000;
 // Function to wait for a specified delay
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-// Add request interceptor to include auth token
+// Add request interceptor to include auth token and CSRF token
 api.interceptors.request.use(
-  (config) => {
+  async (config) => {
+    // Get auth token from localStorage
     const token = localStorage.getItem('authToken');
     if (token) {
       config.headers.Authorization = `Token ${token}`;
     }
     
-    // Add CSRF token if available
-    const csrfToken = document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.getAttribute('content');
-    if (csrfToken) {
-      config.headers['X-CSRFToken'] = csrfToken;
+    // Get CSRF token for Django
+    try {
+      const csrfResponse = await axios.get(`${API_BASE_URL}/api/csrf/`, {
+        withCredentials: true,
+        timeout: 5000,
+      });
+      if (csrfResponse.data?.csrfToken) {
+        config.headers['X-CSRFToken'] = csrfResponse.data.csrfToken;
+      }
+    } catch (error) {
+      console.warn('Could not fetch CSRF token:', error);
     }
     
     return config;
@@ -52,6 +60,7 @@ api.interceptors.response.use(
     if (!config || config.__retryCount >= MAX_RETRIES) {
       if (error.response?.status === 401) {
         localStorage.removeItem('authToken');
+        localStorage.removeItem('user');
         if (window.location.pathname !== '/login') {
           window.location.href = '/login';
         }
@@ -78,6 +87,7 @@ api.interceptors.response.use(
     // Handle specific error codes
     if (error.response?.status === 401) {
       localStorage.removeItem('authToken');
+      localStorage.removeItem('user');
       if (window.location.pathname !== '/login') {
         window.location.href = '/login';
       }
@@ -91,100 +101,104 @@ api.interceptors.response.use(
   }
 );
 
-// For multipart/form-data requests
-export const apiJson = axios.create({
-  baseURL: API_BASE_URL,
-  timeout: 30000,
-  withCredentials: true,
-});
-
-apiJson.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('authToken');
-    if (token) {
-      config.headers.Authorization = `Token ${token}`;
-    }
-    
-    // Add CSRF token if available
-    const csrfToken = document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.getAttribute('content');
-    if (csrfToken) {
-      config.headers['X-CSRFToken'] = csrfToken;
-    }
-    
-    return config;
-  },
-  (error) => {
-    console.error('apiJson request interceptor error:', error);
-    return Promise.reject(error);
-  }
-);
-
-apiJson.interceptors.response.use(
-  (response) => response.data,
-  async (error: AxiosError) => {
-    const config = error.config as any;
-    
-    // Same retry logic as main api instance
-    if (!config || config.__retryCount >= MAX_RETRIES) {
-      if (error.response?.status === 401) {
-        localStorage.removeItem('authToken');
-        if (window.location.pathname !== '/login') {
-          window.location.href = '/login';
-        }
-      }
-      return Promise.reject(error);
-    }
-    
-    config.__retryCount = config.__retryCount || 0;
-    config.__retryCount += 1;
-    
-    if (
-      !error.response || 
-      (error.response.status >= 500 && error.response.status <= 599) ||
-      error.code === 'NETWORK_ERROR' ||
-      error.code === 'ECONNABORTED'
-    ) {
-      console.log(`Retrying apiJson request (${config.__retryCount}/${MAX_RETRIES}): ${config.url}`);
-      await delay(RETRY_DELAY * config.__retryCount);
-      return apiJson(config);
-    }
-    
-    if (error.response?.status === 401) {
-      localStorage.removeItem('authToken');
-      if (window.location.pathname !== '/login') {
-        window.location.href = '/login';
-      }
-    }
-    
-    return Promise.reject(error);
-  }
-);
-
-// API endpoints
+// API endpoints matching Django URL patterns
 export const endpoints = {
-  // Authentication (based on actual Django URLs)
-  login: '/accounts/api/login/',
-  logout: '/accounts/api/logout/',
-  register: '/accounts/api/register/',
-  me: '/accounts/api/me/',
-  updateProfile: '/accounts/api/me/update/',
+  // Authentication
+  login: '/api/auth/login/',
+  logout: '/api/auth/logout/',
+  register: '/api/auth/register/',
+  me: '/api/auth/me/',
+  csrf: '/api/csrf/',
   
-  // Appointments
-  appointments: '/bookings/api/appointments/',
-  bookingConsultations: '/bookings/api/appointments/',
+  // User profile
+  updateProfile: '/api/auth/profile/update/',
+  
+  // Appointments/Bookings
+  appointments: '/api/bookings/',
+  createAppointment: '/api/bookings/create/',
   
   // Doctors
-  doctors: '/doctors/api/',
-  doctorSchedule: '/doctors/api/schedule/',
-  
-  // Consultations
-  consultations: '/telemedicine/api/consultations/',
-  
-  // Vitals
-  vitals: '/vitals/api/records/',
+  doctors: '/api/doctors/',
+  doctorDetail: (id: number) => `/api/doctors/${id}/`,
+  doctorSchedule: (id: number) => `/api/doctors/${id}/schedule/`,
   
   // Patients
-  patients: '/patients/api/',
+  patients: '/api/patients/',
+  patientDetail: (id: number) => `/api/patients/${id}/`,
+  
+  // Consultations (Telemedicine)
+  consultations: '/api/consultations/',
+  createConsultation: '/api/consultations/create/',
+  consultationDetail: (id: string) => `/api/consultations/${id}/`,
+  joinConsultation: (id: string) => `/api/consultations/${id}/join/`,
+  
+  // Vitals
+  vitals: '/api/vitals/',
+  vitalCategories: '/api/vitals/categories/',
+  createVital: '/api/vitals/create/',
+  
+  // Dashboard
+  dashboard: '/api/dashboard/',
+  stats: '/api/dashboard/stats/',
+};
+
+// Auth helper functions
+export const authAPI = {
+  login: async (credentials: { username: string; password: string }) => {
+    try {
+      const response = await api.post(endpoints.login, credentials);
+      if (response.token) {
+        localStorage.setItem('authToken', response.token);
+        localStorage.setItem('user', JSON.stringify(response.user));
+      }
+      return response;
+    } catch (error) {
+      console.error('Login error:', error);
+      throw error;
+    }
+  },
+
+  logout: async () => {
+    try {
+      await api.post(endpoints.logout);
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('user');
+      window.location.href = '/login';
+    }
+  },
+
+  register: async (userData: {
+    username: string;
+    email: string;
+    password: string;
+    first_name: string;
+    last_name: string;
+    role: string;
+  }) => {
+    try {
+      const response = await api.post(endpoints.register, userData);
+      if (response.token) {
+        localStorage.setItem('authToken', response.token);
+        localStorage.setItem('user', JSON.stringify(response.user));
+      }
+      return response;
+    } catch (error) {
+      console.error('Registration error:', error);
+      throw error;
+    }
+  },
+
+  getCurrentUser: async () => {
+    try {
+      return await api.get(endpoints.me);
+    } catch (error) {
+      console.error('Get current user error:', error);
+      throw error;
+    }
+  },
 };
 
 // WebSocket URL helper
@@ -197,10 +211,9 @@ export const getWebSocketURL = (path: string): string => {
 // API Health Check
 export const healthCheck = async (): Promise<boolean> => {
   try {
-    // Try a simple endpoint that doesn't require authentication
-    const response = await axios.get(`${API_BASE_URL}/admin/`, {
+    const response = await axios.get(`${API_BASE_URL}/api/health/`, {
       timeout: 5000,
-      validateStatus: (status) => status < 500, // Accept any status < 500 as "healthy"
+      validateStatus: (status) => status < 500,
     });
     return true;
   } catch (error) {
