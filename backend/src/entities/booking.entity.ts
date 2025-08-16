@@ -29,12 +29,6 @@ export enum AppointmentStatus {
   NO_SHOW = 'no_show',
 }
 
-export enum VideoProvider {
-  JITSI = 'jitsi',
-  ZOOM = 'zoom',
-  GOOGLE_MEET = 'google_meet',
-}
-
 @Entity('bookings')
 @Index(['doctor', 'appointmentDate', 'appointmentTime'], { unique: true })
 export class Booking {
@@ -65,13 +59,8 @@ export class Booking {
   @Column({ name: 'consultation_notes', type: 'text', nullable: true })
   consultationNotes: string;
 
-  @Column({
-    name: 'preferred_video_provider',
-    type: 'enum',
-    enum: VideoProvider,
-    nullable: true,
-  })
-  preferredVideoProvider: VideoProvider;
+  @Column({ name: 'preferred_video_provider', nullable: true })
+  preferredVideoProvider: string;
 
   @CreateDateColumn({ name: 'booking_date' })
   bookingDate: Date;
@@ -142,12 +131,81 @@ export class Booking {
 
   getStatusColor(): string {
     const statusColors = {
-      [AppointmentStatus.PENDING]: '#f39c12',      // Orange
-      [AppointmentStatus.CONFIRMED]: '#2ecc71',    // Green
-      [AppointmentStatus.COMPLETED]: '#3498db',    // Blue
-      [AppointmentStatus.CANCELLED]: '#e74c3c',    // Red
-      [AppointmentStatus.NO_SHOW]: '#95a5a6',      // Gray
+      [AppointmentStatus.PENDING]: '#f59e0b',      // Yellow
+      [AppointmentStatus.CONFIRMED]: '#10b981',    // Green
+      [AppointmentStatus.COMPLETED]: '#3b82f6',    // Blue
+      [AppointmentStatus.CANCELLED]: '#ef4444',    // Red
+      [AppointmentStatus.NO_SHOW]: '#6b7280',      // Gray
     };
-    return statusColors[this.status] || '#95a5a6';
+    return statusColors[this.status] || '#6b7280';
+  }
+
+  getStatusDisplay(): string {
+    const statusDisplayMap = {
+      [AppointmentStatus.PENDING]: 'Pending',
+      [AppointmentStatus.CONFIRMED]: 'Confirmed',
+      [AppointmentStatus.COMPLETED]: 'Completed',
+      [AppointmentStatus.CANCELLED]: 'Cancelled',
+      [AppointmentStatus.NO_SHOW]: 'No Show',
+    };
+    return statusDisplayMap[this.status] || 'Unknown';
+  }
+
+  getTypeDisplay(): string {
+    const typeDisplayMap = {
+      [AppointmentType.IN_PERSON]: 'In-Person',
+      [AppointmentType.VIRTUAL]: 'Virtual',
+    };
+    return typeDisplayMap[this.appointmentType] || 'Unknown';
+  }
+
+  isUpcoming(): boolean {
+    const appointmentDateTime = this.getAppointmentDateTime();
+    return appointmentDateTime > new Date() && this.status !== AppointmentStatus.CANCELLED;
+  }
+
+  isPast(): boolean {
+    const appointmentDateTime = this.getAppointmentDateTime();
+    return appointmentDateTime < new Date();
+  }
+
+  isToday(): boolean {
+    const appointmentDate = new Date(this.appointmentDate);
+    const today = new Date();
+    return (
+      appointmentDate.getDate() === today.getDate() &&
+      appointmentDate.getMonth() === today.getMonth() &&
+      appointmentDate.getFullYear() === today.getFullYear()
+    );
+  }
+
+  canBeCancelled(): boolean {
+    return this.status === AppointmentStatus.PENDING || this.status === AppointmentStatus.CONFIRMED;
+  }
+
+  canBeRescheduled(): boolean {
+    return this.status === AppointmentStatus.PENDING || this.status === AppointmentStatus.CONFIRMED;
+  }
+
+  markAsCompleted(): void {
+    this.status = AppointmentStatus.COMPLETED;
+  }
+
+  markAsNoShow(): void {
+    this.status = AppointmentStatus.NO_SHOW;
+  }
+
+  cancel(): void {
+    this.status = AppointmentStatus.CANCELLED;
+  }
+
+  confirm(): void {
+    this.status = AppointmentStatus.CONFIRMED;
+  }
+
+  reschedule(newDate: Date, newTime: string): void {
+    this.appointmentDate = newDate;
+    this.appointmentTime = newTime;
+    this.status = AppointmentStatus.PENDING; // Reset status when rescheduled
   }
 }

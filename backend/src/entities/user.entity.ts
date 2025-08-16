@@ -22,6 +22,9 @@ import { SoapNote } from './soap-note.entity';
 import { EHRRecord } from './ehr-record.entity';
 import { MobileClinicRequest } from './mobile-clinic.entity';
 import { AuditLog } from './audit-log.entity';
+import { ConsultationParticipant } from './consultation-participant.entity';
+import { ConsultationMessage } from './consultation-message.entity';
+import { TechnicalIssue } from './technical-issue.entity';
 
 export enum UserRole {
   DOCTOR = 'doctor',
@@ -143,6 +146,19 @@ export class User {
   @OneToMany(() => AuditLog, (auditLog) => auditLog.user)
   auditLogs: AuditLog[];
 
+  // Telemedicine relationships
+  @OneToMany(() => ConsultationParticipant, (participant) => participant.user)
+  consultationParticipants: ConsultationParticipant[];
+
+  @OneToMany(() => ConsultationMessage, (message) => message.sender)
+  consultationMessages: ConsultationMessage[];
+
+  @OneToMany(() => TechnicalIssue, (issue) => issue.reporter)
+  reportedTechnicalIssues: TechnicalIssue[];
+
+  @OneToMany(() => TechnicalIssue, (issue) => issue.resolvedBy)
+  resolvedTechnicalIssues: TechnicalIssue[];
+
   @ManyToMany(() => Specialty, (specialty) => specialty.doctors)
   @JoinTable({
     name: 'user_specialties',
@@ -208,5 +224,76 @@ export class User {
 
   canUpdateEHR(): boolean {
     return this.isDoctor() || this.isAdmin();
+  }
+
+  canStartConsultation(): boolean {
+    return this.isDoctor();
+  }
+
+  canJoinConsultation(): boolean {
+    return this.isDoctor() || this.isPatient();
+  }
+
+  canRecordVitals(): boolean {
+    return this.isDoctor() || this.isAdmin();
+  }
+
+  canViewAllVitals(): boolean {
+    return this.isAdmin();
+  }
+
+  canViewPatientVitals(patientId: number): boolean {
+    return this.canAccessPatientData(patientId);
+  }
+
+  canManageMobileClinic(): boolean {
+    return this.isAdmin();
+  }
+
+  canRequestMobileClinic(): boolean {
+    return this.isPatient();
+  }
+
+  canResolveTechnicalIssues(): boolean {
+    return this.isDoctor() || this.isAdmin();
+  }
+
+  getDisplayRole(): string {
+    const roleDisplayMap = {
+      [UserRole.DOCTOR]: 'Doctor',
+      [UserRole.PATIENT]: 'Patient',
+      [UserRole.ADMIN]: 'Administrator',
+    };
+    return roleDisplayMap[this.role] || 'Unknown';
+  }
+
+  getRoleColor(): string {
+    const roleColorMap = {
+      [UserRole.DOCTOR]: '#3b82f6',  // Blue
+      [UserRole.PATIENT]: '#10b981', // Green
+      [UserRole.ADMIN]: '#ef4444',   // Red
+    };
+    return roleColorMap[this.role] || '#6b7280';
+  }
+
+  isOnline(): boolean {
+    // This would typically check last activity timestamp
+    // For now, we'll use lastLogin within last 5 minutes as a simple check
+    if (!this.lastLogin) return false;
+    
+    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+    return this.lastLogin > fiveMinutesAgo;
+  }
+
+  updateLastLogin(): void {
+    this.lastLogin = new Date();
+  }
+
+  deactivate(): void {
+    this.isActive = false;
+  }
+
+  activate(): void {
+    this.isActive = true;
   }
 }
