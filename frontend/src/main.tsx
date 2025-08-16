@@ -23,6 +23,7 @@ import { ConsultationRoom } from './modules/telemedicine/ConsultationRoom'
 import ConsultationsList from './modules/telemedicine/ConsultationsList'
 import CreateConsultation from './modules/telemedicine/CreateConsultation'
 import { AppointmentBooking } from './components/AppointmentBooking'
+import AuthGuard from './components/AuthGuard'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -38,21 +39,55 @@ const router = createBrowserRouter([
     path: '/',
     element: <AppLayout />,
     children: [
-      { index: true, element: <PatientDashboard /> },
+      { index: true, element: <AuthGuard><PatientDashboard /></AuthGuard> },
       { path: 'login', element: <LoginPage /> },
       { path: 'register', element: <RegisterPage /> },
-      { path: 'patients/dashboard', element: <PatientDashboard /> },
-      { path: 'patients/profile', element: <ProfilePage /> },
-      { path: 'doctors/dashboard', element: <DoctorDashboard /> },
-      { path: 'doctors/schedule', element: <SchedulePage /> },
       
-      // Appointment and Telemedicine routes
-      { path: 'appointments', element: <PatientDashboard /> }, // Will show appointments list
-      { path: 'appointments/book', element: <AppointmentBooking /> },
-      { path: 'appointments/book/:doctorId', element: <AppointmentBooking /> },
-      { path: 'consultations', element: <ConsultationsList /> },
-      { path: 'consultations/create', element: <CreateConsultation /> },
-      { path: 'consultations/:consultationId', element: <ConsultationRoom /> },
+      // Patient routes
+      { 
+        path: 'patients/dashboard', 
+        element: <AuthGuard requiredRole="patient"><PatientDashboard /></AuthGuard> 
+      },
+      { 
+        path: 'patients/profile', 
+        element: <AuthGuard requiredRole="patient"><ProfilePage /></AuthGuard> 
+      },
+      
+      // Doctor routes
+      { 
+        path: 'doctors/dashboard', 
+        element: <AuthGuard requiredRole="doctor"><DoctorDashboard /></AuthGuard> 
+      },
+      { 
+        path: 'doctors/schedule', 
+        element: <AuthGuard requiredRole="doctor"><SchedulePage /></AuthGuard> 
+      },
+      
+      // Appointment and Telemedicine routes (authenticated)
+      { 
+        path: 'appointments', 
+        element: <AuthGuard><PatientDashboard /></AuthGuard> 
+      },
+      { 
+        path: 'appointments/book', 
+        element: <AuthGuard><AppointmentBooking /></AuthGuard> 
+      },
+      { 
+        path: 'appointments/book/:doctorId', 
+        element: <AuthGuard><AppointmentBooking /></AuthGuard> 
+      },
+      { 
+        path: 'consultations', 
+        element: <AuthGuard><ConsultationsList /></AuthGuard> 
+      },
+      { 
+        path: 'consultations/create', 
+        element: <AuthGuard><CreateConsultation /></AuthGuard> 
+      },
+      { 
+        path: 'consultations/:consultationId', 
+        element: <AuthGuard><ConsultationRoom /></AuthGuard> 
+      },
     ],
   },
 ])

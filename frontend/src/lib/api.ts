@@ -20,6 +20,37 @@ const RETRY_DELAY = 1000;
 // Function to wait for a specified delay
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
+// CSRF token cache to avoid repeated requests
+let csrfTokenCache: string | null = null;
+let csrfTokenExpiry = 0;
+
+// Function to get CSRF token with caching
+const getCSRFToken = async (): Promise<string | null> => {
+  const now = Date.now();
+  
+  // Return cached token if still valid (cache for 30 minutes)
+  if (csrfTokenCache && now < csrfTokenExpiry) {
+    return csrfTokenCache;
+  }
+  
+  try {
+    const csrfResponse = await axios.get(`${API_BASE_URL}/api/csrf/`, {
+      withCredentials: true,
+      timeout: 5000,
+    });
+    
+    if (csrfResponse.data?.csrfToken) {
+      csrfTokenCache = csrfResponse.data.csrfToken;
+      csrfTokenExpiry = now + (30 * 60 * 1000); // 30 minutes
+      return csrfTokenCache;
+    }
+  } catch (error) {
+    console.warn('Could not fetch CSRF token:', error);
+  }
+  
+  return null;
+};
+
 // Add request interceptor to include auth token and CSRF token
 api.interceptors.request.use(
   async (config) => {
@@ -29,17 +60,10 @@ api.interceptors.request.use(
       config.headers.Authorization = `Token ${token}`;
     }
     
-    // Get CSRF token for Django
-    try {
-      const csrfResponse = await axios.get(`${API_BASE_URL}/api/csrf/`, {
-        withCredentials: true,
-        timeout: 5000,
-      });
-      if (csrfResponse.data?.csrfToken) {
-        config.headers['X-CSRFToken'] = csrfResponse.data.csrfToken;
-      }
-    } catch (error) {
-      console.warn('Could not fetch CSRF token:', error);
+    // Get CSRF token for Django (with caching)
+    const csrfToken = await getCSRFToken();
+    if (csrfToken) {
+      config.headers['X-CSRFToken'] = csrfToken;
     }
     
     return config;
@@ -56,12 +80,18 @@ api.interceptors.response.use(
   async (error: AxiosError) => {
     const config = error.config as any;
     
+    // Don't retry authentication endpoints to avoid infinite loops
+    const isAuthEndpoint = config?.url?.includes('/accounts/api/');
+    
     // Don't retry if we've already exceeded max retries
-    if (!config || config.__retryCount >= MAX_RETRIES) {
+    if (!config || config.__retryCount >= MAX_RETRIES || isAuthEndpoint) {
       if (error.response?.status === 401) {
+        // Clear authentication state
         localStorage.removeItem('authToken');
         localStorage.removeItem('user');
-        if (window.location.pathname !== '/login') {
+        
+        // Only redirect if not already on login page
+        if (window.location.pathname !== '/login' && !isAuthEndpoint) {
           window.location.href = '/login';
         }
       }
@@ -72,15 +102,23 @@ api.interceptors.response.use(
     config.__retryCount = config.__retryCount || 0;
     config.__retryCount += 1;
     
-    // Retry on network errors or 5xx errors
+    // Retry on network errors, timeouts, or 5xx errors
     if (
       !error.response || 
       (error.response.status >= 500 && error.response.status <= 599) ||
       error.code === 'NETWORK_ERROR' ||
-      error.code === 'ECONNABORTED'
+      error.code === 'ECONNABORTED' ||
+      error.code === 'TIMEOUT'
     ) {
       console.log(`Retrying request (${config.__retryCount}/${MAX_RETRIES}): ${config.url}`);
       await delay(RETRY_DELAY * config.__retryCount);
+      
+      // For CSRF errors, clear the cache and retry
+      if (error.response?.status === 403) {
+        csrfTokenCache = null;
+        csrfTokenExpiry = 0;
+      }
+      
       return api(config);
     }
     
@@ -88,13 +126,18 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       localStorage.removeItem('authToken');
       localStorage.removeItem('user');
-      if (window.location.pathname !== '/login') {
+      if (window.location.pathname !== '/login' && !isAuthEndpoint) {
         window.location.href = '/login';
       }
     } else if (error.response?.status === 403) {
       console.error('Permission denied:', error.response.data);
+      // Clear CSRF token cache in case it's a CSRF issue
+      csrfTokenCache = null;
+      csrfTokenExpiry = 0;
     } else if (error.response?.status === 404) {
       console.error('Resource not found:', error.config?.url);
+    } else if (error.response?.status === 429) {
+      console.warn('Rate limited. Please try again later.');
     }
     
     return Promise.reject(error);
@@ -104,14 +147,14 @@ api.interceptors.response.use(
 // API endpoints matching Django URL patterns
 export const endpoints = {
   // Authentication
-  login: '/api/auth/login/',
-  logout: '/api/auth/logout/',
-  register: '/api/auth/register/',
-  me: '/api/auth/me/',
+  login: '/accounts/api/login/',
+  logout: '/accounts/api/logout/',
+  register: '/accounts/api/register/',
+  me: '/accounts/api/me/',
   csrf: '/api/csrf/',
   
   // User profile
-  updateProfile: '/api/auth/profile/update/',
+  updateProfile: '/accounts/api/me/update/',
   
   // Appointments/Bookings
   appointments: '/api/bookings/',

@@ -16,7 +16,7 @@ DEBUG = os.getenv("DEBUG", "False").lower() in ("true", "1", "t")
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1,0.0.0.0,65.108.91.110").split(",")
 
 # CSRF settings
-csrf_origins = os.getenv("CSRF_TRUSTED_ORIGINS", "http://65.108.91.110,https://65.108.91.110,http://localhost:8005,http://127.0.0.1:8005")
+csrf_origins = os.getenv("CSRF_TRUSTED_ORIGINS", "http://65.108.91.110,https://65.108.91.110,http://localhost:8005,http://127.0.0.1:8005,http://localhost:3000,http://127.0.0.1:3000,http://65.108.91.110:3000")
 CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in csrf_origins.split(",") if origin.strip()]
 
 # For development, disable secure cookies if DEBUG is True
