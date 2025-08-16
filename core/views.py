@@ -4,7 +4,10 @@ from django.views.generic import TemplateView
 from django.contrib.admin.views.decorators import staff_member_required
 from django.db.models import Count, Q, Avg
 from django.utils import timezone
+from django.middleware.csrf import get_token
+from django.views.decorators.csrf import csrf_exempt
 from datetime import datetime, timedelta
+import json
 
 from accounts.models import User
 from bookings.models import Booking, Prescription
@@ -26,6 +29,36 @@ class TermsView(TemplateView):
 
 class PrivacyView(TemplateView):
     template_name = "core/privacy.html"
+
+
+class IndexView(TemplateView):
+    template_name = "core/index.html"
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        doctors = (
+            User.objects.select_related("profile")
+            .filter(role="doctor")
+            .filter(is_superuser=False)
+        )
+        context['doctors'] = doctors
+        return context
+
+
+def health_check(request):
+    """API health check endpoint"""
+    return JsonResponse({
+        'status': 'healthy',
+        'timestamp': timezone.now().isoformat(),
+        'version': '1.0.0'
+    })
+
+
+def csrf_token_view(request):
+    """Get CSRF token for frontend"""
+    return JsonResponse({
+        'csrfToken': get_token(request)
+    })
 
 
 @staff_member_required

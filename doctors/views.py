@@ -145,9 +145,48 @@ class DoctorProfileUpdateView(DoctorRequiredMixin, generic.UpdateView):
     model = User
     template_name = "doctors/profile-settings.html"
     form_class = DoctorProfileForm
+    success_url = reverse_lazy("doctors:profile-setting")
 
     def get_object(self, queryset=None):
         return self.request.user
+    
+    def form_valid(self, form):
+        user = form.save(commit=False)
+        profile = user.profile
+
+        # Handle profile image upload
+        if self.request.FILES.get("avatar"):
+            profile.image = self.request.FILES["avatar"]
+
+        # Update profile fields
+        profile_fields = [
+            "specialization",
+            "experience", 
+            "phone",
+            "about",
+            "price_per_consultation",
+        ]
+
+        for field in profile_fields:
+            value = form.cleaned_data.get(field) or self.request.POST.get(field)
+            if value is not None:
+                setattr(profile, field, value)
+
+        # Save both user and profile
+        user.save()
+        profile.save()
+
+        messages.success(self.request, "Profile updated successfully")
+        return redirect(self.success_url)
+
+    def form_invalid(self, form):
+        messages.error(self.request, "Please correct the errors below")
+        return super().form_invalid(form)
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Add any additional context needed for the template
+        return context
 
 
 class DoctorProfileView(DetailView):

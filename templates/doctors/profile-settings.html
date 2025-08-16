@@ -78,22 +78,27 @@
             <div class="row form-row">
                 <div class="col-md-12">
                     <div class="form-group">
-                        <div class="change-avatar">
+                        <div class="change-avatar modern-card">
                             <div class="profile-img">
-                                {% if user.profile.avatar %}
-                                    <img src="{{ user.profile.avatar.url }}" alt="User Image">
+                                {% if user.profile.image %}
+                                    <img src="{{ user.profile.image.url }}" alt="Profile Image" id="profilePreview">
+                                {% else %}
+                                    <img src="{% static 'assets/img/user.png' %}" alt="Default Profile" id="profilePreview">
                                 {% endif %}
                             </div>
                             <div class="upload-img">
                                 <div class="change-photo-btn">
-                                    <span><i class="fa fa-upload"></i> Upload Photo</span>
+                                    <span><i class="fas fa-upload"></i> Upload Photo</span>
                                     <input type="file" 
                                            class="upload" 
                                            name="avatar" 
-                                           accept="image/*"
-                                           onchange="previewImage(this)">
+                                           id="avatarInput"
+                                           accept="image/*">
                                 </div>
-                                <small class="form-text text-muted">Allowed JPG, GIF or PNG. Max size of 2MB</small>
+                                <small class="form-text text-muted">Upload JPG, PNG, or GIF. Max size: 5MB</small>
+                                <button type="button" class="btn btn-outline-danger btn-sm mt-2" id="removePhoto" style="display: none;">
+                                    <i class="fas fa-trash"></i> Remove Photo
+                                </button>
                             </div>
                         </div>
                     </div>

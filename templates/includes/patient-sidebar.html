@@ -54,8 +54,20 @@
                         <span>{% trans "Medical Records" %}</span>
                     </a>
                 </li>
+                <li class="{% if active == 'ehr_records' %}active{% endif %}">
+                    <a href="{% url 'patients:ehr-records' %}">
+                        <i class="fas fa-folder-medical"></i>
+                        <span>{% trans "EHR Records" %}</span>
+                    </a>
+                </li>
+                <li class="{% if active == 'telemedicine' %}active{% endif %}">
+                    <a href="{% url 'patients:telemedicine' %}">
+                        <i class="fas fa-video"></i>
+                        <span>{% trans "Telemedicine" %}</span>
+                    </a>
+                </li>
                 <li class="{% if active == 'profile' %}active{% endif %}">
-                    <a href="#" onclick="alert('Profile settings coming soon!')">
+                    <a href="{% url 'patients:profile-setting' %}">
                         <i class="fas fa-user-cog"></i>
                         <span>{% trans "Profile Settings" %}</span>
                     </a>
