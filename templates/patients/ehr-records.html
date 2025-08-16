@@ -1,0 +1,481 @@
+{% extends 'includes/patient-base.html' %}
+{% load static %}
+
+{% block title %}Medical Records{% endblock %}
+{% block page_name1 %}Medical Records{% endblock %}
+{% block page_name2 %}Medical Records{% endblock %}
+{% block page_name4 %}Medical Records{% endblock %}
+
+{% block css %}
+<style>
+    .ehr-section {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        padding: 24px;
+        margin-bottom: 24px;
+        border-left: 4px solid #007bff;
+    }
+    
+    .ehr-card {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        padding: 20px;
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+    }
+    
+    .ehr-card:hover {
+        box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+        transform: translateY(-2px);
+    }
+    
+    .ehr-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 20px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .ehr-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5em;
+        color: white;
+    }
+    
+    .ehr-icon.allergies { background: linear-gradient(135deg, #ff6b6b, #ee5a52); }
+    .ehr-icon.medications { background: linear-gradient(135deg, #4ecdc4, #44b3a5); }
+    .ehr-icon.history { background: linear-gradient(135deg, #45b7d1, #3b97b8); }
+    .ehr-icon.vitals { background: linear-gradient(135deg, #96ceb4, #7fb1a1); }
+    .ehr-icon.labs { background: linear-gradient(135deg, #feca57, #e5b651); }
+    .ehr-icon.imaging { background: linear-gradient(135deg, #ff9ff3, #e58ce6); }
+    
+    .info-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .info-item:last-child {
+        border-bottom: none;
+    }
+    
+    .info-label {
+        font-weight: 600;
+        color: #2c3e50;
+        min-width: 120px;
+    }
+    
+    .info-value {
+        color: #666;
+        text-align: right;
+        flex: 1;
+    }
+    
+    .soap-note-item {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 12px;
+        border-left: 4px solid #28a745;
+    }
+    
+    .soap-date {
+        font-size: 0.9em;
+        color: #666;
+        margin-bottom: 8px;
+    }
+    
+    .soap-content {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-top: 12px;
+    }
+    
+    .soap-component {
+        background: white;
+        padding: 12px;
+        border-radius: 6px;
+    }
+    
+    .soap-component strong {
+        color: #2c3e50;
+        font-size: 0.9em;
+        text-transform: uppercase;
+        display: block;
+        margin-bottom: 8px;
+    }
+    
+    .vital-item {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 8px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .vital-value {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+    
+    .vital-status {
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 0.8em;
+        font-weight: 500;
+    }
+    
+    .vital-status.normal {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .vital-status.high, .vital-status.low {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    
+    .btn-modern {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        color: white;
+    }
+    
+    .timeline-item {
+        border-left: 2px solid #e9ecef;
+        padding-left: 20px;
+        margin-bottom: 20px;
+        position: relative;
+    }
+    
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: -6px;
+        top: 0;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #007bff;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: #666;
+    }
+    
+    .empty-state i {
+        font-size: 3em;
+        color: #ddd;
+        margin-bottom: 16px;
+    }
+</style>
+{% endblock %}
+
+{% block main %}
+<div class="fade-in">
+    <!-- Header Section -->
+    <div class="ehr-section">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h3 class="mb-2">📋 Electronic Health Records</h3>
+                <p class="text-muted mb-0">Your complete medical history and health information</p>
+            </div>
+            <div>
+                <button class="btn btn-modern" onclick="downloadEHR()">
+                    <i class="fas fa-download"></i> Download Records
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Patient Overview -->
+    {% if ehr_record %}
+    <div class="ehr-section">
+        <h4 class="mb-3">📊 Health Overview</h4>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="info-item">
+                    <span class="info-label">Patient ID</span>
+                    <span class="info-value">#{{ user.id }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Date of Birth</span>
+                    <span class="info-value">{{ user.profile.date_of_birth|default:"Not set" }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Blood Type</span>
+                    <span class="info-value">{{ user.profile.blood_type|default:"Not available" }}</span>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="info-item">
+                    <span class="info-label">Last Updated</span>
+                    <span class="info-value">{{ ehr_record.updated_at|date:"M d, Y" }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Emergency Contact</span>
+                    <span class="info-value">{{ user.profile.emergency_contact|default:"Not set" }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Insurance</span>
+                    <span class="info-value">{{ user.profile.insurance|default:"Not available" }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Health Information Grid -->
+    <div class="row">
+        <!-- Allergies -->
+        <div class="col-lg-6 mb-4">
+            <div class="ehr-card">
+                <div class="ehr-header">
+                    <div class="ehr-icon allergies">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-1">Allergies</h5>
+                        <p class="text-muted mb-0">Known allergies and reactions</p>
+                    </div>
+                </div>
+                {% if ehr_record.allergies %}
+                    <div class="alert alert-warning">
+                        <strong>⚠️ Allergies Present:</strong><br>
+                        {{ ehr_record.allergies|linebreaks }}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-check-circle"></i>
+                        <p>No known allergies recorded</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Current Medications -->
+        <div class="col-lg-6 mb-4">
+            <div class="ehr-card">
+                <div class="ehr-header">
+                    <div class="ehr-icon medications">
+                        <i class="fas fa-pills"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-1">Current Medications</h5>
+                        <p class="text-muted mb-0">Active prescriptions and treatments</p>
+                    </div>
+                </div>
+                {% if ehr_record.medications %}
+                    <div class="medications-list">
+                        {{ ehr_record.medications|linebreaks }}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-prescription-bottle"></i>
+                        <p>No current medications</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Medical History -->
+        <div class="col-lg-6 mb-4">
+            <div class="ehr-card">
+                <div class="ehr-header">
+                    <div class="ehr-icon history">
+                        <i class="fas fa-history"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-1">Medical History</h5>
+                        <p class="text-muted mb-0">Past medical conditions and surgeries</p>
+                    </div>
+                </div>
+                {% if ehr_record.medical_history %}
+                    <div class="history-content">
+                        {{ ehr_record.medical_history|linebreaks }}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-file-medical"></i>
+                        <p>No medical history recorded</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Recent Vitals -->
+        <div class="col-lg-6 mb-4">
+            <div class="ehr-card">
+                <div class="ehr-header">
+                    <div class="ehr-icon vitals">
+                        <i class="fas fa-heartbeat"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-1">Recent Vital Signs</h5>
+                        <p class="text-muted mb-0">Latest measurements</p>
+                    </div>
+                </div>
+                {% if recent_vitals %}
+                    {% for vital in recent_vitals %}
+                    <div class="vital-item">
+                        <div>
+                            <strong>{{ vital.category.name }}</strong>
+                            <small class="text-muted d-block">{{ vital.recorded_at|date:"M d, Y" }}</small>
+                        </div>
+                        <div class="text-end">
+                            <span class="vital-value">{{ vital.value }} {{ vital.category.unit }}</span>
+                            <div class="vital-status normal">Normal</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    <div class="text-center mt-3">
+                        <a href="{% url 'vitals:patient-dashboard' %}" class="btn btn-outline-primary btn-sm">
+                            View All Vitals
+                        </a>
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-chart-line"></i>
+                        <p>No vital signs recorded</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- SOAP Notes History -->
+    <div class="ehr-section">
+        <h4 class="mb-3">📝 Medical Consultation Notes</h4>
+        {% if soap_notes %}
+            {% for soap_note in soap_notes %}
+            <div class="soap-note-item">
+                <div class="soap-date">
+                    <strong>{{ soap_note.created_at|date:"F d, Y" }}</strong> 
+                    - Dr. {{ soap_note.created_by.get_full_name }}
+                    {% if soap_note.appointment %}
+                    (Appointment #{{ soap_note.appointment.id }})
+                    {% endif %}
+                </div>
+                <div class="soap-content">
+                    <div class="soap-component">
+                        <strong>Subjective</strong>
+                        <p>{{ soap_note.subjective|truncatewords:15 }}</p>
+                    </div>
+                    <div class="soap-component">
+                        <strong>Objective</strong>
+                        <p>{{ soap_note.objective|truncatewords:15 }}</p>
+                    </div>
+                    <div class="soap-component">
+                        <strong>Assessment</strong>
+                        <p>{{ soap_note.assessment|truncatewords:15 }}</p>
+                    </div>
+                    <div class="soap-component">
+                        <strong>Plan</strong>
+                        <p>{{ soap_note.plan|truncatewords:15 }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-stethoscope"></i>
+                <h5>No Consultation Notes</h5>
+                <p>Your consultation notes will appear here after doctor visits</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Lab Results & Imaging -->
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <div class="ehr-card">
+                <div class="ehr-header">
+                    <div class="ehr-icon labs">
+                        <i class="fas fa-vials"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-1">Lab Results</h5>
+                        <p class="text-muted mb-0">Recent laboratory tests</p>
+                    </div>
+                </div>
+                {% if ehr_record.lab_results %}
+                    <div class="lab-results">
+                        {{ ehr_record.lab_results|linebreaks }}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-flask"></i>
+                        <p>No lab results available</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-4">
+            <div class="ehr-card">
+                <div class="ehr-header">
+                    <div class="ehr-icon imaging">
+                        <i class="fas fa-x-ray"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-1">Imaging Studies</h5>
+                        <p class="text-muted mb-0">X-rays, MRI, CT scans</p>
+                    </div>
+                </div>
+                {% if ehr_record.imaging_results %}
+                    <div class="imaging-results">
+                        {{ ehr_record.imaging_results|linebreaks }}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-image"></i>
+                        <p>No imaging studies available</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {% else %}
+    <div class="ehr-section">
+        <div class="empty-state">
+            <i class="fas fa-folder-open"></i>
+            <h4>No Medical Records Found</h4>
+            <p>Your electronic health record will be created after your first medical consultation.</p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function downloadEHR() {
+    // This would implement EHR download functionality
+    toastr.info('EHR download functionality will be implemented');
+}
+</script>
+{% endblock %}
