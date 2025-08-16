@@ -12,6 +12,7 @@ import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '../../components/ui/avatar';
 import { Badge } from '../../components/ui/badge';
+import { ImageUpload } from '../../components/ui/image-upload';
 import { 
   User,
   Mail,
@@ -27,6 +28,8 @@ import {
 
 const ProfilePage: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
+  const [profileImage, setProfileImage] = useState<File | null>(null);
+  const [currentImageUrl, setCurrentImageUrl] = useState<string>('/api/placeholder/150/150');
   const [profileData, setProfileData] = useState({
     firstName: 'Alex',
     lastName: 'Johnson',
@@ -43,9 +46,51 @@ const ProfilePage: React.FC = () => {
     setProfileData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleSave = () => {
-    setIsEditing(false);
-    // Handle save logic here
+  const handleImageChange = (file: File | null) => {
+    setProfileImage(file);
+    if (file) {
+      // Create a temporary URL for preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setCurrentImageUrl(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleImageRemove = () => {
+    setProfileImage(null);
+    setCurrentImageUrl('/api/placeholder/150/150');
+  };
+
+  const handleSave = async () => {
+    try {
+      // Create FormData for file upload
+      const formData = new FormData();
+      
+      // Add profile data
+      Object.entries(profileData).forEach(([key, value]) => {
+        formData.append(key, value);
+      });
+      
+      // Add image if changed
+      if (profileImage) {
+        formData.append('profileImage', profileImage);
+      }
+      
+      // TODO: Replace with actual API call
+      console.log('Saving profile:', profileData, profileImage);
+      
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      setIsEditing(false);
+      // Show success message
+      alert('Profile updated successfully!');
+    } catch (error) {
+      console.error('Error saving profile:', error);
+      alert('Error updating profile. Please try again.');
+    }
   };
 
   const containerVariants = {
@@ -107,26 +152,38 @@ const ProfilePage: React.FC = () => {
             <Card className="shadow-lg">
               <CardHeader className="text-center">
                 <CardTitle>Profile Picture</CardTitle>
+                <CardDescription>
+                  {isEditing ? 'Upload a new profile image' : 'Your current profile picture'}
+                </CardDescription>
               </CardHeader>
               <CardContent className="text-center space-y-4">
-                <div className="relative inline-block">
-                  <Avatar className="h-32 w-32 mx-auto">
-                    <AvatarImage src="/api/placeholder/128/128" />
-                    <AvatarFallback className="bg-primary text-white text-2xl">AJ</AvatarFallback>
-                  </Avatar>
-                  {isEditing && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="absolute bottom-0 right-0 rounded-full h-10 w-10 p-0"
-                    >
-                      <Camera className="h-4 w-4" />
-                    </Button>
-                  )}
-                </div>
+                {isEditing ? (
+                  <ImageUpload
+                    currentImage={currentImageUrl}
+                    onImageChange={handleImageChange}
+                    onImageRemove={handleImageRemove}
+                    size="lg"
+                    maxSize={5}
+                    className="mx-auto"
+                  />
+                ) : (
+                  <div className="relative inline-block">
+                    <Avatar className="h-32 w-32 mx-auto">
+                      <AvatarImage src={currentImageUrl} />
+                      <AvatarFallback className="bg-primary text-white text-2xl">
+                        {profileData.firstName[0]}{profileData.lastName[0]}
+                      </AvatarFallback>
+                    </Avatar>
+                  </div>
+                )}
                 <div className="space-y-2">
                   <h3 className="font-semibold text-lg">{profileData.firstName} {profileData.lastName}</h3>
-                  <Badge variant="info">Patient ID: P-1234</Badge>
+                  <Badge variant="secondary">Patient ID: P-1234</Badge>
+                  {profileImage && isEditing && (
+                    <Badge variant="outline" className="text-green-600">
+                      Image ready to upload
+                    </Badge>
+                  )}
                 </div>
               </CardContent>
             </Card>

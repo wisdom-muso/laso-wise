@@ -70,10 +70,15 @@ class PatientProfileUpdateView(PatientRequiredMixin, UpdateView):
         if self.request.FILES.get("avatar"):
             profile.image = self.request.FILES["avatar"]
 
+        # Update user fields from form
+        user.first_name = form.cleaned_data.get('first_name', user.first_name)
+        user.last_name = form.cleaned_data.get('last_name', user.last_name)
+        user.email = form.cleaned_data.get('email', user.email)
+
         # Update profile fields
         profile_fields = [
             "dob",
-            "blood_group",
+            "blood_group", 
             "gender",
             "phone",
             "medical_conditions",
@@ -86,8 +91,8 @@ class PatientProfileUpdateView(PatientRequiredMixin, UpdateView):
         ]
 
         for field in profile_fields:
-            value = self.request.POST.get(field)
-            if value:
+            value = form.cleaned_data.get(field) or self.request.POST.get(field)
+            if value is not None:
                 setattr(profile, field, value)
 
         # Save both user and profile
