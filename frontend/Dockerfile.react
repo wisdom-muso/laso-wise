@@ -1,0 +1,61 @@
+# Multi-stage build for React frontend
+FROM node:20-alpine AS builder
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies
+RUN npm ci --only=production && npm cache clean --force
+
+# Copy source code
+COPY . .
+
+# Build arguments for environment
+ARG VITE_API_BASE=http://localhost:8005
+ENV VITE_API_BASE=$VITE_API_BASE
+
+# Build the application
+RUN npm run build
+
+# Production stage with nginx
+FROM nginx:alpine AS production
+
+# Install curl for health checks
+RUN apk add --no-cache curl
+
+# Copy nginx configuration
+COPY nginx.conf /etc/nginx/nginx.conf
+
+# Copy built application from builder stage
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+# Create non-root user for security
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S reactjs -u 1001 -G nodejs
+
+# Create temp directories for nginx
+RUN mkdir -p /tmp/nginx/client_temp /tmp/nginx/proxy_temp /tmp/nginx/fastcgi_temp /tmp/nginx/uwsgi_temp /tmp/nginx/scgi_temp && \
+    chown -R reactjs:nodejs /tmp/nginx && \
+    chown -R reactjs:nodejs /usr/share/nginx/html && \
+    chown -R reactjs:nodejs /var/cache/nginx && \
+    touch /var/log/nginx/access.log /var/log/nginx/error.log && \
+    chown -R reactjs:nodejs /var/log/nginx
+
+# Copy custom nginx config that doesn't require root
+COPY nginx.conf /etc/nginx/nginx.conf
+
+# Switch to non-root user
+USER reactjs
+
+# Expose port
+EXPOSE 3000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:3000/ || exit 1
+
+# Start nginx
+CMD ["nginx", "-g", "daemon off;"]

@@ -1,6 +1,7 @@
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+import dj_database_url
 
 # Load environment variables from .env file
 load_dotenv()
@@ -15,7 +16,7 @@ DEBUG = os.getenv("DEBUG", "False").lower() in ("true", "1", "t")
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1,0.0.0.0,65.108.91.110").split(",")
 
 # CSRF settings
-csrf_origins = os.getenv("CSRF_TRUSTED_ORIGINS", "https://work-1-dwrrnobogrrhzpma.prod-runtime.all-hands.dev,https://work-2-dwrrnobogrrhzpma.prod-runtime.all-hands.dev,http://65.108.91.110:12000")
+csrf_origins = os.getenv("CSRF_TRUSTED_ORIGINS", "http://65.108.91.110,https://65.108.91.110,http://localhost:8005,http://127.0.0.1:8005")
 CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in csrf_origins.split(",") if origin.strip()]
 
 # For development, disable secure cookies if DEBUG is True
@@ -23,8 +24,8 @@ if DEBUG:
     CSRF_COOKIE_SECURE = False
     SESSION_COOKIE_SECURE = False
 else:
-    CSRF_COOKIE_SECURE = os.getenv("CSRF_COOKIE_SECURE", "True").lower() in ("true", "1", "t")
-    SESSION_COOKIE_SECURE = os.getenv("SESSION_COOKIE_SECURE", "True").lower() in ("true", "1", "t")
+    CSRF_COOKIE_SECURE = os.getenv("CSRF_COOKIE_SECURE", "False").lower() in ("true", "1", "t")
+    SESSION_COOKIE_SECURE = os.getenv("SESSION_COOKIE_SECURE", "False").lower() in ("true", "1", "t")
 
 INSTALLED_APPS = [
     # Django Unfold admin
@@ -92,7 +93,7 @@ UNFOLD = {
     "SITE_TITLE": "Laso Digital Health",
     "SITE_HEADER": "Laso Digital Health",
     "SITE_SYMBOL": "settings",  # Symbol from icon set
-    "ENVIRONMENT": "Development",
+    "ENVIRONMENT": "Development" if DEBUG else "Production",
     "COLORS": {
         "primary": {
             "50": "240 253 250",   # #f0fdfa (teal-50)
@@ -162,12 +163,20 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "laso.wsgi.application"
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+# Database configuration with PostgreSQL support
+DATABASE_URL = os.getenv("DATABASE_URL")
+if DATABASE_URL:
+    DATABASES = {
+        'default': dj_database_url.parse(DATABASE_URL)
     }
-}
+else:
+    # Fallback to SQLite for development
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -288,8 +297,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # React production server
     "http://127.0.0.1:3000",
     "http://65.108.91.110:3000",  # Production React frontend
-    "http://65.108.91.110:12000",  # Production nginx
-    "http://65.108.91.110:8005",  # Production Django
+    "http://65.108.91.110",  # Production nginx
+    "http://65.108.91.110:80",  # Production nginx explicit
 ]
 
 CORS_ALLOW_CREDENTIALS = True
