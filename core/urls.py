@@ -14,6 +14,7 @@ app_name = 'core'
 urlpatterns = [
     # Public pages
     path('', views.IndexView.as_view(), name='index'),
+    path('', views.IndexView.as_view(), name='home'),  # Add home alias for compatibility
     path('about/', TemplateView.as_view(template_name='core/about.html'), name='about'),
     path('contact/', TemplateView.as_view(template_name='core/contact.html'), name='contact'),
     path('services/', TemplateView.as_view(template_name='core/services.html'), name='services'),
