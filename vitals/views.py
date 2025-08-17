@@ -25,7 +25,7 @@ def patient_vitals_dashboard(request):
     # Only patients can access this view
     if request.user.role != 'patient':
         messages.error(request, _("Only patients can access this page."))
-        return redirect('core:home')
+        return redirect('core:index')
     
     # Get latest vital records for each category
     categories = VitalCategory.objects.filter(is_active=True)
@@ -97,7 +97,7 @@ def add_vital_record(request):
                     return redirect('admin-patients')
                 except User.DoesNotExist:
                     messages.error(request, _("Patient not found."))
-                    return redirect('core:home')
+                    return redirect('core:index')
             
             # For patients adding their own vitals
             messages.success(request, _("Vital sign recorded successfully."))
