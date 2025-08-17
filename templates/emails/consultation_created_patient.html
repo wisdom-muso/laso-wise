@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual Consultation Scheduled</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8fafc;
+            color: #334155;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #14b8a6 0%, #0891b2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        .content {
+            padding: 30px;
+        }
+        .consultation-details {
+            background-color: #f1f5f9;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .detail-row:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        .detail-label {
+            font-weight: 600;
+            color: #475569;
+        }
+        .detail-value {
+            color: #64748b;
+        }
+        .meeting-info {
+            background-color: #ecfdf5;
+            border-left: 4px solid #10b981;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .meeting-info h3 {
+            color: #065f46;
+            margin: 0 0 12px 0;
+            font-size: 18px;
+        }
+        .meeting-link {
+            background-color: #ffffff;
+            border: 2px solid #10b981;
+            border-radius: 6px;
+            padding: 12px;
+            margin: 12px 0;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .action-buttons {
+            text-align: center;
+            margin: 30px 0;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            margin: 0 8px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background-color: #14b8a6;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #0891b2;
+        }
+        .btn-secondary {
+            background-color: #f1f5f9;
+            color: #475569;
+        }
+        .btn-secondary:hover {
+            background-color: #e2e8f0;
+        }
+        .preparation {
+            background-color: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 16px;
+            margin: 20px 0;
+            border-radius: 0 6px 6px 0;
+        }
+        .preparation h4 {
+            color: #92400e;
+            margin: 0 0 8px 0;
+            font-size: 16px;
+        }
+        .preparation ul {
+            margin: 8px 0 0 0;
+            padding-left: 20px;
+        }
+        .preparation li {
+            margin-bottom: 4px;
+            color: #78350f;
+        }
+        .tech-requirements {
+            background-color: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            padding: 16px;
+            margin: 20px 0;
+            border-radius: 0 6px 6px 0;
+        }
+        .tech-requirements h4 {
+            color: #1e40af;
+            margin: 0 0 8px 0;
+            font-size: 16px;
+        }
+        .tech-requirements ul {
+            margin: 8px 0 0 0;
+            padding-left: 20px;
+        }
+        .tech-requirements li {
+            margin-bottom: 4px;
+            color: #1e3a8a;
+        }
+        .footer {
+            background-color: #f8fafc;
+            padding: 20px;
+            text-align: center;
+            color: #64748b;
+            font-size: 12px;
+        }
+        .provider-badge {
+            display: inline-block;
+            background-color: #3b82f6;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .alert {
+            background-color: #fef2f2;
+            border-left: 4px solid #ef4444;
+            padding: 16px;
+            margin: 20px 0;
+            border-radius: 0 6px 6px 0;
+        }
+        .alert h4 {
+            color: #dc2626;
+            margin: 0 0 8px 0;
+            font-size: 16px;
+        }
+        .alert p {
+            color: #991b1b;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🩺 Virtual Consultation Scheduled</h1>
+            <p>Your telemedicine appointment is confirmed</p>
+        </div>
+        
+        <div class="content">
+            <p>Dear {{ recipient_name }},</p>
+            
+            <p>Your virtual consultation with Dr. {{ consultation.doctor.get_full_name }} has been scheduled. You can join the video call from the comfort of your home at the scheduled time.</p>
+            
+            <div class="consultation-details">
+                <h3>📋 Appointment Details</h3>
+                <div class="detail-row">
+                    <span class="detail-label">Doctor:</span>
+                    <span class="detail-value">Dr. {{ consultation.doctor.get_full_name }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Date & Time:</span>
+                    <span class="detail-value">{{ consultation.scheduled_start|date:"F j, Y" }} at {{ consultation.scheduled_start|time:"g:i A" }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Platform:</span>
+                    <span class="detail-value">
+                        <span class="provider-badge">{{ consultation.video_provider|title }}</span>
+                    </span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Consultation ID:</span>
+                    <span class="detail-value">{{ consultation.id }}</span>
+                </div>
+                {% if consultation.notes %}
+                <div class="detail-row">
+                    <span class="detail-label">Special Instructions:</span>
+                    <span class="detail-value">{{ consultation.notes }}</span>
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="meeting-info">
+                <h3>🎥 Join Your Video Call</h3>
+                <p><strong>Meeting Link:</strong></p>
+                <div class="meeting-link">{{ consultation.meeting_url }}</div>
+                
+                {% if consultation.meeting_password %}
+                <p><strong>Meeting Password:</strong> <code>{{ consultation.meeting_password }}</code></p>
+                {% endif %}
+                
+                <p><em>💡 Tip: Click the link above or copy and paste it into your web browser to join the consultation.</em></p>
+            </div>
+            
+            <div class="preparation">
+                <h4>📝 How to Prepare for Your Virtual Visit</h4>
+                <ul>
+                    <li>Find a quiet, well-lit space for your appointment</li>
+                    <li>Prepare a list of your current medications and dosages</li>
+                    <li>Write down any symptoms or questions you want to discuss</li>
+                    <li>Have your insurance card and ID ready</li>
+                    <li>Join the waiting room 10-15 minutes before your scheduled time</li>
+                </ul>
+            </div>
+            
+            <div class="tech-requirements">
+                <h4>💻 Technical Requirements</h4>
+                <ul>
+                    <li>A device with camera and microphone (computer, tablet, or smartphone)</li>
+                    <li>Stable internet connection</li>
+                    <li>Updated web browser (Chrome, Safari, Firefox, or Edge)</li>
+                    <li>No software installation required for most platforms</li>
+                </ul>
+            </div>
+            
+            <div class="alert">
+                <h4>⚠️ Important Reminders</h4>
+                <p>Please join the meeting on time. If you're more than 15 minutes late, the appointment may need to be rescheduled. If you experience technical difficulties, contact our support team immediately.</p>
+            </div>
+            
+            <div class="action-buttons">
+                <a href="{{ consultation.meeting_url }}" class="btn btn-primary">
+                    🎥 Join Video Call
+                </a>
+                <a href="#" class="btn btn-secondary">
+                    📱 View in App
+                </a>
+            </div>
+            
+            <p>We look forward to providing you with excellent virtual care. If you have any questions or need to reschedule, please contact our office.</p>
+            
+            <p>Best regards,<br>
+            The Laso Digital Health Team</p>
+        </div>
+        
+        <div class="footer">
+            <p>© 2024 Laso Digital Health. All rights reserved.</p>
+            <p>This is an automated notification. Please do not reply to this email.</p>
+        </div>
+    </div>
+</body>
+</html>

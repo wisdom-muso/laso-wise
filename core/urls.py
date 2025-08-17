@@ -1,31 +1,31 @@
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from django.contrib.admin.views.decorators import staff_member_required
-from django.http import JsonResponse
-from django.utils import timezone
-from datetime import timedelta
-from django.db.models import Count, Avg
+from django.urls import path
+from django.contrib import admin
+from django.views.generic import TemplateView
 
-from .views import home, analytics_api
-from .api import (
-    SoapNoteViewSet, EHRRecordViewSet, AuditLogViewSet, PatientSearchViewSet
+from . import views
+from .admin_views import (
+    EnhancedAdminDashboardView, 
+    vitals_analytics_api, 
+    telemedicine_config_api
 )
 
-# Create router for API viewsets
-router = DefaultRouter()
-router.register(r'soap-notes', SoapNoteViewSet, basename='soap-notes')
-router.register(r'ehr', EHRRecordViewSet, basename='ehr')
-router.register(r'audit-logs', AuditLogViewSet, basename='audit-logs')
-router.register(r'patient-search', PatientSearchViewSet, basename='patient-search')
-
-app_name = "core"
+app_name = 'core'
 
 urlpatterns = [
-    path("", home, name="home"),
+    # Public pages
+    path('', views.IndexView.as_view(), name='index'),
+    path('about/', TemplateView.as_view(template_name='core/about.html'), name='about'),
+    path('contact/', TemplateView.as_view(template_name='core/contact.html'), name='contact'),
+    path('services/', TemplateView.as_view(template_name='core/services.html'), name='services'),
+    
+    # Enhanced Admin Dashboard
+    path('admin/enhanced-dashboard/', EnhancedAdminDashboardView.as_view(), name='enhanced-admin-dashboard'),
+    
+    # Admin Analytics APIs
+    path('admin/analytics/vitals/', vitals_analytics_api, name='vitals-analytics-api'),
+    path('admin/analytics/telemedicine-config/', telemedicine_config_api, name='telemedicine-config-api'),
     
     # API endpoints
-    path("api/", include(router.urls)),
-    
-    # Analytics API (admin only)
-    path("analytics/api/", staff_member_required(analytics_api), name="analytics-api"),
+    path('api/health/', views.health_check, name='health_check'),
+    path('api/csrf/', views.csrf_token_view, name='csrf_token'),
 ]

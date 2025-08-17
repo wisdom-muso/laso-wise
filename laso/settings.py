@@ -1,6 +1,7 @@
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+import dj_database_url
 
 # Load environment variables from .env file
 load_dotenv()
@@ -15,7 +16,7 @@ DEBUG = os.getenv("DEBUG", "False").lower() in ("true", "1", "t")
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1,0.0.0.0,65.108.91.110").split(",")
 
 # CSRF settings
-csrf_origins = os.getenv("CSRF_TRUSTED_ORIGINS", "https://work-1-dwrrnobogrrhzpma.prod-runtime.all-hands.dev,https://work-2-dwrrnobogrrhzpma.prod-runtime.all-hands.dev,http://65.108.91.110:12000")
+csrf_origins = os.getenv("CSRF_TRUSTED_ORIGINS", "http://65.108.91.110,https://65.108.91.110,http://localhost:8005,http://127.0.0.1:8005,http://localhost:3000,http://127.0.0.1:3000,http://65.108.91.110:3000")
 CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in csrf_origins.split(",") if origin.strip()]
 
 # For development, disable secure cookies if DEBUG is True
@@ -23,8 +24,8 @@ if DEBUG:
     CSRF_COOKIE_SECURE = False
     SESSION_COOKIE_SECURE = False
 else:
-    CSRF_COOKIE_SECURE = os.getenv("CSRF_COOKIE_SECURE", "True").lower() in ("true", "1", "t")
-    SESSION_COOKIE_SECURE = os.getenv("SESSION_COOKIE_SECURE", "True").lower() in ("true", "1", "t")
+    CSRF_COOKIE_SECURE = os.getenv("CSRF_COOKIE_SECURE", "False").lower() in ("true", "1", "t")
+    SESSION_COOKIE_SECURE = os.getenv("SESSION_COOKIE_SECURE", "False").lower() in ("true", "1", "t")
 
 INSTALLED_APPS = [
     # Django Unfold admin
@@ -43,6 +44,9 @@ INSTALLED_APPS = [
     # Third-party apps
     "debug_toolbar",
     "rest_framework",
+    "rest_framework.authtoken",
+    "channels",
+    "corsheaders",
     "ckeditor",
     "whitenoise.runserver_nostatic",  # For serving static files in development
     
@@ -56,14 +60,40 @@ INSTALLED_APPS = [
     "vitals",
     "dashboard",
     "sync_monitor",
+    "telemedicine",  # New telemedicine app
 ]
+
+# Django REST Framework settings
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 20,
+}
+
+# Channels settings for WebSocket support
+ASGI_APPLICATION = 'laso.asgi.application'
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    },
+}
 
 # Django Unfold settings
 UNFOLD = {
     "SITE_TITLE": "Laso Digital Health",
     "SITE_HEADER": "Laso Digital Health",
     "SITE_SYMBOL": "settings",  # Symbol from icon set
-    "ENVIRONMENT": "Development",
+    "ENVIRONMENT": "Development" if DEBUG else "Production",
     "COLORS": {
         "primary": {
             "50": "240 253 250",   # #f0fdfa (teal-50)
@@ -101,6 +131,7 @@ UNFOLD = {
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -132,12 +163,20 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "laso.wsgi.application"
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+# Database configuration with PostgreSQL support
+DATABASE_URL = os.getenv("DATABASE_URL")
+if DATABASE_URL:
+    DATABASES = {
+        'default': dj_database_url.parse(DATABASE_URL)
     }
-}
+else:
+    # Fallback to SQLite for development
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -186,6 +225,10 @@ STATICFILES_STORAGE = 'whitenoise.storage.StaticFilesStorage'
 WHITENOISE_USE_FINDERS = True
 WHITENOISE_AUTOREFRESH = DEBUG
 
+# Suppress duplicate static file warnings during collection
+import logging
+logging.getLogger('django.contrib.staticfiles').setLevel(logging.ERROR)
+
 MEDIA_ROOT = BASE_DIR / "media"
 
 AUTH_USER_MODEL = "accounts.User"
@@ -231,6 +274,8 @@ CKEDITOR_CONFIGS = {
 }
 
 CKEDITOR_BASEPATH = "/static/ckeditor/ckeditor/"
+CKEDITOR_RESTRICT_BY_USER = True
+CKEDITOR_BROWSE_SHOW_DIRS = True
 DEBUG_TOOLBAR_CONFIG = {
     "IS_RUNNING_TESTS": False,
 }
@@ -239,3 +284,41 @@ DEBUG_TOOLBAR_CONFIG = {
 ADMIN_SITE_HEADER = "Laso Digital Health Administration"
 ADMIN_SITE_TITLE = "Laso Digital Health Admin Portal"
 ADMIN_INDEX_TITLE = "Welcome to Laso Digital Health Admin Portal"
+
+# Telemedicine Configuration
+TELEMEDICINE_CONFIG = {
+    'ZOOM_API_KEY': os.getenv('ZOOM_API_KEY', ''),
+    'ZOOM_API_SECRET': os.getenv('ZOOM_API_SECRET', ''),
+    'GOOGLE_MEET_CLIENT_ID': os.getenv('GOOGLE_MEET_CLIENT_ID', ''),
+    'GOOGLE_MEET_CLIENT_SECRET': os.getenv('GOOGLE_MEET_CLIENT_SECRET', ''),
+    'JITSI_DOMAIN': os.getenv('JITSI_DOMAIN', 'meet.jit.si'),
+    'RECORDING_ENABLED': os.getenv('RECORDING_ENABLED', 'True').lower() in ('true', '1', 't'),
+    'MAX_CONSULTATION_DURATION': int(os.getenv('MAX_CONSULTATION_DURATION', '60')),  # minutes
+}
+
+# CORS settings for React frontend
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",  # React dev server
+    "http://127.0.0.1:5173",
+    "http://localhost:3000",  # React production server
+    "http://127.0.0.1:3000",
+    "http://65.108.91.110:3000",  # Production React frontend
+    "http://65.108.91.110",  # Production nginx
+    "http://65.108.91.110:80",  # Production nginx explicit
+]
+
+CORS_ALLOW_CREDENTIALS = True
+
+# WebSocket CORS settings
+CORS_ALLOW_ALL_ORIGINS = DEBUG  # Only for development
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]

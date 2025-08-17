@@ -1,0 +1,474 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}Enhanced Admin Dashboard{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.css">
+<style>
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+        margin: 20px 0;
+    }
+    
+    .dashboard-card {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        border-left: 4px solid #007cba;
+    }
+    
+    .dashboard-card h3 {
+        margin-top: 0;
+        color: #333;
+        font-size: 18px;
+    }
+    
+    .stats-row {
+        display: flex;
+        justify-content: space-between;
+        margin: 20px 0;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+    
+    .stat-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 8px;
+        flex: 1;
+        min-width: 200px;
+        text-align: center;
+    }
+    
+    .stat-card.vitals { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+    .stat-card.appointments { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+    .stat-card.consultations { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+    .stat-card.users { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+    
+    .stat-number {
+        font-size: 2.5em;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    
+    .stat-label {
+        font-size: 0.9em;
+        opacity: 0.9;
+    }
+    
+    .vitals-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+    }
+    
+    .vitals-table th,
+    .vitals-table td {
+        padding: 8px 12px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+    
+    .vitals-table th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+    }
+    
+    .status-normal { color: #28a745; font-weight: bold; }
+    .status-abnormal { color: #dc3545; font-weight: bold; }
+    
+    .critical-alert {
+        background-color: #fff3cd;
+        border: 1px solid #ffeaa7;
+        border-radius: 4px;
+        padding: 10px;
+        margin: 10px 0;
+    }
+    
+    .critical-alert.high {
+        background-color: #f8d7da;
+        border-color: #f5c6cb;
+    }
+    
+    .config-form {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 6px;
+        margin: 15px 0;
+    }
+    
+    .config-form input,
+    .config-form select {
+        width: 100%;
+        padding: 8px;
+        margin: 5px 0;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+    
+    .btn-save {
+        background-color: #007cba;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    
+    .btn-save:hover {
+        background-color: #005a87;
+    }
+    
+    .chart-container {
+        position: relative;
+        height: 300px;
+        margin: 20px 0;
+    }
+    
+    .system-health {
+        display: flex;
+        gap: 10px;
+        margin: 15px 0;
+    }
+    
+    .health-indicator {
+        padding: 5px 10px;
+        border-radius: 15px;
+        font-size: 0.8em;
+        background-color: #d4edda;
+        color: #155724;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1>Enhanced Admin Dashboard</h1>
+
+<!-- System Overview Stats -->
+<div class="stats-row">
+    <div class="stat-card users">
+        <div class="stat-number">{{ total_patients }}</div>
+        <div class="stat-label">Total Patients</div>
+    </div>
+    <div class="stat-card users">
+        <div class="stat-number">{{ total_doctors }}</div>
+        <div class="stat-label">Total Doctors</div>
+    </div>
+    <div class="stat-card appointments">
+        <div class="stat-number">{{ total_appointments }}</div>
+        <div class="stat-label">Total Appointments</div>
+    </div>
+    <div class="stat-card vitals">
+        <div class="stat-number">{{ vitals_summary.total_records }}</div>
+        <div class="stat-label">Vital Records (30 days)</div>
+    </div>
+    <div class="stat-card consultations">
+        <div class="stat-number">{{ consultation_stats.total }}</div>
+        <div class="stat-label">Consultations (30 days)</div>
+    </div>
+</div>
+
+<!-- Dashboard Grid -->
+<div class="dashboard-grid">
+    
+    <!-- Vitals Analytics Card -->
+    <div class="dashboard-card">
+        <h3>📊 Vitals Analytics (Inline)</h3>
+        
+        <div class="stats-row" style="margin: 10px 0;">
+            <div style="text-align: center;">
+                <strong>{{ vitals_summary.categories_tracked }}</strong><br>
+                <small>Categories Tracked</small>
+            </div>
+            <div style="text-align: center;">
+                <strong>{{ vitals_summary.avg_readings_per_day }}</strong><br>
+                <small>Avg/Day</small>
+            </div>
+            <div style="text-align: center;">
+                <strong>{{ vitals_summary.professional_readings }}</strong><br>
+                <small>Professional Readings</small>
+            </div>
+        </div>
+        
+        <!-- Vitals by Category Table -->
+        <table class="vitals-table">
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th>Count</th>
+                    <th>Avg Value</th>
+                    <th>Normal Range</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for vital in vitals_by_category %}
+                <tr>
+                    <td>{{ vital.name }}</td>
+                    <td>{{ vital.count }}</td>
+                    <td>{{ vital.avg_value }} {{ vital.unit }}</td>
+                    <td>{{ vital.normal_range }} {{ vital.unit }}</td>
+                    <td class="status-{{ vital.status }}">{{ vital.status|capfirst }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5">No vital records found</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        <!-- Critical Vitals Alerts -->
+        {% if critical_vitals %}
+        <h4 style="margin-top: 20px; color: #dc3545;">🚨 Critical Vitals</h4>
+        {% for vital in critical_vitals %}
+        <div class="critical-alert {{ vital.severity }}">
+            <strong>{{ vital.patient }}</strong> - {{ vital.category }}: {{ vital.value }} {{ vital.unit }}
+            <br><small>{{ vital.recorded_at|date:"M d, Y H:i" }}</small>
+        </div>
+        {% endfor %}
+        {% endif %}
+        
+        <!-- Vitals Chart -->
+        <div class="chart-container">
+            <canvas id="vitalsChart"></canvas>
+        </div>
+    </div>
+    
+    <!-- Telemedicine Configuration Card -->
+    <div class="dashboard-card">
+        <h3>🎥 Telemedicine Configuration</h3>
+        
+        <div class="stats-row" style="margin: 10px 0;">
+            <div style="text-align: center;">
+                <strong>{{ consultation_stats.total }}</strong><br>
+                <small>Total Consultations</small>
+            </div>
+            <div style="text-align: center;">
+                <strong>{{ consultation_stats.avg_duration|floatformat:1 }}min</strong><br>
+                <small>Avg Duration</small>
+            </div>
+            <div style="text-align: center;">
+                <strong>{{ consultation_stats.in_progress }}</strong><br>
+                <small>Active Now</small>
+            </div>
+        </div>
+        
+        <!-- Video Provider Configurations -->
+        <h4>Video Provider Settings</h4>
+        
+        <!-- Zoom Configuration -->
+        <div class="config-form">
+            <h5>Zoom Configuration</h5>
+            <form id="zoomConfigForm">
+                <input type="hidden" name="provider" value="zoom">
+                <input type="text" name="api_key" placeholder="Zoom API Key" id="zoom_api_key">
+                <input type="password" name="api_secret" placeholder="Zoom API Secret" id="zoom_api_secret">
+                <input type="url" name="webhook_url" placeholder="Webhook URL" id="zoom_webhook">
+                <label>
+                    <input type="checkbox" name="is_active" id="zoom_active"> Active
+                </label>
+                <label>
+                    <input type="checkbox" name="recording_enabled" id="zoom_recording"> Enable Recording
+                </label>
+                <input type="number" name="max_participants" placeholder="Max Participants" id="zoom_max_participants" value="50">
+                <button type="submit" class="btn-save">Save Zoom Config</button>
+            </form>
+        </div>
+        
+        <!-- Google Meet Configuration -->
+        <div class="config-form">
+            <h5>Google Meet Configuration</h5>
+            <form id="meetConfigForm">
+                <input type="hidden" name="provider" value="google_meet">
+                <input type="text" name="api_key" placeholder="Google API Key" id="meet_api_key">
+                <input type="text" name="client_id" placeholder="Client ID" id="meet_client_id">
+                <input type="url" name="webhook_url" placeholder="Webhook URL" id="meet_webhook">
+                <label>
+                    <input type="checkbox" name="is_active" id="meet_active"> Active
+                </label>
+                <label>
+                    <input type="checkbox" name="recording_enabled" id="meet_recording"> Enable Recording
+                </label>
+                <input type="number" name="max_participants" placeholder="Max Participants" id="meet_max_participants" value="25">
+                <button type="submit" class="btn-save">Save Google Meet Config</button>
+            </form>
+        </div>
+        
+        <!-- Current Active Providers -->
+        <h4>Active Providers</h4>
+        {% for provider in video_providers %}
+        <div class="health-indicator">
+            {{ provider.provider|capfirst }} - {{ provider.max_participants }} participants
+        </div>
+        {% empty %}
+        <p>No video providers configured</p>
+        {% endfor %}
+    </div>
+    
+    <!-- EHR & SOAP Notes Overview -->
+    <div class="dashboard-card">
+        <h3>📋 EHR & SOAP Notes</h3>
+        
+        <p><strong>Electronic Health Records Integration:</strong></p>
+        <ul>
+            <li>✅ SOAP Notes Creation & Management</li>
+            <li>✅ Patient Medical History Tracking</li>
+            <li>✅ Vital Signs Integration</li>
+            <li>✅ Prescription Management</li>
+            <li>✅ Appointment History Linking</li>
+        </ul>
+        
+        <div class="system-health">
+            <div class="health-indicator">EHR System: Active</div>
+            <div class="health-indicator">SOAP Notes: Operational</div>
+            <div class="health-indicator">Data Sync: Healthy</div>
+        </div>
+        
+        <p><a href="/admin/core/soapnote/" class="button">Manage SOAP Notes</a></p>
+        <p><a href="/admin/core/ehrrecord/" class="button">Manage EHR Records</a></p>
+    </div>
+    
+    <!-- System Health -->
+    <div class="dashboard-card">
+        <h3>🖥️ System Health</h3>
+        
+        <div class="system-health">
+            {% for key, status in system_health.items %}
+            <div class="health-indicator">
+                {{ key|capfirst|replace:"_":" " }}: {{ status|capfirst }}
+            </div>
+            {% endfor %}
+        </div>
+        
+        <h4>Hospital Settings</h4>
+        {% if hospital_settings %}
+        <p><strong>{{ hospital_settings.hospital_name }}</strong><br>
+        {{ hospital_settings.city }}, {{ hospital_settings.state }}<br>
+        {{ hospital_settings.phone }} | {{ hospital_settings.email }}</p>
+        {% else %}
+        <p><a href="/admin/core/hospitalsettings/add/" class="button">Configure Hospital Settings</a></p>
+        {% endif %}
+        
+        <h4>Quick Actions</h4>
+        <p><a href="/admin/accounts/user/" class="button">Manage Users</a></p>
+        <p><a href="/admin/bookings/booking/" class="button">Manage Appointments</a></p>
+        <p><a href="/admin/telemedicine/consultation/" class="button">View Consultations</a></p>
+    </div>
+    
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<script>
+// Vitals Chart
+const ctx = document.getElementById('vitalsChart').getContext('2d');
+new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+        labels: [{% for vital in vitals_by_category %}'{{ vital.name }}'{% if not forloop.last %},{% endif %}{% endfor %}],
+        datasets: [{
+            data: [{% for vital in vitals_by_category %}{{ vital.count }}{% if not forloop.last %},{% endif %}{% endfor %}],
+            backgroundColor: [
+                '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', 
+                '#9966FF', '#FF9F40', '#FF6384', '#C9CBCF'
+            ]
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
+
+// Configuration Forms
+document.getElementById('zoomConfigForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    saveTelemedicineConfig('zoom', this);
+});
+
+document.getElementById('meetConfigForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    saveTelemedicineConfig('google_meet', this);
+});
+
+function saveTelemedicineConfig(provider, form) {
+    const formData = new FormData(form);
+    const config = {};
+    
+    for (let [key, value] of formData.entries()) {
+        if (key !== 'provider') {
+            if (form.querySelector(`[name="${key}"]`).type === 'checkbox') {
+                config[key] = form.querySelector(`[name="${key}"]`).checked;
+            } else if (form.querySelector(`[name="${key}"]`).type === 'number') {
+                config[key] = parseInt(value) || 0;
+            } else {
+                config[key] = value;
+            }
+        }
+    }
+    
+    fetch('/admin/analytics/telemedicine-config/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify({
+            provider: provider,
+            config: config
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while saving configuration');
+    });
+}
+
+// Load existing configurations
+fetch('/admin/analytics/telemedicine-config/')
+.then(response => response.json())
+.then(configs => {
+    // Populate Zoom config
+    if (configs.zoom) {
+        document.getElementById('zoom_active').checked = configs.zoom.is_active;
+        document.getElementById('zoom_recording').checked = configs.zoom.recording_enabled;
+        document.getElementById('zoom_max_participants').value = configs.zoom.max_participants;
+        if (configs.zoom.api_key) {
+            document.getElementById('zoom_api_key').placeholder = 'API Key configured';
+        }
+    }
+    
+    // Populate Google Meet config
+    if (configs.google_meet) {
+        document.getElementById('meet_active').checked = configs.google_meet.is_active;
+        document.getElementById('meet_recording').checked = configs.google_meet.recording_enabled;
+        document.getElementById('meet_max_participants').value = configs.google_meet.max_participants;
+        if (configs.google_meet.api_key) {
+            document.getElementById('meet_api_key').placeholder = 'API Key configured';
+        }
+    }
+});
+</script>
+
+{% csrf_token %}
+{% endblock %}

@@ -10,13 +10,9 @@ import {
 import { Badge } from '../../components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '../../components/ui/avatar';
 import { Button } from '../../components/ui/button';
-import { 
-  Card as NextUICard,
-  Divider,
-  Chip,
-  User,
-  Button as NextUIButton
-} from '@nextui-org/react';
+import { Separator } from '../../components/ui/separator';
+import { Chip } from '../../components/ui/chip';
+import { User } from '../../components/ui/user';
 import { 
   Stethoscope,
   Users,

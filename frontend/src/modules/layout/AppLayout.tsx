@@ -11,16 +11,15 @@ import {
 import { Button } from '../../components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '../../components/ui/avatar';
 import { Badge } from '../../components/ui/badge';
-import { 
-  Dropdown,
-  DropdownTrigger,
+import { Switch } from '../../components/ui/switch';
+import { User } from '../../components/ui/user';
+import { Chip } from '../../components/ui/chip';
+import {
   DropdownMenu,
-  DropdownItem,
-  DropdownContent,
-  Switch,
-  User,
-  Chip
-} from '@nextui-org/react';
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '../../components/ui/dropdown-menu';
 import { 
   Home,
   FileText,
@@ -219,18 +218,18 @@ const AppLayout: React.FC = () => {
               </Button>
 
               {/* Theme Toggle */}
-              <Switch
-                size="sm"
-                color="primary"
-                startContent={<Sun className="h-4 w-4" />}
-                endContent={<Moon className="h-4 w-4" />}
-                isSelected={isDark}
-                onValueChange={setIsDark}
-              />
+              <div className="flex items-center space-x-2">
+                <Sun className="h-4 w-4" />
+                <Switch
+                  checked={isDark}
+                  onCheckedChange={setIsDark}
+                />
+                <Moon className="h-4 w-4" />
+              </div>
 
               {/* User Dropdown */}
-              <Dropdown placement="bottom-end">
-                <DropdownTrigger>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
                     className="flex items-center space-x-2"
@@ -245,16 +244,16 @@ const AppLayout: React.FC = () => {
                     </div>
                     <ChevronDown className="h-4 w-4" />
                   </Button>
-                </DropdownTrigger>
-                <DropdownContent aria-label="User actions">
-                  <DropdownItem key="profile">Profile Settings</DropdownItem>
-                  <DropdownItem key="preferences">Preferences</DropdownItem>
-                  <DropdownItem key="help">Help & Support</DropdownItem>
-                  <DropdownItem key="logout" color="danger">
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem>Profile Settings</DropdownMenuItem>
+                  <DropdownMenuItem>Preferences</DropdownMenuItem>
+                  <DropdownMenuItem>Help & Support</DropdownMenuItem>
+                  <DropdownMenuItem className="text-red-600">
                     Sign Out
-                  </DropdownItem>
-                </DropdownContent>
-              </Dropdown>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
         </div>
       </header>

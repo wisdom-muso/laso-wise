@@ -11,14 +11,8 @@ import {
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
-import { 
-  Card as NextUICard,
-  CardBody,
-  Input as NextUIInput,
-  Button as NextUIButton,
-  Divider,
-  Checkbox
-} from '@nextui-org/react';
+import { Checkbox } from '../../components/ui/checkbox';
+import { Separator } from '../../components/ui/separator';
 import { 
   Eye,
   EyeOff,
@@ -143,7 +137,7 @@ const LoginPage: React.FC = () => {
           animate="visible"
           className="flex justify-center"
         >
-          <NextUICard className="w-full max-w-md shadow-2xl">
+          <Card className="w-full max-w-md shadow-2xl">
             <CardHeader className="text-center pb-6">
               <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-teal-500 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Globe className="h-8 w-8 text-white" />
@@ -250,7 +244,7 @@ const LoginPage: React.FC = () => {
                   )}
                 </Button>
 
-                <Divider className="my-6" />
+                <Separator className="my-6" />
 
                 <div className="text-center">
                   <p className="text-gray-600 text-sm">
@@ -265,7 +259,7 @@ const LoginPage: React.FC = () => {
                 </div>
               </form>
             </CardContent>
-          </NextUICard>
+          </Card>
         </motion.div>
       </div>
     </div>

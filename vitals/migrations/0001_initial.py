@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import migrations, models
 import django.db.models.deletion
 
@@ -7,7 +8,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('auth', '0012_alter_user_first_name_max_length'),
+        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
@@ -46,8 +47,8 @@ class Migration(migrations.Migration):
                 ('recorded_at', models.DateTimeField(auto_now_add=True, verbose_name='Recorded At')),
                 ('updated_at', models.DateTimeField(auto_now=True, verbose_name='Updated At')),
                 ('category', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='records', to='vitals.vitalcategory')),
-                ('patient', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='vital_records', to='auth.user')),
-                ('recorded_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='recorded_vitals', to='auth.user')),
+                ('patient', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='vital_records', to=settings.AUTH_USER_MODEL)),
+                ('recorded_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='recorded_vitals', to=settings.AUTH_USER_MODEL)),
             ],
             options={
                 'verbose_name': 'Vital Record',
@@ -64,7 +65,7 @@ class Migration(migrations.Migration):
                 ('is_read', models.BooleanField(default=False, verbose_name='Read')),
                 ('read_at', models.DateTimeField(blank=True, null=True, verbose_name='Read At')),
                 ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='Created At')),
-                ('patient', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='vital_notifications', to='auth.user')),
+                ('patient', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='vital_notifications', to=settings.AUTH_USER_MODEL)),
                 ('vital_record', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='notifications', to='vitals.vitalrecord')),
             ],
             options={
@@ -85,8 +86,8 @@ class Migration(migrations.Migration):
                 ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='Created At')),
                 ('updated_at', models.DateTimeField(auto_now=True, verbose_name='Updated At')),
                 ('category', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='goals', to='vitals.vitalcategory')),
-                ('patient', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='vital_goals', to='auth.user')),
-                ('set_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='set_vital_goals', to='auth.user')),
+                ('patient', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='vital_goals', to=settings.AUTH_USER_MODEL)),
+                ('set_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='set_vital_goals', to=settings.AUTH_USER_MODEL)),
             ],
             options={
                 'verbose_name': 'Vital Goal',

@@ -85,6 +85,18 @@
                                             <span>My Patients</span>
                                         </a>
                                     </li>
+                                    <li class="{% if request.resolver_match.url_name == 'soap-notes' %}active{% endif %}">
+                                        <a href="{% url 'doctors:soap-notes' %}">
+                                            <i class="fas fa-file-medical-alt"></i>
+                                            <span>SOAP Notes</span>
+                                        </a>
+                                    </li>
+                                    <li class="{% if request.resolver_match.url_name == 'telemedicine' %}active{% endif %}">
+                                        <a href="{% url 'doctors:telemedicine' %}">
+                                            <i class="fas fa-video"></i>
+                                            <span>Telemedicine</span>
+                                        </a>
+                                    </li>
                                     <li class="{% if request.resolver_match.url_name == 'schedule-timings' %}active{% endif %}">
                                         <a href="{% url 'doctors:schedule-timings' %}">
                                             <i class="fas fa-hourglass-start"></i>

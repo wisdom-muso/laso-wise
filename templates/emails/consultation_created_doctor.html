@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual Consultation Scheduled</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8fafc;
+            color: #334155;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #14b8a6 0%, #0891b2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        .content {
+            padding: 30px;
+        }
+        .consultation-details {
+            background-color: #f1f5f9;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .detail-row:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        .detail-label {
+            font-weight: 600;
+            color: #475569;
+        }
+        .detail-value {
+            color: #64748b;
+        }
+        .meeting-info {
+            background-color: #ecfdf5;
+            border-left: 4px solid #10b981;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .meeting-info h3 {
+            color: #065f46;
+            margin: 0 0 12px 0;
+            font-size: 18px;
+        }
+        .meeting-link {
+            background-color: #ffffff;
+            border: 2px solid #10b981;
+            border-radius: 6px;
+            padding: 12px;
+            margin: 12px 0;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .action-buttons {
+            text-align: center;
+            margin: 30px 0;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            margin: 0 8px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background-color: #14b8a6;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #0891b2;
+        }
+        .btn-secondary {
+            background-color: #f1f5f9;
+            color: #475569;
+        }
+        .btn-secondary:hover {
+            background-color: #e2e8f0;
+        }
+        .instructions {
+            background-color: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 16px;
+            margin: 20px 0;
+            border-radius: 0 6px 6px 0;
+        }
+        .instructions h4 {
+            color: #92400e;
+            margin: 0 0 8px 0;
+            font-size: 16px;
+        }
+        .instructions ul {
+            margin: 8px 0 0 0;
+            padding-left: 20px;
+        }
+        .instructions li {
+            margin-bottom: 4px;
+            color: #78350f;
+        }
+        .footer {
+            background-color: #f8fafc;
+            padding: 20px;
+            text-align: center;
+            color: #64748b;
+            font-size: 12px;
+        }
+        .provider-badge {
+            display: inline-block;
+            background-color: #3b82f6;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🩺 Virtual Consultation Scheduled</h1>
+            <p>A new telemedicine consultation has been created</p>
+        </div>
+        
+        <div class="content">
+            <p>Dear Dr. {{ recipient_name }},</p>
+            
+            <p>A virtual consultation has been scheduled with your patient. Please review the details below and prepare for the session.</p>
+            
+            <div class="consultation-details">
+                <h3>📋 Consultation Details</h3>
+                <div class="detail-row">
+                    <span class="detail-label">Patient:</span>
+                    <span class="detail-value">{{ consultation.patient.get_full_name }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Scheduled Time:</span>
+                    <span class="detail-value">{{ consultation.scheduled_start|date:"F j, Y" }} at {{ consultation.scheduled_start|time:"g:i A" }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Platform:</span>
+                    <span class="detail-value">
+                        <span class="provider-badge">{{ consultation.video_provider|title }}</span>
+                    </span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Consultation ID:</span>
+                    <span class="detail-value">{{ consultation.id }}</span>
+                </div>
+                {% if consultation.recording_enabled %}
+                <div class="detail-row">
+                    <span class="detail-label">Recording:</span>
+                    <span class="detail-value">✅ Enabled</span>
+                </div>
+                {% endif %}
+                {% if consultation.notes %}
+                <div class="detail-row">
+                    <span class="detail-label">Notes:</span>
+                    <span class="detail-value">{{ consultation.notes }}</span>
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="meeting-info">
+                <h3>🎥 Video Meeting Information</h3>
+                <p><strong>Meeting URL:</strong></p>
+                <div class="meeting-link">{{ consultation.meeting_url }}</div>
+                
+                {% if consultation.meeting_password %}
+                <p><strong>Meeting Password:</strong> <code>{{ consultation.meeting_password }}</code></p>
+                {% endif %}
+                
+                {% if meeting_info.start_url %}
+                <p><strong>Host URL (for starting the meeting):</strong></p>
+                <div class="meeting-link">{{ meeting_info.start_url }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="instructions">
+                <h4>📝 Pre-Consultation Checklist</h4>
+                <ul>
+                    <li>Test your camera and microphone before the session</li>
+                    <li>Ensure you have a stable internet connection</li>
+                    <li>Review the patient's medical history and previous records</li>
+                    <li>Prepare any necessary documentation or prescriptions</li>
+                    <li>Join the meeting 5-10 minutes early to address any technical issues</li>
+                </ul>
+            </div>
+            
+            <div class="action-buttons">
+                <a href="{{ consultation.meeting_url }}" class="btn btn-primary">
+                    🎥 Join Meeting
+                </a>
+                <a href="#" class="btn btn-secondary">
+                    📱 View in App
+                </a>
+            </div>
+            
+            <p>If you encounter any technical difficulties, please contact our support team immediately.</p>
+            
+            <p>Best regards,<br>
+            The Laso Digital Health Team</p>
+        </div>
+        
+        <div class="footer">
+            <p>© 2024 Laso Digital Health. All rights reserved.</p>
+            <p>This is an automated notification. Please do not reply to this email.</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -10,13 +10,9 @@ import {
 import { Badge } from '../../components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '../../components/ui/avatar';
 import { Button } from '../../components/ui/button';
-import { 
-  Card as NextUICard,
-  Divider,
-  Chip,
-  User,
-  Button as NextUIButton
-} from '@nextui-org/react';
+import { Separator } from '../../components/ui/separator';
+import { Chip } from '../../components/ui/chip';
+import { User } from '../../components/ui/user';
 import { 
   Heart, 
   Activity, 
@@ -210,7 +206,7 @@ const PatientDashboard: React.FC = () => {
 
         {/* Health Assessment Card */}
         <motion.div variants={itemVariants}>
-          <NextUICard className="border-l-4 border-l-green-500 shadow-lg">
+          <Card className="border-l-4 border-l-green-500 shadow-lg">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <div className="flex items-center space-x-2">
                 <Shield className="h-5 w-5 text-green-600" />
@@ -273,7 +269,7 @@ const PatientDashboard: React.FC = () => {
                 )}
                   </div>
             </CardContent>
-          </NextUICard>
+          </Card>
         </motion.div>
 
         {/* Three Column Layout */}

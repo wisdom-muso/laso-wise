@@ -1,49 +1,58 @@
 version: '3.8'
 
+networks:
+  laso_network:
+    driver: bridge
+
+volumes:
+  static_volume:
+  media_volume:
+
 services:
-  web:
+  # Django Backend
+  django:
     build:
       context: .
       dockerfile: Dockerfile
+    container_name: laso_django
     ports:
-      - "12000:8005"
+      - "8005:8005"
     volumes:
-      - .:/usr/src/app
-      - static_volume:/usr/src/app/staticfiles
-      - media_volume:/usr/src/app/media
+      - .:/app
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
     environment:
       - DEBUG=True
       - SECRET_KEY=g!y0otek@9t^b+b*7)&q2a5^=8_9&xcdii8@6h^_*wphl-(fu9
-      - ALLOWED_HOSTS=*,localhost,127.0.0.1,65.108.91.110
-      - CSRF_TRUSTED_ORIGINS=http://localhost:12000,http://127.0.0.1:12000,http://65.108.91.110:12000,http://localhost:3000,http://127.0.0.1:3000,http://65.108.91.110:3000
+      - ALLOWED_HOSTS=*,localhost,127.0.0.1,django
+      - CSRF_TRUSTED_ORIGINS=http://localhost:8005,http://127.0.0.1:8005,http://django:8005,http://localhost:3000,http://127.0.0.1:3000
       - CSRF_COOKIE_SECURE=False
       - SESSION_COOKIE_SECURE=False
-      - CURRENCY=USD
-    command: >
-      sh -c "python manage.py runserver 0.0.0.0:8005"
+    networks:
+      - laso_network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8005/"]
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8005/api/health/', timeout=5)"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 20s
 
+  # React Frontend
   frontend:
-    image: node:20-alpine
-    working_dir: /usr/src/app/frontend
-    depends_on:
-      - web
-    environment:
-      - VITE_API_BASE=${FRONTEND_API_BASE:-http://65.108.91.110:12000}
-      - NODE_ENV=production
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE: http://localhost:8005
+    container_name: laso_react
     ports:
       - "3000:3000"
-    volumes:
-      - .:/usr/src/app
-    command: sh -c "npm install --no-audit --no-fund && npm run build && npm run preview -- --host 0.0.0.0 --port 3000"
+    environment:
+      - VITE_API_BASE=http://localhost:8005
+    depends_on:
+      django:
+        condition: service_healthy
+    networks:
+      - laso_network
     restart: unless-stopped
-
-volumes:
-  static_volume:
-  media_volume:

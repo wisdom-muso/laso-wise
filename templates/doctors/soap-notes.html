@@ -1,0 +1,387 @@
+{% extends 'includes/doctor-sidebar.html' %}
+{% load static %}
+
+{% block title %}SOAP Notes{% endblock %}
+{% block page_name1 %}SOAP Notes{% endblock %}
+{% block page_name2 %}SOAP Notes{% endblock %}
+
+{% block css %}
+<style>
+    .soap-section {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        padding: 24px;
+        margin-bottom: 24px;
+        border-left: 4px solid #007bff;
+    }
+    
+    .soap-section h5 {
+        color: #2c3e50;
+        font-weight: 600;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .soap-note-card {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        padding: 20px;
+        margin-bottom: 20px;
+        border-left: 4px solid #28a745;
+        transition: all 0.3s ease;
+    }
+    
+    .soap-note-card:hover {
+        box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+        transform: translateY(-2px);
+    }
+    
+    .soap-note-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .soap-note-meta {
+        display: flex;
+        gap: 16px;
+        font-size: 0.9em;
+        color: #666;
+    }
+    
+    .soap-component {
+        margin-bottom: 16px;
+    }
+    
+    .soap-component strong {
+        color: #2c3e50;
+        display: block;
+        margin-bottom: 8px;
+        font-size: 0.95em;
+        text-transform: uppercase;
+        font-weight: 600;
+    }
+    
+    .soap-component p {
+        background: #f8f9fa;
+        padding: 12px;
+        border-radius: 8px;
+        margin: 0;
+        line-height: 1.6;
+    }
+    
+    .btn-modern {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        color: white;
+    }
+    
+    .btn-create {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
+    
+    .btn-edit {
+        background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        padding: 8px 16px;
+        font-size: 0.9em;
+    }
+    
+    .status-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.8em;
+        font-weight: 500;
+    }
+    
+    .status-draft {
+        background: #fff3cd;
+        color: #856404;
+    }
+    
+    .status-final {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #666;
+    }
+    
+    .empty-state i {
+        font-size: 4em;
+        color: #ddd;
+        margin-bottom: 16px;
+    }
+</style>
+{% endblock %}
+
+{% block main %}
+<div class="fade-in">
+    <!-- Header Section -->
+    <div class="soap-section">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h3 class="mb-2">📋 SOAP Notes Management</h3>
+                <p class="text-muted mb-0">Create and manage patient SOAP notes for consultations</p>
+            </div>
+            <div>
+                <button class="btn btn-modern btn-create" data-bs-toggle="modal" data-bs-target="#createSoapModal">
+                    <i class="fas fa-plus"></i> Create SOAP Note
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="soap-section">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Filter by Patient</label>
+                    <select class="form-select" id="patientFilter">
+                        <option value="">All Patients</option>
+                        {% for patient in patients %}
+                        <option value="{{ patient.id }}">{{ patient.get_full_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Status</label>
+                    <select class="form-select" id="statusFilter">
+                        <option value="">All Status</option>
+                        <option value="draft">Draft</option>
+                        <option value="final">Final</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Date Range</label>
+                    <input type="date" class="form-control" id="dateFilter">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SOAP Notes List -->
+    <div id="soapNotesList">
+        {% for soap_note in soap_notes %}
+        <div class="soap-note-card" data-patient="{{ soap_note.patient.id }}" data-status="{% if soap_note.is_draft %}draft{% else %}final{% endif %}">
+            <div class="soap-note-header">
+                <div>
+                    <h5 class="mb-1">{{ soap_note.patient.get_full_name }}</h5>
+                    <div class="soap-note-meta">
+                        <span><i class="fas fa-calendar"></i> {{ soap_note.created_at|date:"M d, Y" }}</span>
+                        <span><i class="fas fa-clock"></i> {{ soap_note.created_at|time:"H:i" }}</span>
+                        {% if soap_note.appointment %}
+                        <span><i class="fas fa-link"></i> Appointment #{{ soap_note.appointment.id }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="status-badge status-{% if soap_note.is_draft %}draft{% else %}final{% endif %}">
+                        {% if soap_note.is_draft %}Draft{% else %}Final{% endif %}
+                    </span>
+                    <button class="btn btn-modern btn-edit btn-sm" onclick="editSoapNote({{ soap_note.id }})">
+                        <i class="fas fa-edit"></i> Edit
+                    </button>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="soap-component">
+                        <strong>Subjective</strong>
+                        <p>{{ soap_note.subjective|truncatewords:20|default:"Not recorded" }}</p>
+                    </div>
+                    <div class="soap-component">
+                        <strong>Assessment</strong>
+                        <p>{{ soap_note.assessment|truncatewords:20|default:"Not recorded" }}</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="soap-component">
+                        <strong>Objective</strong>
+                        <p>{{ soap_note.objective|truncatewords:20|default:"Not recorded" }}</p>
+                    </div>
+                    <div class="soap-component">
+                        <strong>Plan</strong>
+                        <p>{{ soap_note.plan|truncatewords:20|default:"Not recorded" }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="empty-state">
+            <i class="fas fa-file-medical"></i>
+            <h4>No SOAP Notes Found</h4>
+            <p>Start by creating your first SOAP note for a patient consultation.</p>
+            <button class="btn btn-modern btn-create" data-bs-toggle="modal" data-bs-target="#createSoapModal">
+                <i class="fas fa-plus"></i> Create First SOAP Note
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Create SOAP Note Modal -->
+<div class="modal fade" id="createSoapModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">📋 Create SOAP Note</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="soapNoteForm" method="post">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Patient <span class="text-danger">*</span></label>
+                            <select name="patient" class="form-select" required>
+                                <option value="">Select Patient</option>
+                                {% for patient in patients %}
+                                <option value="{{ patient.id }}">{{ patient.get_full_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Related Appointment</label>
+                            <select name="appointment" class="form-select">
+                                <option value="">Select Appointment (Optional)</option>
+                                {% for appointment in recent_appointments %}
+                                <option value="{{ appointment.id }}">{{ appointment.patient.get_full_name }} - {{ appointment.appointment_date }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Subjective <span class="text-danger">*</span></label>
+                                <textarea name="subjective" class="form-control" rows="4" 
+                                          placeholder="Patient's symptoms, complaints, and medical history..." required></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Assessment <span class="text-danger">*</span></label>
+                                <textarea name="assessment" class="form-control" rows="4" 
+                                          placeholder="Diagnosis, clinical judgment, and assessment..." required></textarea>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Objective <span class="text-danger">*</span></label>
+                                <textarea name="objective" class="form-control" rows="4" 
+                                          placeholder="Vital signs, physical examination findings..." required></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Plan <span class="text-danger">*</span></label>
+                                <textarea name="plan" class="form-control" rows="4" 
+                                          placeholder="Treatment plan, medications, follow-up instructions..." required></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="is_draft" id="isDraft" checked>
+                        <label class="form-check-label" for="isDraft">
+                            Save as Draft (can be edited later)
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-modern">
+                        <i class="fas fa-save"></i> Save SOAP Note
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// Filter functionality
+document.getElementById('patientFilter').addEventListener('change', filterSoapNotes);
+document.getElementById('statusFilter').addEventListener('change', filterSoapNotes);
+document.getElementById('dateFilter').addEventListener('change', filterSoapNotes);
+
+function filterSoapNotes() {
+    const patientFilter = document.getElementById('patientFilter').value;
+    const statusFilter = document.getElementById('statusFilter').value;
+    const dateFilter = document.getElementById('dateFilter').value;
+    
+    const cards = document.querySelectorAll('.soap-note-card');
+    
+    cards.forEach(card => {
+        let show = true;
+        
+        if (patientFilter && card.dataset.patient !== patientFilter) {
+            show = false;
+        }
+        
+        if (statusFilter && card.dataset.status !== statusFilter) {
+            show = false;
+        }
+        
+        card.style.display = show ? 'block' : 'none';
+    });
+}
+
+function editSoapNote(soapNoteId) {
+    // This would typically load the SOAP note data and populate the modal
+    alert('Edit SOAP Note functionality would be implemented here');
+}
+
+// Form submission
+document.getElementById('soapNoteForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    
+    fetch('{% url "doctors:create-soap-note" %}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            toastr.success('SOAP note created successfully!');
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+        } else {
+            toastr.error('Error creating SOAP note: ' + data.message);
+        }
+    })
+    .catch(error => {
+        toastr.error('An error occurred while creating the SOAP note');
+    });
+});
+</script>
+{% endblock %}

@@ -1,11 +1,8 @@
-import { nextui } from '@nextui-org/react';
-
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
     './index.html',
-    './src/**/*.{js,ts,jsx,tsx}',
-    './node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}'
+    './src/**/*.{js,ts,jsx,tsx}'
   ],
   theme: {
     extend: {
@@ -66,44 +63,5 @@ export default {
     },
   },
   darkMode: 'class',
-  plugins: [
-    nextui({
-      themes: {
-        light: {
-          colors: {
-            primary: {
-              50: '#f0fdfa',
-              100: '#ccfbf1',
-              200: '#99f6e4',
-              300: '#5eead4',
-              400: '#2dd4bf',
-              500: '#14b8a6',
-              600: '#0d9488',
-              700: '#0f766e',
-              800: '#115e59',
-              900: '#134e4a',
-              950: '#042f2e',
-            },
-          },
-        },
-        dark: {
-          colors: {
-            primary: {
-              50: '#042f2e',
-              100: '#134e4a',
-              200: '#115e59',
-              300: '#0f766e',
-              400: '#0d9488',
-              500: '#14b8a6',
-              600: '#2dd4bf',
-              700: '#5eead4',
-              800: '#99f6e4',
-              900: '#ccfbf1',
-              950: '#f0fdfa',
-            },
-          },
-        },
-      },
-    }),
-  ],
+  plugins: [],
 }

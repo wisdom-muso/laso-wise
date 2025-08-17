@@ -1,63 +1,86 @@
-FROM python:3.11-alpine
+# Multi-stage build for Django backend
+FROM python:3.11-slim as builder
 
-WORKDIR /usr/src/app
+# Set working directory
+WORKDIR /app
 
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
 # Install system dependencies
-RUN apk update \
-    && apk add --no-cache \
-        nano \
-        gobject-introspection-dev \
-        pango-dev \
-        cairo-dev \
-        libffi-dev \
-        libmagic \
-        libxml2-dev \
-        libxslt-dev \
-        wget
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libpq-dev \
+    libxml2-dev \
+    libxslt1-dev \
+    libffi-dev \
+    libjpeg-dev \
+    libpng-dev \
+    libmagic1 \
+    git \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements and install dependencies
+# Copy requirements and install Python dependencies
 COPY requirements.txt .
-RUN pip install --upgrade pip \
-    && pip install -r requirements.txt
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
-# Copy the project
+# Production stage
+FROM python:3.11-slim as production
+
+# Set working directory
+WORKDIR /app
+
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV DJANGO_SETTINGS_MODULE=laso.settings
+
+# Install runtime dependencies
+RUN apt-get update && apt-get install -y \
+    libpq5 \
+    libxml2 \
+    libxslt1.1 \
+    libffi8 \
+    libjpeg62-turbo \
+    libpng16-16 \
+    libmagic1 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create app user
+RUN addgroup --system django && \
+    adduser --system --group django
+
+# Copy Python packages from builder
+COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+COPY --from=builder /usr/local/bin /usr/local/bin
+
+# Copy project files
 COPY . .
 
-# Create necessary directories
-RUN mkdir -p /usr/src/app/staticfiles /usr/src/app/media
+# Create necessary directories and set permissions
+RUN mkdir -p staticfiles media logs && \
+    chown -R django:django /app && \
+    chmod +x manage.py
 
-# Create necessary scripts if they don't exist
-RUN if [ ! -f "collect_static.sh" ]; then \
-        echo "collect_static.sh not found, creating it..."; \
-        echo '#!/bin/sh' > collect_static.sh; \
-        echo 'python manage.py collectstatic --noinput' >> collect_static.sh; \
-    fi && \
-    if [ ! -f "setup_app.sh" ]; then \
-        echo "setup_app.sh not found, creating it..."; \
-        echo '#!/bin/sh' > setup_app.sh; \
-        echo 'mkdir -p core/views staticfiles media logs' >> setup_app.sh; \
-        echo 'touch core/views/__init__.py' >> setup_app.sh; \
-    fi && \
-    chmod +x collect_static.sh setup_app.sh
-
-# Create core/views directory and __init__.py file
+# Create core/views directory if it doesn't exist
 RUN mkdir -p core/views && \
-    if [ ! -f "core/views/__init__.py" ]; then \
-        echo "# This file makes the views directory a Python package" > core/views/__init__.py; \
-    fi
+    touch core/views/__init__.py && \
+    chown -R django:django core/views
 
-# Run static files collection
-RUN echo "Running static files collection script..." && \
-    python manage.py collectstatic --noinput
+# Switch to django user
+USER django
 
-# Set proper permissions
-RUN chmod +x manage.py
+# Collect static files
+RUN python manage.py collectstatic --noinput --clear
 
-# Expose the port
+# Expose port
 EXPOSE 8005
 
-# Command to run the server
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8005/api/health/', timeout=5)" || exit 1
+
+# Start the application
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8005"]
