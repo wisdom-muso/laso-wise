@@ -24,6 +24,7 @@ from core.forms import LoginForm
 from core.views import HomeView, dashboard
 from core.logout_view import logout_view
 from core.views_theme import toggle_theme, get_theme_preference
+from core.health_check import health_check, readiness_check, liveness_check
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -44,6 +45,11 @@ urlpatterns = [
     # Tema ayarları
     path('theme/toggle/', toggle_theme, name='toggle-theme'),
     path('theme/preference/', get_theme_preference, name='get-theme-preference'),
+    
+    # Health check endpoints
+    path('health/', health_check, name='health-check'),
+    path('readiness/', readiness_check, name='readiness-check'),
+    path('liveness/', liveness_check, name='liveness-check'),
     
     # Core uygulaması URL'leri
     path('core/', include('core.urls', namespace='core')),

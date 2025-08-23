@@ -1,0 +1,91 @@
+version: '3.8'
+
+# Development override for docker-compose.yml
+# Usage: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+
+services:
+  # Django Web Application - Development Configuration
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: base  # Use base stage for development (includes build tools)
+    environment:
+      - DEBUG=True
+      - ALLOWED_HOSTS=*
+      - EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend
+      - ENABLE_AI_FEATURES=False  # Disable AI for faster development
+    volumes:
+      # Mount source code for live reloading
+      - .:/app
+      - /app/staticfiles  # Exclude staticfiles to prevent conflicts
+    command: python manage.py runserver 0.0.0.0:8000
+    ports:
+      - "8000:8000"
+    stdin_open: true
+    tty: true
+
+  # Celery Worker - Development Configuration
+  celery:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: base
+    environment:
+      - DEBUG=True
+      - ENABLE_AI_FEATURES=False
+    volumes:
+      - .:/app
+    command: celery -A meditrack worker -l debug --autoreload
+
+  # Celery Beat - Development Configuration
+  celery-beat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: base
+    environment:
+      - DEBUG=True
+    volumes:
+      - .:/app
+    command: celery -A meditrack beat -l debug
+
+  # Development Database with exposed port
+  db:
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=laso_healthcare_dev
+      - POSTGRES_USER=laso_dev
+      - POSTGRES_PASSWORD=dev_password
+
+  # Development Redis with exposed port
+  redis:
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes  # No password for development
+
+  # Remove Nginx for development (direct access to Django)
+  nginx:
+    profiles:
+      - production  # Only start nginx in production profile
+
+  # Remove backup service for development
+  db-backup:
+    profiles:
+      - production
+
+  # Add development tools container
+  dev-tools:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: base
+    container_name: laso_dev_tools
+    volumes:
+      - .:/app
+    command: tail -f /dev/null  # Keep container running
+    networks:
+      - laso_network
+    profiles:
+      - tools  # Start with: docker-compose --profile tools up
