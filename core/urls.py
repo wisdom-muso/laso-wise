@@ -13,6 +13,7 @@ from .views_dashboard import (
     dashboard_analytics_api, patient_health_summary_api, recent_activity,
     export_analytics
 )
+from . import views
 
 app_name = 'core'
 
@@ -71,4 +72,7 @@ urlpatterns = [
     
     # AI Assistant
     path('ai-assistant/', views.ai_assistant, name='ai_assistant'),
+    
+    # Health Check
+    path('health/', views.health_check, name='health_check'),
 ]
