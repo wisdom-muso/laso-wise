@@ -28,16 +28,22 @@ class PatientDashboardView(PatientRequiredMixin, TemplateView):
         
         # Get all appointments
         appointments = Booking.objects.select_related("doctor", "doctor__profile").filter(patient=user)
-        context["appointments"] = appointments.order_by("-appointment_date", "-appointment_time")
+        context["appointments"] = appointments.order_by("-appointment_date", "-appointment_time")[:10]  # Limit to 10 most recent
         
-        # Dashboard statistics
-        context["upcoming_appointments_count"] = appointments.filter(
+        # Get upcoming appointments
+        upcoming_appointments = appointments.filter(
             appointment_date__gte=today,
             status__in=["pending", "confirmed"]
-        ).count()
+        ).order_by("appointment_date", "appointment_time")
+        context["upcoming_appointments"] = upcoming_appointments[:5]
         
-        context["prescriptions_count"] = Prescription.objects.filter(patient=user).count()
+        # Get recent prescriptions
+        prescriptions = Prescription.objects.filter(patient=user).select_related("doctor", "doctor__profile")
+        context["prescriptions"] = prescriptions.order_by("-created_at")[:10]
         
+        # Dashboard statistics
+        context["upcoming_appointments_count"] = upcoming_appointments.count()
+        context["prescriptions_count"] = prescriptions.count()
         context["doctors_consulted_count"] = appointments.values('doctor').distinct().count()
         
         # Calculate a simple health score based on recent activity
@@ -49,6 +55,37 @@ class PatientDashboardView(PatientRequiredMixin, TemplateView):
         # Simple health score calculation (0-100)
         health_score = min(100, max(20, 50 + (recent_appointments * 10)))
         context["health_score"] = health_score
+        
+        # Get recent vitals if available
+        try:
+            from vitals.models import VitalRecord
+            recent_vitals = VitalRecord.objects.filter(
+                patient=user
+            ).select_related("category").order_by("-recorded_at")[:5]
+            context["recent_vitals"] = recent_vitals
+        except:
+            context["recent_vitals"] = []
+        
+        # Get EHR record if available
+        try:
+            from core.models import EHRRecord
+            ehr_record, created = EHRRecord.objects.get_or_create(patient=user)
+            context["ehr_record"] = ehr_record
+        except:
+            context["ehr_record"] = None
+            
+        # Next appointment
+        next_appointment = upcoming_appointments.first()
+        context["next_appointment"] = next_appointment
+        
+        # Recent activity count
+        context["recent_activity_count"] = (
+            appointments.filter(appointment_date__gte=today - timedelta(days=30)).count() +
+            prescriptions.filter(created_at__gte=today - timedelta(days=30)).count()
+        )
+        
+        # Current date
+        context["today"] = today
         
         return context
 
