@@ -1,5 +1,5 @@
 """
-Internationalization Management for MediTracked
+Internationalization Management for Laso Healthcare
 Çoklu dil desteği yönetimi
 """
 from django.db import models

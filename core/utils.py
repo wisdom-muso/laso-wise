@@ -152,7 +152,7 @@ def send_appointment_reminder_email(appointment):
     """
     Randevu hatırlatma e-postası gönderir
     """
-    subject = f'MediTrack - Randevu Hatırlatması: {appointment.date.strftime("%d.%m.%Y")}'
+    subject = f'Laso Healthcare - Randevu Hatırlatması: {appointment.date.strftime("%d.%m.%Y")}'
     
     message = f"""Sayın {appointment.patient.get_full_name()},
 
@@ -167,7 +167,7 @@ Açıklama: {appointment.description}
 Randevunuza zamanında gelmenizi rica ederiz. Herhangi bir değişiklik için lütfen kliniğimizle iletişime geçiniz.
 
 Saygılarımızla,
-MediTrack Sağlık Sistemi
+Laso Healthcare Sağlık Sistemi
 """
     
     send_mail(

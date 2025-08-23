@@ -1,5 +1,5 @@
 """
-AI-Powered Features for MediTracked
+AI-Powered Features for Laso Healthcare
 """
 import re
 from datetime import datetime, timedelta

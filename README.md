@@ -1,6 +1,6 @@
-# MediTracked - Advanced Clinical Patient Tracking and Telemedicine System
+# Laso Healthcare - Advanced Clinical Patient Tracking and Telemedicine System
 
-MediTracked is a comprehensive, AI-powered healthcare management system designed for modern healthcare institutions. This advanced platform includes patient tracking, appointment management, telemedicine capabilities, AI health analytics, and comprehensive clinical workflows.
+Laso Healthcare is a comprehensive, AI-powered healthcare management system designed for modern healthcare institutions. This advanced platform includes patient tracking, appointment management, telemedicine capabilities, AI health analytics, and comprehensive clinical workflows.
 
 ## 🚀 Features
 
@@ -56,8 +56,8 @@ MediTracked is a comprehensive, AI-powered healthcare management system designed
 ### Quick Setup
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/your-org/meditracked.git
-   cd meditracked
+   git clone https://github.com/your-org/laso-healthcare.git
+   cd laso-healthcare
    ```
 
 2. **Create virtual environment:**
@@ -81,7 +81,7 @@ MediTracked is a comprehensive, AI-powered healthcare management system designed
 5. **Database setup:**
    ```bash
    python manage.py manage_migrations
-   python manage.py setup_meditracked --all
+   python manage.py setup_laso_healthcare --all
    ```
 
 6. **Start the development server:**
@@ -132,7 +132,7 @@ After running the setup command, you'll have these test accounts:
 ### Environment Variables
 ```bash
 # Database
-DATABASE_URL=postgresql://user:pass@localhost/meditracked
+DATABASE_URL=postgresql://user:pass@localhost/laso_healthcare
 
 # AI Services
 OPENAI_API_KEY=your_openai_key
@@ -218,10 +218,10 @@ python manage.py manage_migrations
 
 # Reset development database
 python manage.py manage_migrations --reset
-python manage.py setup_meditracked --all
+python manage.py setup_laso_healthcare --all
 
 # Generate sample data
-python manage.py setup_meditracked --sample-data
+python manage.py setup_laso_healthcare --sample-data
 
 # Check system health
 python manage.py check --deploy
@@ -294,10 +294,10 @@ python manage.py check --deploy
 
 ## 📞 Support & Documentation
 
-- 📚 [Full Documentation](https://docs.meditracked.com)
-- 🐛 [Issue Tracker](https://github.com/your-org/meditracked/issues)
-- 💬 [Community Forum](https://community.meditracked.com)
-- 📧 [Email Support](mailto:support@meditracked.com)
+- 📚 [Full Documentation](https://docs.laso-healthcare.com)
+- 🐛 [Issue Tracker](https://github.com/your-org/laso-healthcare/issues)
+- 💬 [Community Forum](https://community.laso-healthcare.com)
+- 📧 [Email Support](mailto:support@laso-healthcare.com)
 
 ## 🤝 Contributing
 
@@ -324,9 +324,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**MediTracked** - Transforming Healthcare Through Technology
+**Laso Healthcare** - Transforming Healthcare Through Technology
 
-For more information, visit [www.meditracked.com](https://www.meditracked.com)
+For more information, visit [www.laso-healthcare.com](https://www.laso-healthcare.com)
 |------|-------------|
 | Patient | - Can view their own appointments<br>- Can view their own treatment history<br>- Can update their own profile |
 | Doctor | - Can view their own appointments<br>- Can add treatments and prescriptions to their patients<br>- Can view information about their patients |

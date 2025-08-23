@@ -97,7 +97,7 @@ MEDICATIONS = [
 ]
 
 class Command(BaseCommand):
-    help = 'MediTrack sistemi için örnek veriler oluşturur'
+    help = 'Laso Healthcare sistemi için örnek veriler oluşturur'
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -150,7 +150,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        self.stdout.write(self.style.SUCCESS('MediTrack örnek veri oluşturma başlatılıyor...'))
+        self.stdout.write(self.style.SUCCESS('Laso Healthcare örnek veri oluşturma başlatılıyor...'))
         
         # Admin kullanıcısı oluştur
         self.create_admin_user()

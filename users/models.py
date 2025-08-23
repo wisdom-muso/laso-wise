@@ -4,7 +4,7 @@ from django.utils.translation import gettext_lazy as _
 
 class User(AbstractUser):
     """
-    MediTrack sistemi için özel kullanıcı modeli.
+    Laso Healthcare sistemi için özel kullanıcı modeli.
     Her kullanıcı hasta, doktor, resepsiyonist veya admin olabilir.
     """
     USER_TYPE_CHOICES = [

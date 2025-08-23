@@ -262,30 +262,30 @@ class Command(BaseCommand):
         doctors_data = [
             {
                 'username': 'dr_sarah',
-                'email': 'sarah@meditracked.com',
+                'email': 'sarah@laso-healthcare.com',
                 'first_name': 'Sarah',
                 'last_name': 'Johnson',
                 'user_type': 'doctor',
-                'department': 'Cardiology',
-                'phone': '555-1001'
+                'specialization': 'Cardiology',
+                'phone_number': '555-1001'
             },
             {
                 'username': 'dr_michael',
-                'email': 'michael@meditracked.com',
+                'email': 'michael@laso-healthcare.com',
                 'first_name': 'Michael',
                 'last_name': 'Chen',
                 'user_type': 'doctor',
-                'department': 'Neurology',
-                'phone': '555-1002'
+                'specialization': 'Neurology',
+                'phone_number': '555-1002'
             },
             {
                 'username': 'dr_emma',
-                'email': 'emma@meditracked.com',
+                'email': 'emma@laso-healthcare.com',
                 'first_name': 'Emma',
                 'last_name': 'Davis',
                 'user_type': 'doctor',
-                'department': 'Pediatrics',
-                'phone': '555-1003'
+                'specialization': 'Pediatrics',
+                'phone_number': '555-1003'
             }
         ]
         
@@ -316,7 +316,7 @@ class Command(BaseCommand):
                 'first_name': 'John',
                 'last_name': 'Doe',
                 'user_type': 'patient',
-                'phone': '555-2001'
+                'phone_number': '555-2001'
             },
             {
                 'username': 'patient_jane',
@@ -324,7 +324,7 @@ class Command(BaseCommand):
                 'first_name': 'Jane',
                 'last_name': 'Smith',
                 'user_type': 'patient',
-                'phone': '555-2002'
+                'phone_number': '555-2002'
             },
             {
                 'username': 'patient_bob',
@@ -332,7 +332,7 @@ class Command(BaseCommand):
                 'first_name': 'Bob',
                 'last_name': 'Wilson',
                 'user_type': 'patient',
-                'phone': '555-2003'
+                'phone_number': '555-2003'
             }
         ]
         
@@ -357,12 +357,12 @@ class Command(BaseCommand):
         if not User.objects.filter(username='receptionist').exists():
             receptionist = User.objects.create_user(
                 username='receptionist',
-                email='receptionist@meditracked.com',
+                email='receptionist@laso-healthcare.com',
                 password='receptionist123',
                 first_name='Alice',
                 last_name='Brown',
                 user_type='receptionist',
-                phone='555-3001'
+                phone_number='555-3001'
             )
             self.stdout.write(f'  ✅ Created receptionist: {receptionist.get_full_name()}')
 
