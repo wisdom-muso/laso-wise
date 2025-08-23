@@ -1,77 +1,104 @@
 {% load static %}
 
 <!-- Header -->
-<header class="header shadow-sm">
-    <nav class="navbar navbar-expand-lg navbar-light">
-        <div class="container">
-            <a href="https://www.lasodigitalhealth.com/" class="navbar-brand" target="_blank">
-                <img src="{% static 'assets/img/laso-logo.svg' %}" height="40" alt="Laso Digital Health Logo">
+<header class="header">
+    <nav class="navbar navbar-expand-lg header-nav">
+        <div class="navbar-header">
+            <a id="mobile_btn" href="javascript:void(0);">
+                <span class="bar-icon">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </span>
             </a>
-            
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" aria-controls="navbarMain" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            
-            <div class="collapse navbar-collapse" id="navbarMain">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.path == '/doctors/' %}active{% endif %}" href="{% url 'doctors:list' %}">Doctors</a>
-                    </li>
-
-                    {% if user.is_authenticated and user.role == 'patient' %}
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle {% if request.path == '/patients/' %}active{% endif %}" href="#" id="patientDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                Patients
-                            </a>
-                            <ul class="dropdown-menu" aria-labelledby="patientDropdown">
-                                <li><a class="dropdown-item" href="{% url 'patients:dashboard' %}">Patient Dashboard</a></li>
-                                <li><a class="dropdown-item" href="{% url 'patients:profile-setting' %}">Profile Settings</a></li>
-                                <li><a class="dropdown-item" href="#">Change Password</a></li>
-                            </ul>
-                        </li>
-                    {% endif %}
-                </ul>
-                
-                <div class="d-flex align-items-center">
-                    {% if not user.is_authenticated %}
-                        <a class="btn btn-primary" href="{% url 'accounts:login' %}">
-                            <i class="fas fa-sign-in-alt me-1"></i> Login / Signup
-                        </a>
-                    {% else %}
-                        <!-- User Menu -->
-                        <div class="dropdown">
-                            <a class="dropdown-toggle d-flex align-items-center text-decoration-none" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <img class="rounded-circle me-2" src="{{ user.profile.image }}" width="32" height="32" alt="{{ user.username }}">
-                                <span class="d-none d-md-inline">{{ user.get_full_name|default:user.username }}</span>
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                                <li>
-                                    <div class="px-3 py-2 d-flex align-items-center">
-                                        <img src="{{ user.profile.image }}" alt="User Image" class="rounded-circle me-2" width="40" height="40">
-                                        <div>
-                                            <h6 class="mb-0">{{ user.username }}</h6>
-                                            <small class="text-muted">
-                                                {% if user.role == "patient" %}Patient{% else %}Doctor{% endif %}
-                                            </small>
-                                        </div>
-                                    </div>
-                                </li>
-                                <li><hr class="dropdown-divider"></li>
-                                {% if user.role == "patient" %}
-                                    <li><a class="dropdown-item" href="{% url 'patients:dashboard' %}"><i class="fas fa-columns me-2"></i> Dashboard</a></li>
-                                    <li><a class="dropdown-item" href="{% url 'patients:profile-setting' %}"><i class="fas fa-user-cog me-2"></i> Profile Settings</a></li>
-                                {% elif user.role == "doctor" %}
-                                    <li><a class="dropdown-item" href="{% url 'doctors:dashboard' %}"><i class="fas fa-columns me-2"></i> Dashboard</a></li>
-                                {% endif %}
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="{% url 'accounts:logout' %}"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
-                            </ul>
-                        </div>
-                        <!-- /User Menu -->
-                    {% endif %}
-                </div>
-            </div>
+            <a href="{% url 'core:home-page' %}" class="navbar-brand logo">
+                <img src="{% static 'assets/img/laso-logo.svg' %}" class="img-fluid" alt="Laso Digital Health Logo">
+            </a>
         </div>
+        <div class="main-menu-wrapper">
+            <div class="menu-header">
+                <a href="{% url 'core:home-page' %}" class="menu-logo">
+                    <img src="{% static 'assets/img/laso-logo.svg' %}" class="img-fluid" alt="Laso Digital Health Logo">
+                </a>
+                <a id="menu_close" class="menu-close" href="javascript:void(0);">
+                    <i class="fas fa-times"></i>
+                </a>
+            </div>
+            <ul class="main-nav">
+                <li {% if request.path == '/home/' %}class="active"{% endif %}>
+                    <a href="{% url 'core:home-page' %}">Home</a>
+                </li>
+                <li class="has-submenu{% if request.path == '/doctors/' %} active {% endif %}">
+{#                    <a href="#">Doctors <i class="fas fa-chevron-down"></i></a>#}
+{#                    <ul class="submenu">#}
+{#                        <li><a href="#">Doctor Register</a></li>#}
+{#                    </ul>#}
+                    <a href="{% url 'doctors:list' %}">Doctors</a>
+                </li>
+                {% if not user.is_authenticated %}
+                    <li class="login-link">
+                        <a href="{% url 'accounts:login' %}">Login / Signup</a>
+                    </li>
+                {% elif user.role == 'patient' %}
+                    <li class="has-submenu {% if request.path == '/patients/' %} active {% endif %}">
+                        <a href="#">Patients <i class="fas fa-chevron-down"></i></a>
+                        <ul class="submenu">
+                            <li><a href="{% url 'patients:dashboard' %}">Patient Dashboard</a></li>
+                            <li><a href="{% url 'patients:profile-setting' %}">Profile Settings</a></li>
+                            <li><a href="#">Change Password</a></li>
+                        </ul>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+        <ul class="nav header-navbar-rht">
+            <li class="nav-item contact-item">
+                <div class="header-contact-img">
+                    <i class="far fa-hospital"></i>
+                </div>
+                <div class="header-contact-detail">
+                    <p class="contact-header">Contact</p>
+                    <p class="contact-info-header"> +8801224242</p>
+                </div>
+            </li>
+            {% if not user.is_authenticated %}
+                <li class="nav-item">
+                    <a class="nav-link header-login" href="{% url 'accounts:login' %}">Login / Signup </a>
+                </li>
+            {% else %}
+                <!-- User Menu -->
+                <li class="nav-item dropdown has-arrow logged-item">
+                    <a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown">
+                        <span class="user-img">
+                            <img class="rounded-circle" src="{{ user.profile.image }}" width="31" alt="{{ user.username }}">
+                        </span>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right">
+                        <div class="user-header">
+                            <div class="avatar avatar-sm">
+                                <img src="{{ user.profile.image }}" alt="User Image" class="avatar-img rounded-circle">
+                            </div>
+                            <div class="user-text">
+                                <h6>{{ user.username }}</h6>
+                                {% if user.role == "patient" %}
+                                    <p class="text-muted mb-0">Patient</p>
+                                {% else %}
+                                    <p class="text-muted mb-0">Doctor</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% if user.role == "patient" %}
+                            <a class="dropdown-item" href="{% url 'patients:dashboard' %}">Dashboard</a>
+                            <a class="dropdown-item" href="{% url 'patients:profile-setting' %}">Profile Settings</a>
+                        {% elif user.role == "doctor" %}
+                            <a class="dropdown-item" href="{% url 'doctors:dashboard' %}">Dashboard</a>
+                        {% endif %}
+                        <a class="dropdown-item" href="{% url 'accounts:logout' %}">Logout</a>
+                    </div>
+                </li>
+                <!-- /User Menu -->
+            {% endif %}
+        </ul>
     </nav>
 </header>
 <!-- /Header -->

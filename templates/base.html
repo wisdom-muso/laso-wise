@@ -4,6 +4,7 @@
 <html lang="en">
 
 <head>
+
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
     <title>{% block title %}{% endblock %} - Laso Digital Health</title>
@@ -11,39 +12,25 @@
     <!-- Favicons -->
     <link type="image/x-icon" href="{% static 'assets/img/favicon.png' %}" rel="icon">
 
-    <!-- Bootstrap 5 CSS -->
-    <link rel="stylesheet" href="{% static 'assets/bootstrap5/bootstrap.min.css' %}">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="{% static 'assets/css/bootstrap.min.css' %}">
 
     <!-- Fontawesome CSS -->
     <link rel="stylesheet" href="{% static 'assets/plugins/fontawesome/css/fontawesome.min.css' %}">
     <link rel="stylesheet" href="{% static 'assets/plugins/fontawesome/css/all.min.css' %}">
     <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
-    
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Main CSS -->
     <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
     
     <!-- Laso Digital Health Theme CSS -->
-    <link rel="stylesheet" href="{% static 'css/laso-theme.css' %}">
-    
-    <!-- Modern Design System CSS -->
-    <link rel="stylesheet" href="{% static 'css/modern-design-system.css' %}">
-    
-    <!-- Laso Modern Theme CSS (Bootstrap 5 Enhanced) -->
-    <link rel="stylesheet" href="{% static 'css/laso-modern.css' %}">
-    
-    <!-- Enhanced Theme CSS (Modern Design System) -->
-    <link rel="stylesheet" href="{% static 'css/enhanced-theme.css' %}">
-    
-    <!-- Custom Theme Overrides -->
-    <link rel="stylesheet" href="{% static 'assets/css/custom-theme.css' %}">
-    
-    <!-- React-Inspired Modern Theme -->
-    <link rel="stylesheet" href="{% static 'css/react-inspired-theme.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/laso-theme.css' %}">
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+    <script src="{% static 'assets/js/html5shiv.min.js' %}"></script>
+    <script src="{% static 'assets/js/respond.min.js' %}"></script>
+    <![endif]-->
 
     <script src="https://unpkg.com/htmx.org@1.9.12"></script>
 
@@ -54,8 +41,8 @@
     </style>
 
     {% block css %}{% endblock %}
-</head>
 
+</head>
 <body class="account-page" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
 
 <!-- Main Wrapper -->
@@ -63,11 +50,20 @@
 
     {% include 'includes/navbar.html' %}
 
-    <!-- Page Content -->
-    <div class="page-wrapper">
-        {% block content %}{% endblock %}
-    </div>
-    <!-- /Page Content -->
+    {% if messages %}
+        <div class="container mt-3">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% block content %}{% endblock %}
 
     {% include 'includes/footer.html' %}
 
@@ -75,46 +71,33 @@
 <!-- /Main Wrapper -->
 
 <!-- jQuery -->
-<script src="{% static 'assets/js/jquery-3.6.0.min.js' %}"></script>
+<script src="{% static 'assets/js/jquery.min.js' %}"></script>
 
 <!-- Bootstrap Core JS -->
-<script src="{% static 'assets/bootstrap5/bootstrap.bundle.min.js' %}"></script>
+<script src="{% static 'assets/js/popper.min.js' %}"></script>
+<script src="{% static 'assets/js/bootstrap.min.js' %}"></script>
+
+<!-- Slick JS -->
+<script src="{% static 'assets/js/slick.js' %}"></script>
 
 <!-- Custom JS -->
 <script src="{% static 'assets/js/script.js' %}"></script>
-
-<!-- Toastr JS -->
-<script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<script defer type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
 <script>
-    // Configure toastr
-    toastr.options = {
-        "closeButton": true,
-        "debug": false,
-        "newestOnTop": false,
-        "progressBar": true,
-        "positionClass": "toast-top-right",
-        "preventDuplicates": false,
-        "onclick": null,
-        "showDuration": "300",
-        "hideDuration": "1000",
-        "timeOut": "5000",
-        "extendedTimeOut": "1000",
-        "showEasing": "swing",
-        "hideEasing": "linear",
-        "showMethod": "fadeIn",
-        "hideMethod": "fadeOut"
-    };
+    // hook up csrf tokens to all htmx requests
+    document.body.addEventListener('htmx:configRequest', (event) => {
+        event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
+    });
 
-    // Global success message handler
-    {% if messages %}
-        {% for message in messages %}
-            toastr.{{ message.tags }}('{{ message }}');
-        {% endfor %}
-    {% endif %}
+    document.addEventListener('show-toast', event => {
+        const {level, message, title} = event.detail;
+        toastr[level](message, title);
+    });
 </script>
 
-{% block js %}{% endblock %}
+{% block scripts %}{% endblock %}
 
 </body>
+
 </html>

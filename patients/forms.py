@@ -6,38 +6,12 @@ from core.models import Review
 
 class PatientProfileForm(forms.ModelForm):
     """
-    Patient profile update form
+    Patent profile update form
     """
 
-    first_name = forms.CharField(
-        required=True,
-        widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'Enter first name'
-        })
-    )
-    last_name = forms.CharField(
-        required=True,
-        widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'Enter last name'
-        })
-    )
-    email = forms.EmailField(
-        required=True,
-        widget=forms.EmailInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'Enter email address'
-        })
-    )
-    avatar = forms.ImageField(
-        required=False,
-        widget=forms.FileInput(attrs={
-            'class': 'form-control',
-            'accept': 'image/*'
-        }),
-        help_text='Upload JPG, PNG, or GIF. Max size: 5MB'
-    )
+    first_name = forms.CharField(required=True)
+    last_name = forms.CharField(required=True)
+    avatar = forms.ImageField(required=False)
     dob = forms.DateField(
         required=False, widget=forms.DateInput(attrs={"type": "date"})
     )
@@ -91,20 +65,7 @@ class PatientProfileForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = ["first_name", "last_name", "email", "avatar"]
-    
-    def clean_avatar(self):
-        avatar = self.cleaned_data.get('avatar')
-        if avatar:
-            # Check file size (5MB max)
-            if avatar.size > 5 * 1024 * 1024:
-                raise forms.ValidationError("Image file too large. Maximum size is 5MB.")
-            
-            # Check file type
-            if not avatar.content_type.startswith('image/'):
-                raise forms.ValidationError("Please upload a valid image file.")
-        
-        return avatar
+        fields = ["first_name", "last_name", "avatar"]
 
     def clean_phone(self):
         phone = self.cleaned_data.get("phone")

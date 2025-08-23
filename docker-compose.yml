@@ -1,58 +1,20 @@
-version: '3.8'
+version: '3'
 
-networks:
-  laso_network:
-    driver: bridge
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    ports:
+      - "8005:8005"
+    volumes:
+      - .:/usr/src/app
+      - static_volume:/usr/src/app/staticfiles
+      - media_volume:/usr/src/app/media
+    env_file: .env
+    command: python manage.py runserver 0.0.0.0:8005
+    restart: unless-stopped
 
 volumes:
   static_volume:
   media_volume:
-
-services:
-  # Django Backend
-  django:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: laso_django
-    ports:
-      - "8005:8005"
-    volumes:
-      - .:/app
-      - static_volume:/app/staticfiles
-      - media_volume:/app/media
-    environment:
-      - DEBUG=True
-      - SECRET_KEY=g!y0otek@9t^b+b*7)&q2a5^=8_9&xcdii8@6h^_*wphl-(fu9
-      - ALLOWED_HOSTS=*,localhost,127.0.0.1,django
-      - CSRF_TRUSTED_ORIGINS=http://localhost:8005,http://127.0.0.1:8005,http://django:8005,http://localhost:3000,http://127.0.0.1:3000
-      - CSRF_COOKIE_SECURE=False
-      - SESSION_COOKIE_SECURE=False
-    networks:
-      - laso_network
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8005/api/health/', timeout=5)"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 20s
-
-  # React Frontend
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-      args:
-        VITE_API_BASE: http://localhost:8005
-    container_name: laso_react
-    ports:
-      - "3000:3000"
-    environment:
-      - VITE_API_BASE=http://localhost:8005
-    depends_on:
-      django:
-        condition: service_healthy
-    networks:
-      - laso_network
-    restart: unless-stopped

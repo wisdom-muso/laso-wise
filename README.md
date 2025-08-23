@@ -1,195 +1,107 @@
-# Django + React Medical System
+# Laso Digital Health Platform
 
-A containerized medical system with Django backend and React frontend, configured for production deployment on VPS.
+A Django-based healthcare platform for managing doctors, patients, and appointments.
 
-## 🚀 Quick Start (Production VPS)
+## Features
 
-```bash
-# 1. Clone to your VPS
-git clone <your-repo> && cd <project>
+- Modern admin interface with Django Unfold
+- Secure CSRF protection
+- Docker-ready deployment
+- Responsive design
+- RESTful API
 
-# 2. Setup environment
-cp env.template .env
-nano .env  # Update SECRET_KEY, POSTGRES_PASSWORD, etc.
+## Development Setup
 
-# 3. Deploy to production
-./run.sh start prod
+### Using Docker (Recommended)
 
-# 4. Setup database (first time only)
-./run.sh migrate
-./run.sh superuser
-```
-
-**Your app will be live at: http://65.108.91.110**
-
-## 🌐 Production URLs
-
-- **Main Application:** http://65.108.91.110
-- **Django Admin:** http://65.108.91.110/admin  
-- **API Endpoints:** http://65.108.91.110/api
-
-## 📋 Commands
-
-| Command | Description |
-|---------|-------------|
-| `./run.sh start prod` | Deploy to production |
-| `./run.sh start dev` | Run development mode |
-| `./run.sh stop` | Stop all services |
-| `./run.sh logs [service]` | View logs |
-| `./run.sh status` | Check service status |
-| `./run.sh migrate` | Run database migrations |
-| `./run.sh superuser` | Create Django admin user |
-| `./run.sh shell [service]` | Access container shell |
-| `./run.sh backup` | Backup production database |
-| `./run.sh help` | Show all commands |
-
-## 🏗️ Production Architecture
-
-```
-Internet → Nginx (Port 80) → Django (Port 8005) + React (Port 3000)
-                            ↘ PostgreSQL Database
-```
-
-**Services:**
-- **Nginx**: Reverse proxy, static files, load balancing
-- **Django**: Backend API with PostgreSQL  
-- **React**: Frontend UI (built and served via nginx)
-- **PostgreSQL**: Production database
-
-## ⚙️ Configuration
-
-### Environment Setup
-
-1. **Copy template:**
+1. Clone the repository:
    ```bash
-   cp env.template .env
+   git clone https://github.com/davidlasomvp-group/lasoai.git
+   cd lasoai
    ```
 
-2. **Update key settings:**
+2. Create a `.env` file based on `.env.example`:
    ```bash
-   SECRET_KEY=your-new-secret-key
-   POSTGRES_PASSWORD=secure-password
-   ALLOWED_HOSTS=65.108.91.110,your-domain.com
+   cp .env.example .env
    ```
 
-3. **For HTTPS (optional):**
+3. Build and run the Docker containers:
    ```bash
-   CSRF_COOKIE_SECURE=True
-   SESSION_COOKIE_SECURE=True
-   CSRF_TRUSTED_ORIGINS=https://65.108.91.110
+   docker-compose up --build
    ```
 
-### Development vs Production
+4. Access the application at http://localhost:8005
 
-| Mode | Command | Database | Debug | URL |
-|------|---------|----------|-------|-----|
-| **Development** | `./run.sh start dev` | SQLite | Yes | http://localhost:8005 |
-| **Production** | `./run.sh start prod` | PostgreSQL | No | http://65.108.91.110 |
+### Manual Setup
 
-## 🔧 Management
-
-### Database Operations
-```bash
-# Run migrations
-./run.sh migrate
-
-# Create superuser
-./run.sh superuser
-
-# Backup database
-./run.sh backup
-
-# Database shell
-./run.sh shell db
-```
-
-### Service Management
-```bash
-# View all service status
-./run.sh status
-
-# View nginx logs
-./run.sh logs nginx
-
-# Restart production services
-./run.sh restart prod
-
-# Access Django shell
-./run.sh shell django
-```
-
-### Maintenance
-```bash
-# Clean up Docker resources
-./run.sh cleanup
-
-# Update and restart
-git pull && ./run.sh restart prod
-```
-
-## 🛠️ Development
-
-For local development:
-
-```bash
-# Start development environment
-./run.sh start dev
-
-# Access services
-# Django: http://localhost:8005
-# React: http://localhost:3000
-```
-
-## 📊 Monitoring
-
-- **Health Check**: http://65.108.91.110/health/
-- **Service Status**: `./run.sh status`
-- **Logs**: `./run.sh logs [service]`
-
-## 🔒 Security Features
-
-- Nginx reverse proxy with security headers
-- CSRF protection
-- Rate limiting on API endpoints
-- PostgreSQL with secure credentials
-- Docker container isolation
-
-## 📦 Requirements
-
-- **VPS**: 2GB+ RAM, 20GB+ storage
-- **Docker**: Latest version with `docker compose`
-- **Ports**: 80 (HTTP) open to internet
-
-## 🚨 Troubleshooting
-
-### Common Issues
-
-1. **Port 80 busy:**
+1. Clone the repository:
    ```bash
-   sudo lsof -i :80
-   sudo systemctl stop apache2  # if running
+   git clone https://github.com/davidlasomvp-group/lasoai.git
+   cd lasoai
    ```
 
-2. **Database connection issues:**
+2. Create a virtual environment and activate it:
    ```bash
-   ./run.sh logs db
-   ./run.sh shell db  # Check database
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
    ```
 
-3. **Nginx config issues:**
+3. Install dependencies:
    ```bash
-   ./run.sh logs nginx
+   pip install -r requirements.txt
    ```
 
-### Reset Everything
+4. Create a `.env` file based on `.env.example`:
+   ```bash
+   cp .env.example .env
+   ```
+
+5. Apply migrations:
+   ```bash
+   python manage.py migrate
+   ```
+
+6. Run the development server:
+   ```bash
+   python manage.py runserver 0.0.0.0:8005
+   ```
+
+7. Access the application at http://localhost:8005
+
+## Production Deployment
+
+For production deployment, use the Docker Compose production configuration:
+
 ```bash
-./run.sh cleanup
-rm .env
-cp env.template .env
-# Edit .env with new values
-./run.sh start prod
+docker-compose -f docker-compose.prod.yml up --build -d
 ```
 
----
+This will:
+1. Build the application with production settings
+2. Run the application on port 8005
+3. Set up Nginx as a reverse proxy
 
-**Production Ready:** ✅ Configured for http://65.108.91.110 deployment
+## Environment Variables
+
+Key environment variables:
+
+- `DEBUG`: Set to "False" in production
+- `SECRET_KEY`: Django secret key
+- `ALLOWED_HOSTS`: Comma-separated list of allowed hosts
+- `CSRF_TRUSTED_ORIGINS`: Comma-separated list of trusted origins for CSRF
+- `DJANGO_PORT`: Port for the Django application (default: 8005)
+
+## Admin Interface
+
+The admin interface has been enhanced with Django Unfold for a modern, user-friendly experience. Access it at `/admin/` with your superuser credentials.
+
+## Security Features
+
+- CSRF protection configured for secure form submissions
+- Secure cookie settings for production
+- Environment-based configuration
+- Proper error handling for CSRF failures
+
+## License
+
+[License information]

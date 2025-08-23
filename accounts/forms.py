@@ -8,16 +8,6 @@ from .models import User
 class DoctorRegistrationForm(UserCreationForm):
     def __init__(self, *args, **kwargs):
         super(DoctorRegistrationForm, self).__init__(*args, **kwargs)
-        # Keep username field but make it optional
-        if 'username' in self.fields:
-            self.fields['username'].required = False
-            self.fields['username'].help_text = "Optional. If left blank, a username will be generated for you."
-            self.fields['username'].widget.attrs.update(
-                {
-                    "placeholder": "Enter username (optional)",
-                }
-            )
-            
         self.fields["first_name"].label = "First name"
         self.fields["last_name"].label = "Last name"
         self.fields["password1"].label = "Password"
@@ -26,13 +16,11 @@ class DoctorRegistrationForm(UserCreationForm):
         self.fields["first_name"].widget.attrs.update(
             {
                 "placeholder": "Enter first name",
-                "required": True,
             }
         )
         self.fields["last_name"].widget.attrs.update(
             {
                 "placeholder": "Enter last name",
-                "required": True,
             }
         )
         self.fields["email"].widget.attrs.update(
@@ -56,7 +44,6 @@ class DoctorRegistrationForm(UserCreationForm):
         fields = [
             "first_name",
             "last_name",
-            "username",
             "email",
             "password1",
             "password2",
@@ -75,7 +62,8 @@ class DoctorRegistrationForm(UserCreationForm):
     def save(self, commit=True):
         user = super(UserCreationForm, self).save(commit=False)
         user.role = "doctor"
-        # Note: We don't save here as the view will handle username generation and saving
+        if commit:
+            user.save()
         return user
 
 

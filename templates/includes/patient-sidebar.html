@@ -1,84 +1,106 @@
-{% load static %}
-{% load i18n %}
+{% extends 'base.html' %}
 
-<div class="profile-sidebar">
-    <div class="widget-profile pro-widget-content">
-        <div class="profile-info-widget">
-            <a href="#" class="booking-doc-img">
-                {% if user.profile.profile_picture %}
-                    <img src="{{ user.profile.profile_picture.url }}" alt="User Image">
-                {% else %}
-                    <img src="{% static 'assets/img/user.png' %}" alt="User Image">
-                {% endif %}
-            </a>
-            <div class="profile-det-info">
-                <h3>{{ user.get_full_name|default:user.username }}</h3>
-                <div class="patient-details">
-                    <h5><i class="fas fa-birthday-cake"></i> {{ user.profile.date_of_birth|default:"Not set" }}</h5>
-                    <h5 class="mb-0"><i class="fas fa-map-marker-alt"></i> {{ user.profile.address|default:"Not set" }}</h5>
+{% block title %}Profile settings{% endblock %}
+
+{% load static %}
+
+{% block content %}
+
+    <!-- Breadcrumb -->
+    <div class="breadcrumb-bar">
+        <div class="container-fluid">
+            <div class="row align-items-center">
+                <div class="col-md-12 col-12">
+                    <nav aria-label="breadcrumb" class="page-breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Home</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">{% block page_name1 %}{% endblock %}</li>
+                        </ol>
+                    </nav>
+                    <h2 class="breadcrumb-title">{% block page_name2 %}{% endblock %}</h2>
                 </div>
             </div>
         </div>
     </div>
-    <div class="dashboard-widget">
-        <nav class="dashboard-menu">
-            <ul>
-                <li class="{% if active == 'dashboard' %}active{% endif %}">
-                    <a href="{% url 'patients:dashboard' %}">
-                        <i class="fas fa-columns"></i>
-                        <span>{% trans "Dashboard" %}</span>
-                    </a>
-                </li>
-                <li class="{% if active == 'vitals' %}active{% endif %}">
-                    <a href="{% url 'vitals:patient-dashboard' %}">
-                        <i class="fas fa-heartbeat"></i>
-                        <span>{% trans "Vitals" %}</span>
-                    </a>
-                </li>
+    <!-- /Breadcrumb -->
 
-                <li class="{% if active == 'bookings' %}active{% endif %}">
-                    <a href="{% url 'bookings:booking-list' %}">
-                        <i class="fas fa-calendar-check"></i>
-                        <span>{% trans "Appointments" %}</span>
-                    </a>
-                </li>
-                <li class="{% if active == 'prescriptions' %}active{% endif %}">
-                    <a href="{% url 'patients:prescriptions' %}">
-                        <i class="fas fa-prescription"></i>
-                        <span>{% trans "Prescriptions" %}</span>
-                    </a>
-                </li>
-                <li class="{% if active == 'medical_records' %}active{% endif %}">
-                    <a href="{% url 'patients:medical-records' %}">
-                        <i class="fas fa-file-medical"></i>
-                        <span>{% trans "Medical Records" %}</span>
-                    </a>
-                </li>
-                <li class="{% if active == 'ehr_records' %}active{% endif %}">
-                    <a href="{% url 'patients:ehr-records' %}">
-                        <i class="fas fa-folder-medical"></i>
-                        <span>{% trans "EHR Records" %}</span>
-                    </a>
-                </li>
-                <li class="{% if active == 'telemedicine' %}active{% endif %}">
-                    <a href="{% url 'patients:telemedicine' %}">
-                        <i class="fas fa-video"></i>
-                        <span>{% trans "Telemedicine" %}</span>
-                    </a>
-                </li>
-                <li class="{% if active == 'profile' %}active{% endif %}">
-                    <a href="{% url 'patients:profile-setting' %}">
-                        <i class="fas fa-user-cog"></i>
-                        <span>{% trans "Profile Settings" %}</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="{% url 'accounts:logout' %}">
-                        <i class="fas fa-sign-out-alt"></i>
-                        <span>{% trans "Logout" %}</span>
-                    </a>
-                </li>
-            </ul>
-        </nav>
+    <!-- Page Content -->
+    <div class="content">
+        <div class="container-fluid">
+            <div class="row">
+
+                <!-- Profile Sidebar -->
+                <div class="col-md-5 col-lg-4 col-xl-3 theiaStickySidebar">
+                    <div class="profile-sidebar">
+                        <div class="widget-profile pro-widget-content">
+                            <div class="profile-info-widget">
+                                <a href="#" class="booking-doc-img">
+                                    <img src="{{ user.profile.image }}" alt="User Image">
+                                </a>
+                                <div class="profile-det-info">
+                                    <h3>{{ user.get_full_name }}</h3>
+                                    <div class="patient-details">
+                                        {% if user.profile.dob %}
+                                            <h5><i class="fas fa-birthday-cake"></i> {{ user.profile.dob|date:"d M Y" }}</h5>
+                                        {% endif %}
+                                        {% if user.profile.city and user.profile.country %}
+                                            <h5 class="mb-0">
+                                                <i class="fas fa-map-marker-alt"></i> 
+                                                {{ user.profile.city }}, {{ user.profile.country }}
+                                            </h5>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dashboard-widget">
+                            <nav class="dashboard-menu">
+                                <ul>
+                                    <li class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                                        <a href="{% url 'patients:dashboard' %}">
+                                            <i class="fas fa-columns"></i>
+                                            <span>Dashboard</span>
+                                        </a>
+                                    </li>
+                                    <li class="{% if request.resolver_match.url_name == 'booking-list' %}active{% endif %}">
+                                        <a href="{% url 'bookings:booking-list' %}">
+                                            <i class="fas fa-calendar-alt"></i>
+                                            <span>Bookings</span>
+                                        </a>
+                                    </li>
+                                    <li class="{% if request.resolver_match.url_name == 'profile-setting' %}active{% endif %}">
+                                        <a href="{% url 'patients:profile-setting' %}">
+                                            <i class="fas fa-user-cog"></i>
+                                            <span>Profile Settings</span>
+                                        </a>
+                                    </li>
+                                    <li class="{% if request.resolver_match.url_name == 'change-password' %}active{% endif %}">
+                                        <a href="{% url 'patients:change-password' %}">
+                                            <i class="fas fa-lock"></i>
+                                            <span>Change Password</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="{% url 'accounts:logout' %}">
+                                            <i class="fas fa-sign-out-alt"></i>
+                                            <span>Logout</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+
+                    </div>
+                </div>
+                <!-- /Profile Sidebar -->
+
+                <div class="col-md-7 col-lg-8 col-xl-9">
+                    {% block main %}{% endblock %}
+                </div>
+            </div>
+        </div>
+
     </div>
-</div>
+    <!-- /Page Content -->
+
+{% endblock %}

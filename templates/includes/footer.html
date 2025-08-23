@@ -1,102 +1,122 @@
 {% load static %}
 
 <!-- Footer -->
-<footer class="footer py-5 mt-5">
-    <div class="container">
-        <!-- Footer Top -->
-        <div class="row g-4 mb-5">
-            <div class="col-lg-3 col-md-6">
-                <!-- Footer Widget -->
-                <div class="mb-4">
-                    <div class="mb-4">
-                        <img src="{% static 'assets/img/laso-logo.svg' %}" alt="Laso Digital Health" height="40">
+<footer class="footer">
+    <!-- Footer Top -->
+    <div class="footer-top">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-3 col-md-6">
+                    <!-- Footer Widget -->
+                    <div class="footer-widget footer-about">
+                        <div class="footer-logo">
+                            <img src="{% static 'assets/img/laso-logo.svg' %}" alt="Laso Digital Health">
+                        </div>
+                        <div class="footer-about-content">
+                            <p>Find and book appointments with the best doctors in Bangladesh. Quality healthcare made accessible and convenient.</p>
+                            <div class="social-icon">
+                                <ul>
+                                    <li>
+                                        <a href="https://facebook.com" target="_blank"><i class="fab fa-facebook-f"></i></a>
+                                    </li>
+                                    <li>
+                                        <a href="https://twitter.com" target="_blank"><i class="fab fa-twitter"></i></a>
+                                    </li>
+                                    <li>
+                                        <a href="https://linkedin.com" target="_blank"><i class="fab fa-linkedin-in"></i></a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
-                    <p class="text-white-50 mb-4">Find and book appointments with the best doctors in Bangladesh. Quality healthcare made accessible and convenient.</p>
-                    <div class="d-flex gap-3">
-                        <a href="https://facebook.com" target="_blank" class="text-white-50 fs-5 social-icon"><i class="fab fa-facebook-f"></i></a>
-                        <a href="https://twitter.com" target="_blank" class="text-white-50 fs-5 social-icon"><i class="fab fa-twitter"></i></a>
-                        <a href="https://linkedin.com" target="_blank" class="text-white-50 fs-5 social-icon"><i class="fab fa-linkedin-in"></i></a>
+                    <!-- /Footer Widget -->
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <!-- Footer Widget -->
+                    <div class="footer-widget footer-menu">
+                        <h2 class="footer-title">For Patients</h2>
+                        <ul>
+                            <li><a href="{% url 'doctors:list' %}"><i class="fas fa-angle-double-right"></i> Search for Doctors</a></li>
+                            <li><a href="{% url 'accounts:login' %}"><i class="fas fa-angle-double-right"></i> Login</a></li>
+                            <li><a href="{% url 'accounts:patient-register' %}"><i class="fas fa-angle-double-right"></i> Register</a></li>
+                            {% if user.is_authenticated and user.role == 'patient' %}
+                                <li><a href="{% url 'patients:dashboard' %}"><i class="fas fa-angle-double-right"></i> Patient Dashboard</a></li>
+                            {% endif %}
+                        </ul>
                     </div>
+                    <!-- /Footer Widget -->
                 </div>
-                <!-- /Footer Widget -->
-            </div>
 
-            <div class="col-lg-3 col-md-6">
-                <!-- Footer Widget -->
-                <div class="mb-4">
-                    <h4 class="text-white mb-4">For Patients</h4>
-                    <ul class="list-unstyled footer-links">
-                        <li class="mb-2"><a href="{% url 'doctors:list' %}" class="text-decoration-none text-white-50"><i class="fas fa-angle-right me-2"></i>Search for Doctors</a></li>
-                        <li class="mb-2"><a href="{% url 'accounts:login' %}" class="text-decoration-none text-white-50"><i class="fas fa-angle-right me-2"></i>Login</a></li>
-                        <li class="mb-2"><a href="{% url 'accounts:patient-register' %}" class="text-decoration-none text-white-50"><i class="fas fa-angle-right me-2"></i>Register</a></li>
-                        {% if user.is_authenticated and user.role == 'patient' %}
-                            <li class="mb-2"><a href="{% url 'patients:dashboard' %}" class="text-decoration-none text-white-50"><i class="fas fa-angle-right me-2"></i>Patient Dashboard</a></li>
-                        {% endif %}
-                    </ul>
+                <div class="col-lg-3 col-md-6">
+                    <!-- Footer Widget -->
+                    <div class="footer-widget footer-menu">
+                        <h2 class="footer-title">For Doctors</h2>
+                        <ul>
+                            {% if user.is_authenticated and user.role == 'doctor' %}
+                                <li><a href="{% url 'doctors:appointments' %}"><i class="fas fa-angle-double-right"></i> Appointments</a></li>
+                                <li><a href="{% url 'doctors:dashboard' %}"><i class="fas fa-angle-double-right"></i> Doctor Dashboard</a></li>
+                            {% else %}
+                                <li><a href="{% url 'accounts:login' %}"><i class="fas fa-angle-double-right"></i> Login</a></li>
+                                <li><a href="{% url 'accounts:doctor-register' %}"><i class="fas fa-angle-double-right"></i> Register</a></li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                    <!-- /Footer Widget -->
                 </div>
-                <!-- /Footer Widget -->
-            </div>
 
-            <div class="col-lg-3 col-md-6">
-                <!-- Footer Widget -->
-                <div class="mb-4">
-                    <h4 class="text-white mb-4">For Doctors</h4>
-                    <ul class="list-unstyled footer-links">
-                        {% if user.is_authenticated and user.role == 'doctor' %}
-                            <li class="mb-2"><a href="{% url 'doctors:appointments' %}" class="text-decoration-none text-white-50"><i class="fas fa-angle-right me-2"></i>Appointments</a></li>
-                            <li class="mb-2"><a href="{% url 'doctors:dashboard' %}" class="text-decoration-none text-white-50"><i class="fas fa-angle-right me-2"></i>Doctor Dashboard</a></li>
-                        {% else %}
-                            <li class="mb-2"><a href="{% url 'accounts:login' %}" class="text-decoration-none text-white-50"><i class="fas fa-angle-right me-2"></i>Login</a></li>
-                            <li class="mb-2"><a href="{% url 'accounts:doctor-register' %}" class="text-decoration-none text-white-50"><i class="fas fa-angle-right me-2"></i>Register</a></li>
-                        {% endif %}
-                    </ul>
-                </div>
-                <!-- /Footer Widget -->
-            </div>
-
-            <div class="col-lg-3 col-md-6">
-                <!-- Footer Widget -->
-                <div class="mb-4">
-                    <h4 class="text-white mb-4">Contact Us</h4>
-                    <ul class="list-unstyled footer-contact">
-                        <li class="d-flex mb-3 text-white-50">
-                            <i class="fas fa-map-marker-alt mt-1 me-3"></i>
-                            <span>House 1, Road 1, Block A, Banani, Dhaka-1213, Bangladesh</span>
-                        </li>
-                        <li class="d-flex mb-3 text-white-50">
-                            <i class="fas fa-phone-alt mt-1 me-3"></i>
-                            <span>+880 1700-000000</span>
-                        </li>
-                        <li class="d-flex mb-3 text-white-50">
-                            <i class="fas fa-envelope mt-1 me-3"></i>
-                            <span>info@lasodigitalhealth.com</span>
-                        </li>
-                    </ul>
-                </div>
-                <!-- /Footer Widget -->
-            </div>
-        </div>
-        <!-- /Footer Top -->
-
-        <!-- Footer Bottom -->
-        <div class="pt-4 border-top border-secondary">
-            <div class="row align-items-center">
-                <div class="col-md-6">
-                    <p class="text-white-50 mb-md-0">&copy; 2024 Laso Digital Health. All rights reserved.</p>
-                </div>
-                <div class="col-md-6">
-                    <ul class="list-inline mb-0 text-md-end">
-                        <li class="list-inline-item me-4">
-                            <a href="{% url 'core:terms' %}" class="text-decoration-none text-white-50">Terms and Conditions</a>
-                        </li>
-                        <li class="list-inline-item">
-                            <a href="{% url 'core:privacy' %}" class="text-decoration-none text-white-50">Privacy Policy</a>
-                        </li>
-                    </ul>
+                <div class="col-lg-3 col-md-6">
+                    <!-- Footer Widget -->
+                    <div class="footer-widget footer-contact">
+                        <h2 class="footer-title">Contact Us</h2>
+                        <div class="footer-contact-info">
+                            <div class="footer-address">
+                                <span><i class="fas fa-map-marker-alt"></i></span>
+                                <p>House 1, Road 1, Block A, Banani, Dhaka-1213, Bangladesh</p>
+                            </div>
+                            <p>
+                                <i class="fas fa-phone-alt"></i>
+                                +880 1700-000000
+                            </p>
+                            <p class="mb-0">
+                                <i class="fas fa-envelope"></i>
+                                info@lasodigitalhealth.com
+                            </p>
+                        </div>
+                    </div>
+                    <!-- /Footer Widget -->
                 </div>
             </div>
         </div>
-        <!-- /Footer Bottom -->
     </div>
+    <!-- /Footer Top -->
+
+    <!-- Footer Bottom -->
+    <div class="footer-bottom">
+        <div class="container-fluid">
+            <!-- Copyright -->
+            <div class="copyright">
+                <div class="row">
+                    <div class="col-md-6 col-lg-6">
+                        <div class="copyright-text">
+                            <p class="mb-0">&copy; 2024 Laso Digital Health. All rights reserved.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-6">
+                        <!-- Copyright Menu -->
+                        <div class="copyright-menu">
+                            <ul class="policy-menu">
+                                <li><a href="{% url 'core:terms' %}">Terms and Conditions</a></li>
+                                <li><a href="{% url 'core:privacy' %}">Privacy Policy</a></li>
+                            </ul>
+                        </div>
+                        <!-- /Copyright Menu -->
+                    </div>
+                </div>
+            </div>
+            <!-- /Copyright -->
+        </div>
+    </div>
+    <!-- /Footer Bottom -->
 </footer>
 <!-- /Footer -->

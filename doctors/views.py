@@ -3,7 +3,6 @@ from datetime import datetime
 
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
-from django.contrib import messages
 from django.http import (
     HttpRequest,
     HttpResponse,
@@ -111,28 +110,24 @@ def convert_to_24_hour_format(time_str):
 def schedule_timings(request: HttpRequest) -> HttpResponse:
     if request.method == "POST":
         data = request.POST
-        # Clear existing time ranges for the days being updated
         for i in range(7):
             if data.get(f"day_{i}", None):
-                day, created = days[i].objects.get_or_create(user=request.user)
-                day.time_range.clear()  # Remove all existing time ranges
-                
                 start_times = data.getlist(f"start_time_{i}", default=[])
                 end_times = data.getlist(f"end_time_{i}", default=[])
-                
                 for index in range(len(start_times)):
-                    if start_times[index] and end_times[index]:  # Only process if both times are provided
-                        try:
-                            start = convert_to_24_hour_format(start_times[index])
-                            end = convert_to_24_hour_format(end_times[index])
-                            time_range, time_created = TimeRange.objects.get_or_create(
-                                start=start, end=end
-                            )
-                            day.time_range.add(time_range)
-                        except Exception as e:
-                            messages.error(request, f"Error processing time: {e}")
-                            
-        messages.success(request, "Your appointment schedule has been updated successfully!")
+                    start = convert_to_24_hour_format(start_times[index])
+                    end = convert_to_24_hour_format(end_times[index])
+                    time_range, time_created = TimeRange.objects.get_or_create(
+                        start=start, end=end
+                    )
+                    day, created = days[i].objects.get_or_create(
+                        user=request.user
+                    )
+                    ranges = day.time_range
+                    if time_range.id not in list(
+                        ranges.values_list("id", flat=True)
+                    ):
+                        day.time_range.add(time_range)
 
         return HttpResponsePermanentRedirect(
             reverse_lazy("doctors:schedule-timings")
@@ -145,48 +140,9 @@ class DoctorProfileUpdateView(DoctorRequiredMixin, generic.UpdateView):
     model = User
     template_name = "doctors/profile-settings.html"
     form_class = DoctorProfileForm
-    success_url = reverse_lazy("doctors:profile-setting")
 
     def get_object(self, queryset=None):
         return self.request.user
-    
-    def form_valid(self, form):
-        user = form.save(commit=False)
-        profile = user.profile
-
-        # Handle profile image upload
-        if self.request.FILES.get("avatar"):
-            profile.image = self.request.FILES["avatar"]
-
-        # Update profile fields
-        profile_fields = [
-            "specialization",
-            "experience", 
-            "phone",
-            "about",
-            "price_per_consultation",
-        ]
-
-        for field in profile_fields:
-            value = form.cleaned_data.get(field) or self.request.POST.get(field)
-            if value is not None:
-                setattr(profile, field, value)
-
-        # Save both user and profile
-        user.save()
-        profile.save()
-
-        messages.success(self.request, "Profile updated successfully")
-        return redirect(self.success_url)
-
-    def form_invalid(self, form):
-        messages.error(self.request, "Please correct the errors below")
-        return super().form_invalid(form)
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        # Add any additional context needed for the template
-        return context
 
 
 class DoctorProfileView(DetailView):
