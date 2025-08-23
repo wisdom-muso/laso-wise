@@ -93,10 +93,11 @@
                                            class="upload" 
                                            name="avatar" 
                                            id="avatarInput"
-                                           accept="image/*">
+                                           accept="image/jpeg,image/png,image/gif,image/webp"
+                                           onchange="previewImage(this)">
                                 </div>
-                                <small class="form-text text-muted">Upload JPG, PNG, or GIF. Max size: 5MB</small>
-                                <button type="button" class="btn btn-outline-danger btn-sm mt-2" id="removePhoto" style="display: none;">
+                                <small class="form-text text-muted">Upload JPG, PNG, GIF, or WEBP. Max size: 5MB</small>
+                                <button type="button" class="btn btn-outline-danger btn-sm mt-2" id="removePhoto" style="display: none;" onclick="removeImage()">
                                     <i class="fas fa-trash"></i> Remove Photo
                                 </button>
                             </div>
