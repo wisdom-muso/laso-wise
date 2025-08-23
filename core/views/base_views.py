@@ -1,8 +1,10 @@
 from django.http import HttpResponse, HttpRequest, JsonResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views.generic import TemplateView
 from django.middleware.csrf import get_token
 from django.utils import timezone
+from django.contrib.auth.decorators import login_required
+from django.urls import reverse
 
 from accounts.models import User
 from core.constants import USER_ROLE_DOCTOR
@@ -26,17 +28,17 @@ class PrivacyView(TemplateView):
 
 
 class IndexView(TemplateView):
-    template_name = "core/index.html"
+    """Redirect to login page as the first page"""
     
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        doctors = (
-            User.objects.select_related("profile")
-            .filter(role=USER_ROLE_DOCTOR)
-            .filter(is_superuser=False)
-        )
-        context['doctors'] = doctors
-        return context
+    def get(self, request, *args, **kwargs):
+        # If user is authenticated, redirect to appropriate dashboard
+        if request.user.is_authenticated:
+            if request.user.is_staff or request.user.is_superuser:
+                return redirect('/admin/')
+            else:
+                return redirect('/dashboard/')
+        # If not authenticated, redirect to login
+        return redirect('accounts:login')
 
 
 def csrf_token_view(request):

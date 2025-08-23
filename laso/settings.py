@@ -296,13 +296,11 @@ TELEMEDICINE_CONFIG = {
     'MAX_CONSULTATION_DURATION': int(os.getenv('MAX_CONSULTATION_DURATION', '60')),  # minutes
 }
 
-# CORS settings for React frontend
+# CORS settings for API access
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",  # React dev server
-    "http://127.0.0.1:5173",
-    "http://localhost:3000",  # React production server
-    "http://127.0.0.1:3000",
-    "http://65.108.91.110:3000",  # Production React frontend
+    "http://localhost:8005",  # Django bootstrap UI
+    "http://127.0.0.1:8005",
+    "http://65.108.91.110:8005",  # Production Django backend
     "http://65.108.91.110",  # Production nginx
     "http://65.108.91.110:80",  # Production nginx explicit
 ]
