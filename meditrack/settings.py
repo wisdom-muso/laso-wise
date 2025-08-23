@@ -155,8 +155,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # Unfold Admin Theme Settings
 UNFOLD = {
-    "SITE_TITLE": "MediTracked",
-    "SITE_HEADER": "MediTracked",
+    "SITE_TITLE": "Laso Healthcare",
+    "SITE_HEADER": "Laso Healthcare",
     "SITE_URL": "/",
     "SITE_ICON": None,  # or a path to your logo
     "DASHBOARD_CALLBACK": None,

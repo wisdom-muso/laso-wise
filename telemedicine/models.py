@@ -1,5 +1,5 @@
 """
-Telemedicine Models for MediTracked
+Telemedicine Models for Laso Healthcare
 """
 from django.db import models
 from django.utils.translation import gettext_lazy as _

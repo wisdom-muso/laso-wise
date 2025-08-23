@@ -1,5 +1,5 @@
 """
-Mobile API Endpoints for MediTracked
+Mobile API Endpoints for Laso Healthcare
 REST API for mobile applications
 """
 from django.http import JsonResponse
@@ -156,7 +156,7 @@ def mobile_dashboard(request):
         else:
             # Diğer kullanıcı tipleri için genel dashboard
             dashboard_data = {
-                'message': 'Welcome to MediTracked',
+                'message': 'Welcome to Laso Healthcare',
                 'user_type': user.user_type
             }
         

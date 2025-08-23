@@ -30,7 +30,7 @@
   --bs-gray-800: #252F4A;
   --bs-gray-900: #071437;
   --bs-light: #F9F9F9;
-  --bs-primary: #1B84FF;
+  --bs-primary: #12bab8;
   --bs-secondary: #F1F1F4;
   --bs-success: #17C653;
   --bs-info: #7239EA;
@@ -45,7 +45,7 @@
   --bs-warning-rgb: 246, 192, 0;
   --bs-danger-rgb: 248, 40, 90;
   --bs-dark-rgb: 30, 33, 41;
-  --bs-primary-text-emphasis: #0b3566;
+  --bs-primary-text-emphasis: #0a5957;
   --bs-secondary-text-emphasis: #606062;
   --bs-success-text-emphasis: #094f21;
   --bs-info-text-emphasis: #2e175e;
@@ -53,7 +53,7 @@
   --bs-danger-text-emphasis: #631024;
   --bs-light-text-emphasis: #4B5675;
   --bs-dark-text-emphasis: #4B5675;
-  --bs-primary-bg-subtle: #d1e6ff;
+  --bs-primary-bg-subtle: #d4f5f5;
   --bs-secondary-bg-subtle: #fcfcfd;
   --bs-success-bg-subtle: #d1f4dd;
   --bs-info-bg-subtle: #e3d7fb;
@@ -61,7 +61,7 @@
   --bs-danger-bg-subtle: #fed4de;
   --bs-light-bg-subtle: #fcfcfc;
   --bs-dark-bg-subtle: #C4CADA;
-  --bs-primary-border-subtle: #a4ceff;
+  --bs-primary-border-subtle: #a9eceb;
   --bs-secondary-border-subtle: #f9f9fb;
   --bs-success-border-subtle: #a2e8ba;
   --bs-info-border-subtle: #c7b0f7;
@@ -142,7 +142,7 @@
   --bs-tertiary-color-rgb: 245, 245, 245;
   --bs-tertiary-bg: #162241;
   --bs-tertiary-bg-rgb: 22, 34, 65;
-  --bs-primary-text-emphasis: #76b5ff;
+  --bs-primary-text-emphasis: #4dd0ce;
   --bs-secondary-text-emphasis: #f7f7f8;
   --bs-success-text-emphasis: #74dd98;
   --bs-info-text-emphasis: #aa88f2;
@@ -150,7 +150,7 @@
   --bs-danger-text-emphasis: #fb7e9c;
   --bs-light-text-emphasis: #F9F9F9;
   --bs-dark-text-emphasis: #DBDFE9;
-  --bs-primary-bg-subtle: #051a33;
+  --bs-primary-bg-subtle: #0a302f;
   --bs-secondary-bg-subtle: #303031;
   --bs-success-bg-subtle: #052811;
   --bs-info-bg-subtle: #170b2f;
@@ -158,7 +158,7 @@
   --bs-danger-bg-subtle: #320812;
   --bs-light-bg-subtle: #252F4A;
   --bs-dark-bg-subtle: #131825;
-  --bs-primary-border-subtle: #104f99;
+  --bs-primary-border-subtle: #0e8a88;
   --bs-secondary-border-subtle: #919192;
   --bs-success-border-subtle: #0e7732;
   --bs-info-border-subtle: #44228c;
@@ -28525,14 +28525,14 @@ textarea.form-control-lg {
   --bs-gray-900: #071437;
   --bs-gray-900-rgb: 7, 20, 55;
   --bs-light: #F9F9F9;
-  --bs-primary: #1B84FF;
+  --bs-primary: #12bab8;
   --bs-secondary: #F1F1F4;
   --bs-success: #17C653;
   --bs-info: #7239EA;
   --bs-warning: #F6C000;
   --bs-danger: #F8285A;
   --bs-dark: #1E2129;
-  --bs-primary-active: #056EE9;
+  --bs-primary-active: #0e8a88;
   --bs-secondary-active: #C4CADA;
   --bs-light-active: #F1F1F4;
   --bs-success-active: #04B440;
@@ -28540,7 +28540,7 @@ textarea.form-control-lg {
   --bs-warning-active: #DEAD00;
   --bs-danger-active: #D81A48;
   --bs-dark-active: #111318;
-  --bs-primary-light: #E9F3FF;
+  --bs-primary-light: #e8f9f9;
   --bs-secondary-light: #F9F9F9;
   --bs-success-light: #DFFFEA;
   --bs-info-light: #F8F5FF;
@@ -28573,7 +28573,7 @@ textarea.form-control-lg {
   --bs-danger-rgb: 248, 40, 90;
   --bs-dark-rgb: 30, 33, 41;
   --bs-text-white: #ffffff;
-  --bs-text-primary: #1B84FF;
+  --bs-text-primary: #12bab8;
   --bs-text-secondary: #F1F1F4;
   --bs-text-light: #F9F9F9;
   --bs-text-success: #17C653;
@@ -28692,7 +28692,7 @@ textarea.form-control-lg {
   --bs-warning: #C59A00;
   --bs-danger: #E42855;
   --bs-dark: #F9F9F9;
-  --bs-primary-active: #107EFF;
+  --bs-primary-active: #16d4d2;
   --bs-secondary-active: #464852;
   --bs-light-active: #1F212A;
   --bs-success-active: #01BF73;
@@ -28700,7 +28700,7 @@ textarea.form-control-lg {
   --bs-warning-active: #D9AA00;
   --bs-danger-active: #FF3767;
   --bs-dark-active: #F9F9F9;
-  --bs-primary-light: #172331;
+  --bs-primary-light: #0a302f;
   --bs-secondary-light: #363843;
   --bs-success-light: #1F212A;
   --bs-info-light: #272134;
@@ -28733,7 +28733,7 @@ textarea.form-control-lg {
   --bs-danger-rgb: 228, 40, 85;
   --bs-dark-rgb: 249, 249, 249;
   --bs-text-white: #ffffff;
-  --bs-text-primary: #006AE6;
+  --bs-text-primary: #4dd0ce;
   --bs-text-secondary: #363843;
   --bs-text-light: #1B1C22;
   --bs-text-success: #00A261;
