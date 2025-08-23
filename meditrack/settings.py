@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import os
+from decouple import config, Csv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,12 +22,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-$87@n^(g6isfhz4rt7uxv-yx1khpu&c+t(n_svs7y7u9u)49r)'
+SECRET_KEY = config('SECRET_KEY', default='django-insecure-$87@n^(g6isfhz4rt7uxv-yx1khpu&c+t(n_svs7y7u9u)49r)')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,65.108.91.110,*', cast=Csv())
 
 
 # Application definition
@@ -118,9 +119,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
-LANGUAGE_CODE = 'tr'
+LANGUAGE_CODE = 'en'
 
-TIME_ZONE = 'Europe/Istanbul'
+TIME_ZONE = 'UTC'
 
 USE_I18N = True
 
@@ -303,3 +304,37 @@ LOGGING = {
         },
     },
 }
+
+# Production settings
+import dj_database_url
+
+if not DEBUG:
+    # Database for production
+    if config('DATABASE_URL', default=None):
+        DATABASES['default'] = dj_database_url.parse(config('DATABASE_URL'))
+    
+    # Static files for production
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+    
+    # Security settings for production
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    X_FRAME_OPTIONS = 'DENY'
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    
+    # Email settings
+    EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
+    EMAIL_HOST = config('EMAIL_HOST', default='')
+    EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
+    EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
+    EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
+    EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
+    
+    # CORS settings for production
+    CORS_ALLOW_ALL_ORIGINS = False
+    CORS_ALLOWED_ORIGINS = [
+        "http://65.108.91.110",
+        "https://65.108.91.110",  # If you add SSL later
+    ]
