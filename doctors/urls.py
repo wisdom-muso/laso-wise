@@ -19,6 +19,10 @@ from .views import (
     PrescriptionCreateView,
     PrescriptionDetailView,
 )
+from .telemedicine_soap_views import (
+    DoctorTelemedicineView,
+    DoctorSOAPNotesView,
+)
 from .api import (
     DoctorDashboardAPI,
     DoctorAppointmentActionAPI,
@@ -102,3 +106,6 @@ urlpatterns = [
         name="prescription-detail",
     ),
 ]
+    # Telemedicine and SOAP Notes
+    path("telemedicine/", DoctorTelemedicineView.as_view(), name="telemedicine"),
+    path("soap-notes/", DoctorSOAPNotesView.as_view(), name="soap-notes"),
