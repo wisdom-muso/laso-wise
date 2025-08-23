@@ -1,0 +1,111 @@
+version: '3.8'
+
+services:
+  # Django Application
+  web:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=True
+      - DATABASE_URL=postgresql://laso_user:laso_password@db:5432/laso_healthcare
+      - REDIS_URL=redis://redis:6379/0
+      - SECRET_KEY=${SECRET_KEY:-dev-secret-key-change-in-production}
+      - ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - .:/app
+      - static_volume:/app/static
+      - media_volume:/app/media
+    networks:
+      - laso_network
+    command: python manage.py runserver 0.0.0.0:8000
+
+  # PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=laso_healthcare
+      - POSTGRES_USER=laso_user
+      - POSTGRES_PASSWORD=laso_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - laso_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U laso_user -d laso_healthcare"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis for caching and Celery
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - laso_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Celery Worker
+  celery:
+    build: .
+    restart: unless-stopped
+    command: celery -A meditrack worker --loglevel=info
+    environment:
+      - DEBUG=True
+      - DATABASE_URL=postgresql://laso_user:laso_password@db:5432/laso_healthcare
+      - REDIS_URL=redis://redis:6379/0
+      - SECRET_KEY=${SECRET_KEY:-dev-secret-key-change-in-production}
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - .:/app
+      - static_volume:/app/static
+      - media_volume:/app/media
+    networks:
+      - laso_network
+
+  # Celery Beat (Scheduler)
+  celery-beat:
+    build: .
+    restart: unless-stopped
+    command: celery -A meditrack beat --loglevel=info
+    environment:
+      - DEBUG=True
+      - DATABASE_URL=postgresql://laso_user:laso_password@db:5432/laso_healthcare
+      - REDIS_URL=redis://redis:6379/0
+      - SECRET_KEY=${SECRET_KEY:-dev-secret-key-change-in-production}
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - .:/app
+      - static_volume:/app/static
+      - media_volume:/app/media
+    networks:
+      - laso_network
+
+volumes:
+  postgres_data:
+  redis_data:
+  static_volume:
+  media_volume:
+
+networks:
+  laso_network:
+    driver: bridge

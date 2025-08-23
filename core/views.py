@@ -8,6 +8,11 @@ from django.views.generic import CreateView, UpdateView, ListView, DetailView, D
 from django.utils.translation import gettext_lazy as _
 from django.db.models import Q
 from django.utils import timezone
+from django.http import JsonResponse
+from django.db import connection
+from django.core.cache import cache
+import redis
+import os
 
 from .forms import (
     LoginForm, PatientRegistrationForm, AppointmentForm, 
@@ -683,3 +688,45 @@ def ai_assistant(request):
     }
     
     return render(request, 'core/ai_assistant.html', context)
+
+def health_check(request):
+    """
+    Health check endpoint for Docker containers
+    """
+    health_status = {
+        'status': 'healthy',
+        'timestamp': timezone.now().isoformat(),
+        'services': {}
+    }
+    
+    # Check database connection
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1")
+        health_status['services']['database'] = 'healthy'
+    except Exception as e:
+        health_status['services']['database'] = f'unhealthy: {str(e)}'
+        health_status['status'] = 'unhealthy'
+    
+    # Check Redis connection
+    try:
+        redis_url = os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
+        r = redis.from_url(redis_url)
+        r.ping()
+        health_status['services']['redis'] = 'healthy'
+    except Exception as e:
+        health_status['services']['redis'] = f'unhealthy: {str(e)}'
+        health_status['status'] = 'unhealthy'
+    
+    # Check static files
+    try:
+        from django.conf import settings
+        if settings.STATIC_ROOT and os.path.exists(settings.STATIC_ROOT):
+            health_status['services']['static_files'] = 'healthy'
+        else:
+            health_status['services']['static_files'] = 'warning: static files not collected'
+    except Exception as e:
+        health_status['services']['static_files'] = f'unhealthy: {str(e)}'
+    
+    status_code = 200 if health_status['status'] == 'healthy' else 503
+    return JsonResponse(health_status, status=status_code)
