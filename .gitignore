@@ -105,3 +105,16 @@ docker-compose.override.yml
 *.pot
 *.pyc
 local_settings.py
+
+# Docker
+.env
+logs/
+backups/
+docker/nginx/ssl/
+.docker/
+
+# Container volumes
+postgres_data/
+redis_data/
+staticfiles/
+media/
