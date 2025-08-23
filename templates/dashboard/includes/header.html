@@ -38,13 +38,13 @@
         <li class="nav-item dropdown has-arrow">
             <a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown">
                 <span class="user-img">
-                    <img class="rounded-circle" src="{{ user.profile.image }}" width="31" alt="Admin">
+                    <img class="rounded-circle" src="{{ user.profile.avatar }}" width="31" alt="Admin">
                 </span>
             </a>
             <div class="dropdown-menu">
                 <div class="user-header">
                     <div class="avatar avatar-sm">
-                        <img src="{{ user.profile.image }}" alt="User Image" class="avatar-img rounded-circle">
+                        <img src="{{ user.profile.avatar }}" alt="User Image" class="avatar-img rounded-circle">
                     </div>
                     <div class="user-text">
                         <h6>{{ user.get_full_name }}</h6>

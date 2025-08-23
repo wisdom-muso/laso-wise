@@ -26,7 +26,23 @@ class PrivacyView(TemplateView):
 
 
 class IndexView(TemplateView):
-    template_name = "core/index.html"
+    template_name = "home.html"
+    
+    def dispatch(self, request, *args, **kwargs):
+        # If user is authenticated, redirect to appropriate dashboard
+        if request.user.is_authenticated:
+            if request.user.role == 'patient':
+                from django.shortcuts import redirect
+                return redirect('patients:dashboard')
+            elif request.user.role == 'doctor':
+                from django.shortcuts import redirect
+                return redirect('doctors:dashboard')
+            elif request.user.is_staff or request.user.is_superuser:
+                from django.shortcuts import redirect
+                return redirect('admin-dashboard')
+        
+        # If not authenticated, show the public landing page
+        return super().dispatch(request, *args, **kwargs)
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

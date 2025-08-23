@@ -80,8 +80,8 @@
                     <div class="form-group">
                         <div class="change-avatar modern-card">
                             <div class="profile-img">
-                                {% if user.profile.image %}
-                                    <img src="{{ user.profile.image.url }}" alt="Profile Image" id="profilePreview">
+                                {% if user.profile.avatar %}
+                                    <img src="{{ user.profile.avatar.url }}" alt="Profile Image" id="profilePreview">
                                 {% else %}
                                     <img src="{% static 'assets/img/user.png' %}" alt="Default Profile" id="profilePreview">
                                 {% endif %}
