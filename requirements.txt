@@ -56,3 +56,8 @@ python-magic==0.4.27
 # Security
 cryptography==41.0.8
 pyjwt==2.8.0
+
+# Production deployment
+gunicorn==21.2.0
+dj-database-url==2.1.0
+python-decouple==3.8
