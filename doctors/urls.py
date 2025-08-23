@@ -18,6 +18,8 @@ from .views import (
     DoctorChangePasswordView,
     PrescriptionCreateView,
     PrescriptionDetailView,
+    SoapNotesView,
+    SoapNoteCreateView,
 )
 from .api import (
     DoctorDashboardAPI,
@@ -100,5 +102,16 @@ urlpatterns = [
         "prescription/<int:pk>/",
         PrescriptionDetailView.as_view(),
         name="prescription-detail",
+    ),
+    # SOAP Notes URLs
+    path(
+        "soap-notes/",
+        SoapNotesView.as_view(),
+        name="soap-notes",
+    ),
+    path(
+        "soap-notes/create/",
+        SoapNoteCreateView.as_view(),
+        name="create-soap-note",
     ),
 ]

@@ -12,7 +12,7 @@ export CSRF_TRUSTED_ORIGINS=http://localhost:8005,http://127.0.0.1:8005,http://l
 
 # Check if we can run with minimal dependencies
 echo "Installing minimal dependencies..."
-python3 -m pip install django python-dotenv dj-database-url --break-system-packages --quiet 2>/dev/null || echo "Dependencies already installed"
+python3 -m pip install django python-dotenv dj-database-url djangorestframework channels corsheaders --break-system-packages --quiet 2>/dev/null || echo "Dependencies already installed"
 
 # Run migrations (if needed)
 echo "Running migrations..."
@@ -39,6 +39,16 @@ echo ""
 echo "Default login credentials:"
 echo "Username: admin"
 echo "Password: admin123"
+echo ""
+echo "Features available:"
+echo "- Patient Management"
+echo "- Doctor Management" 
+echo "- Appointment Booking"
+echo "- SOAP Notes"
+echo "- EHR Records"
+echo "- Vitals Monitoring"
+echo "- Telemedicine"
+echo "- Prescription Management"
 echo ""
 
 python3 manage.py runserver 0.0.0.0:8005

@@ -268,22 +268,38 @@ class MedicalRecordsView(PatientRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         user = self.request.user
         
-        # Get progress notes
+        # Get or create EHR record
+        try:
+            from core.models import EHRRecord, SoapNote
+            ehr_record, created = EHRRecord.objects.get_or_create(patient=user)
+            context["ehr_record"] = ehr_record
+        except:
+            context["ehr_record"] = None
+        
+        # Get progress notes (which are like SOAP notes)
         context["progress_notes"] = ProgressNote.objects.filter(
             patient=user, is_private=False
         ).select_related("doctor", "doctor__profile").order_by("-created_at")
+        
+        # Get SOAP notes
+        try:
+            context["soap_notes"] = SoapNote.objects.filter(
+                patient=user
+            ).select_related("created_by", "appointment").order_by("-created_at")
+        except:
+            context["soap_notes"] = []
         
         # Get prescriptions
         context["prescriptions"] = Prescription.objects.filter(
             patient=user
         ).select_related("doctor", "doctor__profile").order_by("-created_at")
         
-        # Get vitals
+        # Get recent vitals
         try:
-            context["vitals"] = VitalRecord.objects.filter(
+            context["recent_vitals"] = VitalRecord.objects.filter(
                 patient=user
-            ).order_by("-recorded_at")
+            ).select_related("category").order_by("-recorded_at")[:5]
         except:
-            context["vitals"] = []
+            context["recent_vitals"] = []
             
         return context

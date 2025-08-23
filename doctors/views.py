@@ -9,6 +9,7 @@ from django.http import (
     HttpResponse,
     Http404,
     HttpResponsePermanentRedirect,
+    JsonResponse,
 )
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
@@ -44,6 +45,7 @@ from mixins.custom_mixins import DoctorRequiredMixin
 from patients.forms import ChangePasswordForm
 from utils.htmx import render_toast_message_for_api
 from accounts.models import User
+from core.models import SoapNote
 
 days = {
     0: Sunday,
@@ -714,3 +716,92 @@ class PrescriptionDetailView(DoctorRequiredMixin, DetailView):
             "patient__profile",
             "booking",
         )
+
+
+class SoapNotesView(DoctorRequiredMixin, TemplateView):
+    template_name = "doctors/soap-notes.html"
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Get doctor's patients
+        doctor_appointments = Booking.objects.filter(
+            doctor=self.request.user
+        ).values_list('patient', flat=True).distinct()
+        
+        context["patients"] = User.objects.filter(
+            id__in=doctor_appointments,
+            role='patient'
+        ).order_by('first_name', 'last_name')
+        
+        # Get doctor's SOAP notes
+        context["soap_notes"] = SoapNote.objects.filter(
+            created_by=self.request.user
+        ).select_related('patient', 'appointment').order_by('-created_at')
+        
+        # Get recent appointments for the dropdown
+        context["recent_appointments"] = Booking.objects.filter(
+            doctor=self.request.user,
+            status__in=['confirmed', 'completed']
+        ).select_related('patient').order_by('-appointment_date')[:10]
+        
+        return context
+
+
+class SoapNoteCreateView(DoctorRequiredMixin, View):
+    def post(self, request):
+        try:
+            data = request.POST
+            
+            # Validate required fields
+            required_fields = ['patient', 'subjective', 'objective', 'assessment', 'plan']
+            for field in required_fields:
+                if not data.get(field):
+                    return JsonResponse({
+                        'success': False, 
+                        'message': f'{field.title()} is required'
+                    })
+            
+            # Get patient and appointment
+            patient = User.objects.get(id=data['patient'], role='patient')
+            appointment = None
+            if data.get('appointment'):
+                appointment = Booking.objects.get(
+                    id=data['appointment'], 
+                    doctor=request.user,
+                    patient=patient
+                )
+            
+            # Create SOAP note
+            soap_note = SoapNote.objects.create(
+                patient=patient,
+                appointment=appointment,
+                created_by=request.user,
+                subjective=data['subjective'],
+                objective=data['objective'],
+                assessment=data['assessment'],
+                plan=data['plan'],
+                is_draft=data.get('is_draft') == 'on'
+            )
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'SOAP note created successfully',
+                'soap_note_id': soap_note.id
+            })
+            
+        except User.DoesNotExist:
+            return JsonResponse({
+                'success': False,
+                'message': 'Patient not found'
+            })
+        except Booking.DoesNotExist:
+            return JsonResponse({
+                'success': False,
+                'message': 'Appointment not found'
+            })
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'message': f'Error creating SOAP note: {str(e)}'
+            })
