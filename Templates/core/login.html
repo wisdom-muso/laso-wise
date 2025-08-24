@@ -20,194 +20,340 @@
     <link href="{% static 'assets/css/style.bundle.css' %}" rel="stylesheet" type="text/css" />
     
     <style>
-        .login-bg {
-            background: linear-gradient(135deg, #20b2aa 0%, #008b8b 100%);
+        /* Teal Color Palette */
+        :root {
+            --teal-50: #f0fdfa;
+            --teal-100: #ccfbf1;
+            --teal-200: #99f6e4;
+            --teal-300: #5eead4;
+            --teal-400: #2dd4bf;
+            --teal-500: #14b8a6;
+            --teal-600: #0d9488;
+            --teal-700: #0f766e;
+            --teal-800: #115e59;
+            --teal-900: #134e4a;
         }
-        
-        .form-control:focus {
-            box-shadow: 0 0 0 0.25rem rgba(32, 178, 170, 0.25);
-            border-color: #20b2aa;
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--teal-400) 0%, var(--teal-600) 100%);
+            min-height: 100vh;
         }
-        
-        .btn-primary {
-            background-color: #20b2aa;
-            border-color: #20b2aa;
+
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
         }
-        
-        .btn-primary:hover {
-            background-color: #008b8b;
-            border-color: #008b8b;
+
+        .login-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+            max-width: 400px;
+            width: 100%;
+            padding: 0;
         }
-        
-        .text-primary {
-            color: #20b2aa !important;
+
+        .login-header {
+            background: linear-gradient(135deg, var(--teal-500) 0%, var(--teal-600) 100%);
+            padding: 40px 30px 30px;
+            text-align: center;
+            color: white;
         }
-        
-        .text-hover-primary:hover {
-            color: #008b8b !important;
-        }
-        
-        .feature-item {
-            transition: transform 0.3s ease;
-        }
-        
-        .feature-item:hover {
-            transform: translateY(-5px);
-        }
-        
+
         .login-logo {
-            max-height: 70px;
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .login-logo img {
+            width: 50px;
+            height: 50px;
+        }
+
+        .login-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0 0 8px;
+            color: white;
+        }
+
+        .login-subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+            margin: 0;
+            color: white;
+        }
+
+        .login-form {
+            padding: 40px 30px 30px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .form-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.2s ease;
+            background: #f9fafb;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--teal-500);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1);
+        }
+
+        .btn-signin {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--teal-500) 0%, var(--teal-600) 100%);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
             margin-bottom: 20px;
+        }
+
+        .btn-signin:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 25px rgba(20, 184, 166, 0.3);
+        }
+
+        .btn-signin:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .form-links {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .form-links a {
+            color: var(--teal-600);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            transition: color 0.2s ease;
+        }
+
+        .form-links a:hover {
+            color: var(--teal-700);
+        }
+
+        .divider {
+            margin: 20px 0;
+            text-align: center;
+            color: #9ca3af;
+            font-size: 14px;
+        }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .alert-danger {
+            background-color: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
+        }
+
+        .alert-success {
+            background-color: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #16a34a;
+        }
+
+        .loading-spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid transparent;
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-left: 8px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .user-role-select {
+            background: var(--teal-50);
+            border: 2px solid var(--teal-200);
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .user-role-select label {
+            color: var(--teal-700);
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .user-role-select select {
+            background: white;
+            border: 1px solid var(--teal-300);
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-top: 5px;
+            width: 100%;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 480px) {
+            .login-card {
+                margin: 10px;
+                border-radius: 16px;
+            }
+            
+            .login-header {
+                padding: 30px 20px 20px;
+            }
+            
+            .login-form {
+                padding: 30px 20px 20px;
+            }
+            
+            .login-title {
+                font-size: 20px;
+            }
         }
     </style>
 </head>
-<body id="kt_body" class="app-blank app-blank">
-    <div class="d-flex flex-column flex-root" id="kt_app_root">
-        <div class="d-flex flex-column flex-lg-row flex-column-fluid">
-            
-            <!-- Solda Giriş Formu -->
-            <div class="d-flex flex-column flex-lg-row-fluid w-lg-50 p-10 order-2 order-lg-1">
-                <div class="d-flex flex-center flex-column flex-lg-row-fluid">
-                    <div class="w-lg-500px p-10">
-                        
-                        <!-- Form Başlığı -->
-                        <div class="text-center mb-11">
-
-                            <img src="https://cdn-icons-png.flaticon.com/512/4497/4497909.png" alt="Laso Healthcare Logo" class="login-logo">
-                            <h1 class="text-gray-900 fw-bolder mb-3">Laso Healthcare</h1>
-                            <div class="text-gray-500 fw-semibold fs-6">Clinical Patient Tracking and Appointment System</div>
-
-
-                        </div>
-                        
-                        <!-- Flash Messages -->
-                        {% if messages %}
-                        <div class="messages">
-                            {% for message in messages %}
-                            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">
-                                {{ message }}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                            </div>
-                            {% endfor %}
-                        </div>
-                        {% endif %}
-                        
-                        <!-- Error Messages -->
-                        {% if form.errors %}
-                        <div class="alert alert-danger">
-                            <div class="d-flex flex-column">
-                                <h4 class="mb-1 text-danger">Login Failed</h4>
-                                <span>Please check your username and password.</span>
-                            </div>
-                        </div>
-                        {% endif %}
-                        
-                        <!-- Giriş Formu -->
-                        <form class="form w-100" method="post">
-                            {% csrf_token %}
-                            
-                            <!-- Kullanıcı Adı -->
-                            <div class="fv-row mb-8">
-                                <label class="form-label fs-6 fw-bolder text-gray-900">{{ form.username.label }}</label>
-                                {{ form.username }}
-                            </div>
-                            
-                            <!-- Şifre -->
-                            <div class="fv-row mb-8">
-                                <label class="form-label fw-bolder text-gray-900 fs-6">{{ form.password.label }}</label>
-                                {{ form.password }}
-                            </div>
-                            
-                                                    <!-- Login Button -->
-                        <div class="d-grid mb-10">
-                            <button type="submit" id="kt_sign_in_submit" class="btn btn-primary btn-lg">
-                                <span class="indicator-label">Sign In</span>
-                                <span class="indicator-progress" style="display: none;">Please wait...
-                                <span class="spinner-border spinner-border-sm align-middle ms-2"></span></span>
-                            </button>
-                        </div>
-                            
-                            <input type="hidden" name="next" value="{{ next }}">
-                        </form>
-                        
-                        <!-- Registration Link -->
-                        <div class="text-center mb-3">
-                            <span class="text-gray-500">Don't have an account? </span>
-                            <a href="{% url 'core:patient-register' %}" class="text-primary text-hover-primary fw-bold">Register as Patient</a>
-                        </div>
-                        
-                        <!-- Back to Home -->
-                        <div class="text-center">
-                            <a href="{% url 'home' %}" class="text-gray-500 text-hover-primary">Back to Home</a>
-                        </div>
-                    </div>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <!-- Header with Logo and Title -->
+            <div class="login-header">
+                <div class="login-logo">
+                    <svg width="50" height="50" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M50 10C30 10 15 25 15 45C15 55 20 65 30 70L50 90L70 70C80 65 85 55 85 45C85 25 70 10 50 10Z" fill="url(#gradient)"/>
+                        <circle cx="50" cy="40" r="8" fill="white"/>
+                        <defs>
+                            <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#14b8a6;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#0d9488;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
                 </div>
+                <h1 class="login-title">Welcome to LASO</h1>
+                <p class="login-subtitle">Your Health, In Your Hands</p>
             </div>
-            
-            <!-- Sağda Görsel ve Bilgi Alanı -->
-            <div class="d-flex flex-lg-row-fluid w-lg-50 login-bg order-1 order-lg-2">
-                <div class="d-flex flex-column flex-center py-7 py-lg-15 px-5 px-md-15 w-100">
-                    <div class="mb-10 mb-lg-15 text-center"></div>
-                    
-                    <div class="text-center text-white">
-                      
-                        <h1 class="fs-2qx fw-bold mb-5">Laso Healthcare System</h1>
 
-                        
-                        <div class="fs-6 mb-7">
-                            Modern and comprehensive solution that brings your healthcare center to the digital world
-                        </div>
-                        
-                        <div class="d-flex flex-center flex-wrap">
-                            <div class="d-flex align-items-center mb-6 me-7 feature-item">
-                                <div class="symbol symbol-45px me-4">
-                                    <span class="symbol-label bg-white bg-opacity-20">
-                                        <i class="ki-outline ki-calendar-tick fs-2 text-white"></i>
-                                    </span>
-                                </div>
-                                <div class="d-flex flex-column align-items-start">
-                                    <span class="text-white fw-bold fs-6">Appointment Management</span>
-                                </div>
-                            </div>
-                            
-                            <div class="d-flex align-items-center mb-6 feature-item">
-                                <div class="symbol symbol-45px me-4">
-                                    <span class="symbol-label bg-white bg-opacity-20">
-                                        <i class="ki-outline ki-profile-user fs-2 text-white"></i>
-                                    </span>
-                                </div>
-                                <div class="d-flex flex-column align-items-start">
-                                    <span class="text-white fw-bold fs-6">Patient Tracking</span>
-                                </div>
-                            </div>
-                            
-                            <div class="d-flex align-items-center mb-6 me-7 feature-item">
-                                <div class="symbol symbol-45px me-4">
-                                    <span class="symbol-label bg-white bg-opacity-20">
-                                        <i class="ki-outline ki-tablet-ok fs-2 text-white"></i>
-                                    </span>
-                                </div>
-                                <div class="d-flex flex-column align-items-start">
-                                    <span class="text-white fw-bold fs-6">Prescription Management</span>
-                                </div>
-                            </div>
-                            
-                            <div class="d-flex align-items-center mb-6 feature-item">
-                                <div class="symbol symbol-45px me-4">
-                                    <span class="symbol-label bg-white bg-opacity-20">
-                                        <i class="ki-outline ki-chart-line fs-2 text-white"></i>
-                                    </span>
-                                </div>
-                                <div class="d-flex flex-column align-items-start">
-                                    <span class="text-white fw-bold fs-6">Analytics & Reports</span>
-                                </div>
-                            </div>
-                        </div>
+            <!-- Login Form -->
+            <div class="login-form">
+                <!-- Flash Messages -->
+                {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                    <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}success{% endif %}">
+                        {{ message }}
                     </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                
+                <!-- Error Messages -->
+                {% if form.errors %}
+                <div class="alert alert-danger">
+                    <strong>Login Failed</strong><br>
+                    Please check your username and password.
+                </div>
+                {% endif %}
+
+                <form method="post" id="loginForm">
+                    {% csrf_token %}
+                    
+                    <!-- Email/Username Field -->
+                    <div class="form-group">
+                        <label class="form-label" for="{{ form.username.id_for_label }}">Email address *</label>
+                        <input type="text" 
+                               id="{{ form.username.id_for_label }}" 
+                               name="{{ form.username.name }}" 
+                               class="form-control" 
+                               placeholder="pinnaculumdigital@gmail.com" 
+                               value="{{ form.username.value|default:'' }}"
+                               required>
+                    </div>
+                    
+                    <!-- Password Field -->
+                    <div class="form-group">
+                        <label class="form-label" for="{{ form.password.id_for_label }}">Password *</label>
+                        <input type="password" 
+                               id="{{ form.password.id_for_label }}" 
+                               name="{{ form.password.name }}" 
+                               class="form-control" 
+                               placeholder="••••••" 
+                               required>
+                    </div>
+
+                    <!-- Role Selection -->
+                    <div class="user-role-select">
+                        <label for="user-role">Select your role</label>
+                        <select id="user-role" class="form-control">
+                            <option value="patient">Client/Patient</option>
+                            <option value="doctor">Doctor</option>
+                            <option value="admin">Administrator</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Sign In Button -->
+                    <button type="submit" class="btn-signin" id="signInBtn">
+                        <span class="btn-text">Sign in</span>
+                        <span class="loading-spinner" style="display: none;"></span>
+                    </button>
+                    
+                    <input type="hidden" name="next" value="{{ next }}">
+                </form>
+
+                <!-- Footer Links -->
+                <div class="form-links">
+                    <p>Don't have an account? <a href="{% url 'core:patient-register' %}">Sign up here</a></p>
+                    <div class="divider">•</div>
+                    <p><a href="{% url 'admin:index' %}">Administrator Login</a></p>
                 </div>
             </div>
         </div>
-    </div>
+    </div></body>
     
     <!-- JavaScript Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -217,19 +363,30 @@
     <!-- Custom Form Handler -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const form = document.querySelector('form');
-            const submitButton = document.querySelector('#kt_sign_in_submit');
-            const labelSpan = submitButton.querySelector('.indicator-label');
-            const progressSpan = submitButton.querySelector('.indicator-progress');
+            const form = document.querySelector('#loginForm');
+            const submitButton = document.querySelector('#signInBtn');
+            const btnText = submitButton.querySelector('.btn-text');
+            const spinner = submitButton.querySelector('.loading-spinner');
             
             if (form && submitButton) {
                 form.addEventListener('submit', function() {
                     // Show loading state
-                    labelSpan.style.display = 'none';
-                    progressSpan.style.display = 'inline-block';
+                    btnText.textContent = 'Signing in...';
+                    spinner.style.display = 'inline-block';
                     submitButton.disabled = true;
                 });
             }
+
+            // Auto-dismiss alerts after 5 seconds
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function(alert) {
+                setTimeout(function() {
+                    alert.style.opacity = '0';
+                    setTimeout(function() {
+                        alert.remove();
+                    }, 300);
+                }, 5000);
+            });
         });
     </script>
 </body>
