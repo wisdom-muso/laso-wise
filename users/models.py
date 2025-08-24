@@ -4,13 +4,13 @@ from django.utils.translation import gettext_lazy as _
 
 class User(AbstractUser):
     """
-    Laso Healthcare sistemi için özel kullanıcı modeli.
-    Her kullanıcı hasta, doktor, resepsiyonist veya admin olabilir.
+    Custom user model for Laso Healthcare system.
+    Each user can be a patient, doctor, receptionist, or admin.
     """
     USER_TYPE_CHOICES = [
-        ('patient', _('Hasta')),
-        ('doctor', _('Doktor')),
-        ('receptionist', _('Resepsiyonist')),
+        ('patient', _('Patient')),
+        ('doctor', _('Doctor')),
+        ('receptionist', _('Receptionist')),
         ('admin', _('Admin')),
     ]
     
@@ -18,39 +18,39 @@ class User(AbstractUser):
         max_length=20,
         choices=USER_TYPE_CHOICES,
         default='patient',
-        verbose_name=_('Kullanıcı Tipi')
+        verbose_name=_('User Type')
     )
     
-    # Doktorlar için ek alanlar
+    # Additional fields for doctors
     specialization = models.CharField(
         max_length=100, 
         blank=True, 
         null=True,
-        verbose_name=_('Uzmanlık Alanı')
+        verbose_name=_('Specialization')
     )
     
-    # Hastalar için ek alanlar
+    # Additional fields for patients
     date_of_birth = models.DateField(
         blank=True, 
         null=True, 
-        verbose_name=_('Doğum Tarihi')
+        verbose_name=_('Date of Birth')
     )
     phone_number = models.CharField(
         max_length=20, 
         blank=True, 
         null=True,
-        verbose_name=_('Telefon Numarası')
+        verbose_name=_('Phone Number')
     )
     address = models.TextField(
         blank=True, 
         null=True,
-        verbose_name=_('Adres')
+        verbose_name=_('Address')
     )
     blood_type = models.CharField(
         max_length=10, 
         blank=True, 
         null=True,
-        verbose_name=_('Kan Grubu')
+        verbose_name=_('Blood Type')
     )
     
     def is_patient(self):
@@ -66,8 +66,8 @@ class User(AbstractUser):
         return self.user_type == 'admin'
     
     class Meta:
-        verbose_name = _('Kullanıcı')
-        verbose_name_plural = _('Kullanıcılar')
+        verbose_name = _('User')
+        verbose_name_plural = _('Users')
         
     def __str__(self):
         return f"{self.get_full_name()} ({self.get_user_type_display()})"
