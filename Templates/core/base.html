@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -27,7 +27,51 @@
     
     <!-- Custom CSS -->
     <style>
-        /* Sidebar düzenleme */
+        /* Teal Color Theme Override */
+        :root {
+            --bs-primary: #20b2aa;
+            --bs-primary-rgb: 32, 178, 170;
+        }
+        
+        .text-primary {
+            color: #20b2aa !important;
+        }
+        
+        .bg-primary {
+            background-color: #20b2aa !important;
+        }
+        
+        .btn-primary {
+            background-color: #20b2aa;
+            border-color: #20b2aa;
+        }
+        
+        .btn-primary:hover {
+            background-color: #008b8b;
+            border-color: #008b8b;
+        }
+        
+        .btn-primary:focus, .btn-primary.focus {
+            box-shadow: 0 0 0 0.2rem rgba(32, 178, 170, 0.5);
+        }
+        
+        .badge-primary {
+            background-color: #20b2aa;
+        }
+        
+        .bg-light-primary {
+            background-color: rgba(32, 178, 170, 0.1) !important;
+        }
+        
+        .text-hover-primary:hover {
+            color: #008b8b !important;
+        }
+        
+        .btn-active-color-primary:not(.btn-outline):not(.btn-dashed):not(.btn-light):not(.active) {
+            color: #20b2aa;
+        }
+        
+        /* Sidebar layout */
         #kt_app_sidebar {
             z-index: 100;
             position: fixed;
@@ -37,30 +81,30 @@
             width: 225px;
         }
         
-        /* Ana içerik padding ayarı */
+        /* Main content padding */
         #kt_app_main {
-            padding-left: 225px; /* Sidebar genişliği kadar padding */
-            padding-top: 60px; /* Header yüksekliği için */
+            padding-left: 225px;
+            padding-top: 60px;
         }
         
-        /* Header yüksekliğini azaltma */
+        /* Header height adjustment */
         .app-header {
             height: 60px !important;
             min-height: 60px !important;
         }
         
-        /* Header içindeki elemanların yüksekliğini azaltma */
+        /* Header elements height adjustment */
         .app-header .app-header-logo, 
         .app-header .app-navbar {
             height: 60px !important;
         }
         
-        /* Form elemanlarının yüksekliğini azaltma */
+        /* Form elements height adjustment */
         .search-input.form-control {
             height: 35px !important;
         }
         
-        /* Mobil görünüm için medya sorgusu */
+        /* Mobile view media query */
         @media (max-width: 991.98px) {
             #kt_app_main {
                 padding-left: 0;

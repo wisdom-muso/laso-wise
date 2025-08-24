@@ -13,48 +13,48 @@ User = get_user_model()
 
 class LoginForm(AuthenticationForm):
     """
-    Kullanıcı giriş formu, AuthenticationForm'u özelleştirir.
+    Custom user login form that extends AuthenticationForm.
     """
     username = forms.CharField(
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Kullanıcı Adı')}),
-        label=_('Kullanıcı Adı')
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Username')}),
+        label=_('Username')
     )
     password = forms.CharField(
-        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': _('Şifre')}),
-        label=_('Şifre')
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': _('Password')}),
+        label=_('Password')
     )
 
 class PatientRegistrationForm(UserCreationForm):
     """
-    Hasta kayıt formu, yeni bir hasta kullanıcı oluşturmak için kullanılır.
+    Patient registration form for creating new patient users.
     """
     first_name = forms.CharField(
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Ad')}),
-        label=_('Ad')
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('First Name')}),
+        label=_('First Name')
     )
     last_name = forms.CharField(
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Soyad')}),
-        label=_('Soyad')
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Last Name')}),
+        label=_('Last Name')
     )
     email = forms.EmailField(
-        widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': _('E-posta')}),
-        label=_('E-posta')
+        widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': _('Email')}),
+        label=_('Email')
     )
     date_of_birth = forms.DateField(
         widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
-        label=_('Doğum Tarihi')
+        label=_('Date of Birth')
     )
     phone_number = forms.CharField(
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Telefon Numarası')}),
-        label=_('Telefon Numarası')
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Phone Number')}),
+        label=_('Phone Number')
     )
     address = forms.CharField(
-        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': _('Adres')}),
-        label=_('Adres')
+        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': _('Address')}),
+        label=_('Address')
     )
     blood_type = forms.ChoiceField(
         choices=[
-            ('', _('Seçiniz')),
+            ('', _('Select')),
             ('A+', 'A+'),
             ('A-', 'A-'),
             ('B+', 'B+'),
@@ -65,7 +65,7 @@ class PatientRegistrationForm(UserCreationForm):
             ('0-', '0-'),
         ],
         widget=forms.Select(attrs={'class': 'form-control'}),
-        label=_('Kan Grubu')
+        label=_('Blood Type')
     )
     
     class Meta:
@@ -75,9 +75,9 @@ class PatientRegistrationForm(UserCreationForm):
         
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['username'].widget.attrs.update({'class': 'form-control', 'placeholder': _('Kullanıcı Adı')})
-        self.fields['password1'].widget.attrs.update({'class': 'form-control', 'placeholder': _('Şifre')})
-        self.fields['password2'].widget.attrs.update({'class': 'form-control', 'placeholder': _('Şifre (Tekrar)')})
+        self.fields['username'].widget.attrs.update({'class': 'form-control', 'placeholder': _('Username')})
+        self.fields['password1'].widget.attrs.update({'class': 'form-control', 'placeholder': _('Password')})
+        self.fields['password2'].widget.attrs.update({'class': 'form-control', 'placeholder': _('Confirm Password')})
         
     def save(self, commit=True):
         user = super().save(commit=False)

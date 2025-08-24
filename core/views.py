@@ -192,7 +192,7 @@ def dashboard(request):
 # Hasta Kayıt
 class PatientRegistrationView(CreateView):
     """
-    Yeni hasta kaydı oluşturma görünümü
+    Patient registration view for creating new patient accounts
     """
     template_name = 'core/patient_registration.html'
     form_class = PatientRegistrationForm
@@ -200,7 +200,7 @@ class PatientRegistrationView(CreateView):
     
     def form_valid(self, form):
         response = super().form_valid(form)
-        messages.success(self.request, _('Hasta kaydı başarıyla oluşturuldu.'))
+        messages.success(self.request, _('Patient registration completed successfully.'))
         return response
 
 # Randevu Görünümleri
