@@ -91,7 +91,7 @@ services:
       target: production
     container_name: laso_celery
     restart: unless-stopped
-    command: celery -A meditrack worker -l info
+    command: celery -A laso worker -l info
     environment:
       - DEBUG=${DEBUG:-False}
       - SECRET_KEY=${SECRET_KEY}
@@ -117,7 +117,7 @@ services:
       target: production
     container_name: laso_celery_beat
     restart: unless-stopped
-    command: celery -A meditrack beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    command: celery -A laso beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
     environment:
       - DEBUG=${DEBUG:-False}
       - SECRET_KEY=${SECRET_KEY}

@@ -102,7 +102,6 @@ if not USE_SQLITE and DATABASE_URL:
         'default': dj_database_url.parse(DATABASE_URL)
     }
 else:
-    # SQLite database configuration
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
