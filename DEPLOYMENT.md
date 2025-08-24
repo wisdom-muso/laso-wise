@@ -23,7 +23,7 @@ apt update && apt upgrade -y
 
 ### Install required packages
 ```bash
-apt install -y python3 python3-pip python3-venv nginx postgresql postgresql-contrib redis-server git curl
+apt install -y python3 python3-pip python3-venv nginx postgresql-17 postgresql-contrib-17 redis-server git curl
 ```
 
 ### Create a new user for the application
