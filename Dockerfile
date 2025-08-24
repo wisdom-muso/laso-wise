@@ -53,9 +53,10 @@ COPY --from=base /usr/local/bin /usr/local/bin
 # Copy application code
 COPY . .
 
-# Create necessary directories
+# Create necessary directories with proper permissions
 RUN mkdir -p /app/staticfiles /app/media /app/logs && \
-    chown -R app:app /app
+    chown -R app:app /app && \
+    chmod -R 755 /app/logs
 
 # Switch to app user
 USER app

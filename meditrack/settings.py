@@ -363,8 +363,18 @@ if not DEBUG:
     # Performance settings
     CONN_MAX_AGE = config('DB_CONN_MAX_AGE', default=300, cast=int)
     
-    # Logging to files in production
-    LOGGING['handlers']['file']['filename'] = '/app/logs/django.log'
+    # Logging to files in production (disable file logging for now)
+    # LOGGING['handlers']['file']['filename'] = '/app/logs/django.log'
+    # Use console logging for production to avoid permission issues
+    LOGGING['handlers'] = {
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+        },
+    }
+    LOGGING['loggers']['django']['handlers'] = ['console']
+    LOGGING['loggers']['telemedicine']['handlers'] = ['console']
+    LOGGING['loggers']['core.ai_features']['handlers'] = ['console']
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
