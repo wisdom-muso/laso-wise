@@ -323,30 +323,36 @@ if REDIS_URL:
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
-    'handlers': {
-        'file': {
-            'level': 'INFO',
-            'class': 'logging.FileHandler',
-            'filename': BASE_DIR / 'meditrack.log',
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
         },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
         'console': {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
         },
     },
     'loggers': {
         'django': {
-            'handlers': ['file', 'console'],
+            'handlers': ['console'],
             'level': 'INFO',
             'propagate': True,
         },
         'telemedicine': {
-            'handlers': ['file', 'console'],
+            'handlers': ['console'],
             'level': 'DEBUG',
             'propagate': True,
         },
         'core.ai_features': {
-            'handlers': ['file', 'console'],
+            'handlers': ['console'],
             'level': 'INFO',
             'propagate': True,
         },
@@ -364,7 +370,31 @@ if not DEBUG:
     CONN_MAX_AGE = config('DB_CONN_MAX_AGE', default=300, cast=int)
     
     # Logging to files in production
-    LOGGING['handlers']['file']['filename'] = '/app/logs/django.log'
+    import os
+    log_dir = '/app/logs'
+    try:
+        # Ensure log directory exists and is writable
+        os.makedirs(log_dir, exist_ok=True)
+        log_file = os.path.join(log_dir, 'django.log')
+        # Test if we can write to the directory
+        test_file = os.path.join(log_dir, 'test_write.tmp')
+        with open(test_file, 'w') as f:
+            f.write('test')
+        os.remove(test_file)
+        
+        # Add file handler if directory is writable
+        LOGGING['handlers']['file'] = {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': log_file,
+            'formatter': 'verbose',
+        }
+        # Add file handler to all loggers
+        for logger_name in LOGGING['loggers']:
+            LOGGING['loggers'][logger_name]['handlers'].append('file')
+    except (OSError, PermissionError):
+        # If we can't write to log directory, just use console logging
+        pass
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
