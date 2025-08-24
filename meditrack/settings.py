@@ -319,34 +319,32 @@ if REDIS_URL:
     CELERY_TIMEZONE = TIME_ZONE
     CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 
+LOG_TO_FILE = config('LOG_TO_FILE', default=False, cast=bool)
+
 # Logging Settings
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'handlers': {
-        'file': {
-            'level': 'INFO',
-            'class': 'logging.FileHandler',
-            'filename': BASE_DIR / 'meditrack.log',
-        },
         'console': {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
         },
+        # 'file' handler is added below only if enabled
     },
     'loggers': {
         'django': {
-            'handlers': ['file', 'console'],
+            'handlers': ['console'],
             'level': 'INFO',
             'propagate': True,
         },
         'telemedicine': {
-            'handlers': ['file', 'console'],
+            'handlers': ['console'],
             'level': 'DEBUG',
             'propagate': True,
         },
         'core.ai_features': {
-            'handlers': ['file', 'console'],
+            'handlers': ['console'],
             'level': 'INFO',
             'propagate': True,
         },
@@ -363,8 +361,16 @@ if not DEBUG:
     # Performance settings
     CONN_MAX_AGE = config('DB_CONN_MAX_AGE', default=300, cast=int)
     
-    # Logging to files in production
-    LOGGING['handlers']['file']['filename'] = '/app/logs/django.log'
+    # Optional: log to file in production only if explicitly enabled
+    if LOG_TO_FILE:
+        LOGGING['handlers']['file'] = {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': '/app/logs/django.log',
+        }
+        LOGGING['loggers']['django']['handlers'] = ['console', 'file']
+        LOGGING['loggers']['telemedicine']['handlers'] = ['console', 'file']
+        LOGGING['loggers']['core.ai_features']['handlers'] = ['console', 'file']
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
