@@ -52,9 +52,10 @@ services:
     environment:
       - DEBUG=${DEBUG:-False}
       - SECRET_KEY=${SECRET_KEY}
-      - DATABASE_URL=postgresql://${POSTGRES_USER:-laso_user}:${POSTGRES_PASSWORD:-laso_password}@db:5432/${POSTGRES_DB:-laso_healthcare}
-      - REDIS_URL=redis://:${REDIS_PASSWORD:-redis_password}@redis:6379/0
       - ALLOWED_HOSTS=${ALLOWED_HOSTS:-localhost,127.0.0.1}
+      - USE_SQLITE=${USE_SQLITE:-True}
+      - LOG_TO_FILE=${LOG_TO_FILE:-False}
+      - EMAIL_BACKEND=${EMAIL_BACKEND}
       - EMAIL_HOST=${EMAIL_HOST}
       - EMAIL_PORT=${EMAIL_PORT:-587}
       - EMAIL_HOST_USER=${EMAIL_HOST_USER}
@@ -94,7 +95,7 @@ services:
     environment:
       - DEBUG=${DEBUG:-False}
       - SECRET_KEY=${SECRET_KEY}
-      - DATABASE_URL=postgresql://${POSTGRES_USER:-laso_user}:${POSTGRES_PASSWORD:-laso_password}@db:5432/${POSTGRES_DB:-laso_healthcare}
+      - USE_SQLITE=${USE_SQLITE:-True}
       - REDIS_URL=redis://:${REDIS_PASSWORD:-redis_password}@redis:6379/0
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - HUGGINGFACE_API_KEY=${HUGGINGFACE_API_KEY}
@@ -120,7 +121,7 @@ services:
     environment:
       - DEBUG=${DEBUG:-False}
       - SECRET_KEY=${SECRET_KEY}
-      - DATABASE_URL=postgresql://${POSTGRES_USER:-laso_user}:${POSTGRES_PASSWORD:-laso_password}@db:5432/${POSTGRES_DB:-laso_healthcare}
+      - USE_SQLITE=${USE_SQLITE:-True}
       - REDIS_URL=redis://:${REDIS_PASSWORD:-redis_password}@redis:6379/0
     volumes:
       - logs_volume:/app/logs

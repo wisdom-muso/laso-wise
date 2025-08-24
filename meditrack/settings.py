@@ -89,17 +89,19 @@ WSGI_APPLICATION = 'meditrack.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+# Explicit toggle to force SQLite even if DATABASE_URL is present
+USE_SQLITE = config('USE_SQLITE', default=False, cast=bool)
+
 # Check if we have a DATABASE_URL environment variable (for Docker/production)
 DATABASE_URL = config('DATABASE_URL', default=None)
 
-if DATABASE_URL:
+if not USE_SQLITE and DATABASE_URL:
     # Production/Docker database configuration
     import dj_database_url
     DATABASES = {
         'default': dj_database_url.parse(DATABASE_URL)
     }
 else:
-    # Development database configuration (SQLite)
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
@@ -282,26 +284,33 @@ SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = 'DENY'
 
-# Cache Settings (Redis for production, local memory for development)
+# Cache Settings (Redis optional)
 REDIS_URL = config('REDIS_URL', default=None)
 
 if REDIS_URL:
-    # Production cache with Redis
-    CACHES = {
-        'default': {
-            'BACKEND': 'django_redis.cache.RedisCache',
-            'LOCATION': REDIS_URL,
-            'OPTIONS': {
-                'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+    try:
+        # Only configure django-redis if the package is installed
+        import django_redis  # noqa: F401
+        CACHES = {
+            'default': {
+                'BACKEND': 'django_redis.cache.RedisCache',
+                'LOCATION': REDIS_URL,
+                'OPTIONS': {
+                    'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+                }
             }
         }
-    }
-    
-    # Session engine for Redis
-    SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
-    SESSION_CACHE_ALIAS = 'default'
+        SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+        SESSION_CACHE_ALIAS = 'default'
+    except Exception:
+        # Fallback to local memory cache if django-redis isn't available
+        CACHES = {
+            'default': {
+                'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+                'LOCATION': 'unique-snowflake',
+            }
+        }
 else:
-    # Development cache
     CACHES = {
         'default': {
             'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
