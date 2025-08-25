@@ -66,11 +66,21 @@ class CustomLoginView(DjangoLoginView):
         """
         If the form is invalid, add error message and render the form again.
         """
+        # Debug logging
+        print(f"DEBUG: Login form invalid")
+        print(f"DEBUG: Form errors: {form.errors}")
+        print(f"DEBUG: Non-field errors: {form.non_field_errors()}")
+        print(f"DEBUG: POST data: {dict(self.request.POST)}")
+        
         # Add specific error messages for debugging
         error_messages = []
         for field, errors in form.errors.items():
             for error in errors:
                 error_messages.append(f"{field}: {error}")
+        
+        # Add non-field errors (like invalid login)
+        for error in form.non_field_errors():
+            error_messages.append(f"Authentication: {error}")
         
         if error_messages:
             messages.error(self.request, f"Login failed: {', '.join(error_messages)}")

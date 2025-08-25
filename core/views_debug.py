@@ -27,10 +27,17 @@ def debug_auth(request):
                     'is_active': user.is_active,
                     'is_staff': user.is_staff,
                     'is_superuser': user.is_superuser,
+                    'has_usable_password': user.has_usable_password(),
+                    'password_hash_starts_with': user.password[:20] if user.password else None,
                 }
+                
+                # Test password check directly
+                password_check = user.check_password(password)
+                
             except User.DoesNotExist:
                 user_exists = False
                 user_info = None
+                password_check = False
             
             # Test authentication
             auth_user = authenticate(request, username=username, password=password)
@@ -39,11 +46,20 @@ def debug_auth(request):
             return JsonResponse({
                 'user_exists': user_exists,
                 'user_info': user_info,
+                'password_check': password_check,
                 'auth_success': auth_success,
                 'total_users': User.objects.count(),
+                'debug_info': {
+                    'auth_user_id': auth_user.id if auth_user else None,
+                    'request_method': request.method,
+                }
             })
         except Exception as e:
-            return JsonResponse({'error': str(e)}, status=400)
+            import traceback
+            return JsonResponse({
+                'error': str(e),
+                'traceback': traceback.format_exc()
+            }, status=400)
     
     # GET request - show current user status
     return JsonResponse({
