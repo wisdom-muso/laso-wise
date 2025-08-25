@@ -8,6 +8,10 @@ from django.views.generic import CreateView, UpdateView, ListView, DetailView, D
 from django.utils.translation import gettext_lazy as _
 from django.db.models import Q
 from django.utils import timezone
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
+import json
 
 from .forms import (
     LoginForm, PatientRegistrationForm, AppointmentForm, 
@@ -676,10 +680,41 @@ def analytics_dashboard(request):
 @login_required
 def ai_assistant(request):
     """
-    AI Sağlık Asistanı görünümü
+    AI Health Assistant view
     """
     context = {
-        'title': _('AI Sağlık Asistanı')
+        'title': _('AI Health Assistant'),
+        'current_time': timezone.now()
     }
     
     return render(request, 'core/ai_assistant.html', context)
+
+@login_required
+@require_http_methods(["POST"])
+def ai_chat(request):
+    """
+    AI Chat endpoint for processing user messages
+    """
+    try:
+        message = request.POST.get('message', '').strip()
+        
+        if not message:
+            return JsonResponse({
+                'success': False,
+                'error': 'No message provided'
+            })
+        
+        # Simple AI response for now - this can be enhanced with actual AI integration
+        ai_response = f"Thank you for your message: '{message}'. I'm currently a prototype AI assistant. For real medical advice, please consult with your healthcare provider."
+        
+        return JsonResponse({
+            'success': True,
+            'response': ai_response,
+            'timestamp': timezone.now().isoformat()
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': 'An error occurred processing your request'
+        })
