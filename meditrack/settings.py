@@ -186,7 +186,9 @@ UNFOLD = {
     "SITE_URL": "/",
     "SITE_ICON": None,  # or a path to your logo
     "DASHBOARD_CALLBACK": None,
-    "STYLES": [],  # Using default styles
+    "STYLES": [
+        "css/admin_custom.css",  # Custom CSS for teal theme
+    ],
     "SCRIPTS": [],  # Using default scripts
     "SIDEBAR": {
         "show_search": True,
@@ -199,6 +201,21 @@ UNFOLD = {
         "default": "light",
         "toggle": True,
     },
+    "COLORS": {
+        "primary": {
+            "50": "#f0fdfa",
+            "100": "#ccfbf1", 
+            "200": "#99f6e4",
+            "300": "#5eead4",
+            "400": "#2dd4bf",
+            "500": "#14b8a6",  # Main teal color
+            "600": "#0d9488",
+            "700": "#0f766e", 
+            "800": "#115e59",
+            "900": "#134e4a",
+            "950": "#042f2e"
+        }
+    }
 }
 
 # REST Framework Settings

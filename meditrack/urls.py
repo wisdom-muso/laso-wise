@@ -22,6 +22,7 @@ from django.contrib.auth import views as auth_views
 from django.views.generic import RedirectView
 from core.forms import LoginForm
 from core.views import HomeView, dashboard
+from core.views_auth import CustomLoginView, HomeRedirectView
 from core.logout_view import logout_view
 from core.views_theme import toggle_theme, get_theme_preference
 from core.health_check import health_check, readiness_check, liveness_check
@@ -29,17 +30,15 @@ from core.health_check import health_check, readiness_check, liveness_check
 urlpatterns = [
     path('admin/', admin.site.urls),
     
-    # Ana sayfa
-    path('', HomeView.as_view(), name='home'),
+    # Ana sayfa - redirect to login if not authenticated, otherwise to dashboard
+    path('', HomeRedirectView.as_view(), name='home'),
+    path('landing/', HomeView.as_view(), name='landing'),
     
     # Dashboard
     path('dashboard/', dashboard, name='dashboard'),
     
     # Authentication
-    path('login/', auth_views.LoginView.as_view(
-        template_name='core/login.html',
-        authentication_form=LoginForm
-    ), name='login'),
+    path('login/', CustomLoginView.as_view(), name='login'),
     path('logout/', logout_view, name='logout'),
     
     # Tema ayarları
