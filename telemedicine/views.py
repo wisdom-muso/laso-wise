@@ -29,7 +29,7 @@ class TeleMedicineConsultationListView(LoginRequiredMixin, ListView):
     Telemedicine konsültasyon listesi
     """
     model = TeleMedicineConsultation
-    template_name = 'telemedicine/consultation_list.html'
+    template_name = 'telemedicine/session_list.html'
     context_object_name = 'consultations'
     paginate_by = 10
     

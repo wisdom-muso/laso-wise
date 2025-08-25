@@ -111,7 +111,7 @@
     <div class="dashboard-header">
         <div class="row align-items-center">
             <div class="col-md-8">
-                <h1 class="mb-2">{% translate "Hoş geldiniz" %}, {{ user.get_full_name|default:user.username }}!</h1>
+                <h1 class="mb-2">{% translate "Welcome" %}, {{ user.get_full_name|default:user.username }}!</h1>
                 <p class="mb-0">
                     {% if user.is_doctor %}
                         {% translate "Bugün" %} {{ current_date|date:"d F Y" }} - {% translate "Hasta bakım dashboard'unuz" %}
