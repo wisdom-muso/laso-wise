@@ -175,12 +175,12 @@
         }
 
         .registration-form-section {
-            padding: 60px 40px;
+            padding: 40px 40px;
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            max-height: 100vh;
-            overflow-y: auto;
+            justify-content: flex-start;
+            min-height: 100vh;
+            overflow-y: visible;
         }
 
         .form-title {
@@ -382,11 +382,13 @@
             }
 
             .registration-info {
-                padding: 40px 30px;
+                padding: 30px 20px;
+                min-height: auto;
             }
 
             .registration-form-section {
-                padding: 40px 30px;
+                padding: 30px 20px;
+                min-height: auto;
             }
 
             .form-row {
@@ -400,6 +402,18 @@
 
             .form-title {
                 font-size: 20px;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .registration-wrapper {
+                grid-template-columns: 1fr;
+                max-width: 600px;
+            }
+            
+            .registration-info {
+                min-height: auto;
+                padding: 40px 30px;
             }
         }
 

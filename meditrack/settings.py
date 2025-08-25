@@ -168,6 +168,9 @@ LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL = 'login'
 LOGIN_URL = 'login'
 
+# Admin login redirect fix
+ADMIN_REDIRECT_URL = '/admin/'
+
 # Email ayarları (geliştirme için console backend)
 EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
 
