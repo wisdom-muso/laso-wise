@@ -26,6 +26,7 @@ from core.views_auth import CustomLoginView, HomeRedirectView
 from core.logout_view import logout_view
 from core.views_theme import toggle_theme, get_theme_preference
 from core.health_check import health_check, readiness_check, liveness_check
+from core import views_debug
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -52,6 +53,12 @@ urlpatterns = [
     path('health/', health_check, name='health-check'),
     path('readiness/', readiness_check, name='readiness-check'),
     path('liveness/', liveness_check, name='liveness-check'),
+    
+    # Debug endpoints (remove in production)
+    path('debug/auth/', include([
+        path('', views_debug.debug_auth, name='debug-auth'),
+        path('user/', views_debug.debug_user, name='debug-user'),
+    ])),
     
     # Core application URLs
     path('core/', include('core.urls', namespace='core')),

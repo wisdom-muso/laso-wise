@@ -51,6 +51,10 @@ class CustomLoginView(DjangoLoginView):
         """
         Security check complete. Log the user in and redirect to success URL.
         """
+        # Debug logging
+        user = form.get_user()
+        print(f"DEBUG: Login successful for user: {user.username}, type: {user.user_type}")
+        
         response = super().form_valid(form)
         
         # Add success message
@@ -62,7 +66,17 @@ class CustomLoginView(DjangoLoginView):
         """
         If the form is invalid, add error message and render the form again.
         """
-        messages.error(self.request, _('Login failed. Please check your username and password.'))
+        # Add specific error messages for debugging
+        error_messages = []
+        for field, errors in form.errors.items():
+            for error in errors:
+                error_messages.append(f"{field}: {error}")
+        
+        if error_messages:
+            messages.error(self.request, f"Login failed: {', '.join(error_messages)}")
+        else:
+            messages.error(self.request, _('Login failed. Please check your username and password.'))
+        
         return super().form_invalid(form)
 
 
