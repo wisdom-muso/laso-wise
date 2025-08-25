@@ -1,0 +1,172 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Dashboard Test - LASO Healthcare{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card mb-5">
+                <div class="card-header">
+                    <h3 class="card-title">🧪 Dashboard Styling Test</h3>
+                </div>
+                <div class="card-body">
+                    <!-- Color Tests -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5>Primary Color Tests</h5>
+                            <p class="text-primary">This text should be teal (#14b8a6)</p>
+                            <button class="btn btn-primary">Primary Button (Teal)</button>
+                            <span class="badge badge-primary ms-2">Primary Badge</span>
+                            <div class="bg-primary text-white p-2 mt-2 rounded">Primary Background</div>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Interactive Elements</h5>
+                            <a href="#" class="text-hover-primary">Hover over this link</a><br>
+                            <button class="btn btn-sm btn-primary mt-2">Small Primary Button</button><br>
+                            <i class="ki-outline ki-user fs-2 text-primary mt-2"></i> <span>Teal Icon</span>
+                        </div>
+                    </div>
+
+                    <!-- CSS Loading Test -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5>CSS Loading Status</h5>
+                            <div class="d-flex align-items-center">
+                                <div class="border border-gray-300 border-dashed rounded min-w-125px py-3 px-4 me-3">
+                                    <div class="fw-bold">Bootstrap</div>
+                                    <div class="text-muted fs-6">External CSS</div>
+                                </div>
+                                <div class="border border-gray-300 border-dashed rounded min-w-125px py-3 px-4 me-3">
+                                    <div class="fw-bold">Theme CSS</div>
+                                    <div class="text-muted fs-6">Static Files</div>
+                                </div>
+                                <div class="border border-gray-300 border-dashed rounded min-w-125px py-3 px-4">
+                                    <div class="fw-bold">Inline CSS</div>
+                                    <div class="text-muted fs-6">Fallback</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sample Dashboard Elements -->
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="fw-bold m-0">Sample Data Table</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-row-dashed table-row-gray-300 align-middle">
+                                            <thead>
+                                                <tr class="fw-bold text-muted">
+                                                    <th>Name</th>
+                                                    <th>Type</th>
+                                                    <th>Status</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>
+                                                        <div class="d-flex align-items-center">
+                                                            <i class="ki-outline ki-user fs-3 text-primary me-2"></i>
+                                                            <span class="fw-bold">John Doe</span>
+                                                        </div>
+                                                    </td>
+                                                    <td>Patient</td>
+                                                    <td><span class="badge badge-light-primary">Active</span></td>
+                                                    <td>
+                                                        <button class="btn btn-sm btn-primary">View</button>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <div class="d-flex align-items-center">
+                                                            <i class="ki-outline ki-calendar fs-3 text-primary me-2"></i>
+                                                            <span class="fw-bold">Appointment</span>
+                                                        </div>
+                                                    </td>
+                                                    <td>Schedule</td>
+                                                    <td><span class="badge badge-primary">Upcoming</span></td>
+                                                    <td>
+                                                        <button class="btn btn-sm btn-primary">Edit</button>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="fw-bold m-0">Quick Stats</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="text-center py-4">
+                                        <i class="ki-outline ki-heart fs-4x text-primary mb-3"></i>
+                                        <div class="fw-bold fs-3 text-primary">42</div>
+                                        <div class="text-muted">Total Patients</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Diagnostic Info -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="bg-light-primary p-3 rounded">
+                                <h6 class="fw-bold mb-2">🔍 Diagnostic Information:</h6>
+                                <ul class="mb-0">
+                                    <li><strong>Language:</strong> English (Turkish text removed)</li>
+                                    <li><strong>Primary Color:</strong> Teal (#14b8a6) instead of blue</li>
+                                    <li><strong>CSS Framework:</strong> Bootstrap 5 + Custom Theme</li>
+                                    <li><strong>Icons:</strong> KTIcons + Font Awesome</li>
+                                    <li><strong>Layout:</strong> Responsive card-based design</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Client-side CSS loading test
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🧪 Dashboard Test Page Loaded');
+    
+    // Test if primary color is applied correctly
+    const primaryElements = document.querySelectorAll('.text-primary');
+    if (primaryElements.length > 0) {
+        const computedStyle = window.getComputedStyle(primaryElements[0]);
+        const color = computedStyle.color;
+        console.log('Primary color applied:', color);
+        
+        // Check if it's teal (approximately)
+        if (color.includes('20, 184, 166') || color.includes('#14b8a6')) {
+            console.log('✅ Teal color scheme is working!');
+        } else {
+            console.log('⚠️ Color might not be teal:', color);
+        }
+    }
+    
+    // Test CSS loading
+    const testCard = document.querySelector('.card');
+    if (testCard) {
+        const cardStyle = window.getComputedStyle(testCard);
+        if (cardStyle.backgroundColor !== 'rgba(0, 0, 0, 0)') {
+            console.log('✅ CSS is loading properly');
+        } else {
+            console.log('⚠️ CSS might not be loading properly');
+        }
+    }
+});
+</script>
+{% endblock %}

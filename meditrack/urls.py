@@ -19,7 +19,7 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
-from django.views.generic import RedirectView
+from django.views.generic import RedirectView, TemplateView
 from core.forms import LoginForm
 from core.views import HomeView, dashboard
 from core.views_auth import CustomLoginView, HomeRedirectView
@@ -37,6 +37,9 @@ urlpatterns = [
     
     # Dashboard - main dashboard endpoint
     path('dashboard/', dashboard, name='dashboard'),
+    
+    # Dashboard test page
+    path('dashboard/test/', TemplateView.as_view(template_name='core/dashboard_test.html'), name='dashboard-test'),
     
     # Add catch-all for login/dashboard redirect fix
     path('login/dashboard/', RedirectView.as_view(pattern_name='dashboard', permanent=True)),
