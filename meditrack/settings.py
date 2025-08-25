@@ -160,13 +160,13 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Özel kullanıcı modeli
+# Custom user model
 AUTH_USER_MODEL = 'users.User'
 
-# Giriş/çıkış ayarları
-LOGIN_REDIRECT_URL = 'dashboard'
-LOGOUT_REDIRECT_URL = 'login'
-LOGIN_URL = 'login'
+# Login/logout settings
+LOGIN_REDIRECT_URL = '/dashboard/'
+LOGOUT_REDIRECT_URL = '/login/'
+LOGIN_URL = '/login/'
 
 # Admin login redirect fix
 ADMIN_REDIRECT_URL = '/admin/'
