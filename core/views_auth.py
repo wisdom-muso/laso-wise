@@ -20,7 +20,13 @@ class CustomLoginView(DjangoLoginView):
     def get_success_url(self):
         """
         Return the URL to redirect to after processing a valid form.
+        Route users based on their role:
+        - Admin users -> /admin/
+        - Patients -> /dashboard/
+        - Doctors -> /dashboard/
         """
+        user = self.request.user
+        
         # First check if there's a 'next' parameter
         next_url = self.request.GET.get('next') or self.request.POST.get('next')
         
@@ -30,8 +36,16 @@ class CustomLoginView(DjangoLoginView):
             if url_has_allowed_host_and_scheme(next_url, allowed_hosts={self.request.get_host()}):
                 return next_url
         
-        # Fallback to LOGIN_REDIRECT_URL
-        return getattr(settings, 'LOGIN_REDIRECT_URL', reverse_lazy('dashboard'))
+        # Route based on user role
+        if user.is_staff or user.is_superuser:
+            # Admin users go to admin panel
+            return '/admin/'
+        elif hasattr(user, 'user_type'):
+            # For custom user types (patient, doctor)
+            return reverse_lazy('dashboard')
+        else:
+            # Default fallback
+            return reverse_lazy('dashboard')
     
     def form_valid(self, form):
         """

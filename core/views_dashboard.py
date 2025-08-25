@@ -22,14 +22,14 @@ User = get_user_model()
 
 class EnhancedDashboardView(LoginRequiredMixin, TemplateView):
     """
-    Gelişmiş dashboard görünümü
+    Enhanced dashboard view
     """
     template_name = 'dashboards/enhanced_dashboard.html'
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
-        # Analitik verilerini al
+        # Get analytics data
         analytics = DashboardAnalytics(user=self.request.user)
         dashboard_data = analytics.get_comprehensive_dashboard_data()
         
@@ -37,16 +37,16 @@ class EnhancedDashboardView(LoginRequiredMixin, TemplateView):
         context['user'] = self.request.user
         context['current_date'] = timezone.now().date()
         
-        # Hızlı erişim linkleri
+        # Quick access links
         context['quick_actions'] = self.get_quick_actions()
         
-        # Son aktiviteler
+        # Recent activities
         context['recent_activities'] = self.get_recent_activities()
         
         return context
     
     def get_quick_actions(self):
-        """Kullanıcı tipine göre hızlı eylem linkleri"""
+        """Quick action links based on user type"""
         user = self.request.user
         actions = []
         

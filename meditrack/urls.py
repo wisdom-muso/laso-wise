@@ -30,18 +30,21 @@ from core.health_check import health_check, readiness_check, liveness_check
 urlpatterns = [
     path('admin/', admin.site.urls),
     
-    # Ana sayfa - redirect to login if not authenticated, otherwise to dashboard
+    # Home page - redirect to login if not authenticated, otherwise to dashboard
     path('', HomeRedirectView.as_view(), name='home'),
     path('landing/', HomeView.as_view(), name='landing'),
     
-    # Dashboard
+    # Dashboard - main dashboard endpoint
     path('dashboard/', dashboard, name='dashboard'),
+    
+    # Add catch-all for login/dashboard redirect fix
+    path('login/dashboard/', RedirectView.as_view(pattern_name='dashboard', permanent=True)),
     
     # Authentication
     path('login/', CustomLoginView.as_view(), name='login'),
     path('logout/', logout_view, name='logout'),
     
-    # Tema ayarları
+    # Theme settings
     path('theme/toggle/', toggle_theme, name='toggle-theme'),
     path('theme/preference/', get_theme_preference, name='get-theme-preference'),
     
@@ -50,20 +53,20 @@ urlpatterns = [
     path('readiness/', readiness_check, name='readiness-check'),
     path('liveness/', liveness_check, name='liveness-check'),
     
-    # Core uygulaması URL'leri
+    # Core application URLs
     path('core/', include('core.urls', namespace='core')),
     
-    # Appointments uygulaması URL'leri
+    # Appointments application URLs
     path('appointments/', include('appointments.urls')),
     
-    # Treatments uygulaması URL'leri
+    # Treatments application URLs
     path('treatments/', include('treatments.urls')),
     
-    # Telemedicine uygulaması URL'leri
+    # Telemedicine application URLs
     path('telemedicine/', include('telemedicine.urls')),
 ]
 
-# Media ve static dosyaları için URL'ler
+# URLs for media and static files
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
