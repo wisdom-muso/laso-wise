@@ -341,6 +341,52 @@ def update_consultation_status(request, consultation_id):
         return JsonResponse({'error': str(e)}, status=500)
 
 
+class TeleMedicineConsultationCreateView(LoginRequiredMixin, CreateView):
+    """
+    Create a new telemedicine consultation
+    """
+    model = TeleMedicineConsultation
+    template_name = 'telemedicine/schedule_consultation.html'
+    fields = ['appointment', 'consultation_type', 'platform', 'notes']
+    success_url = reverse_lazy('telemedicine:list')
+    
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        user = self.request.user
+        
+        # Filter appointments based on user type
+        if user.is_doctor():
+            form.fields['appointment'].queryset = Appointment.objects.filter(
+                doctor=user,
+                status='scheduled'
+            )
+        elif user.is_patient():
+            form.fields['appointment'].queryset = Appointment.objects.filter(
+                patient=user,
+                status='scheduled'
+            )
+        
+        return form
+    
+    def form_valid(self, form):
+        consultation = form.save(commit=False)
+        appointment = consultation.appointment
+        
+        # Set scheduled start time from appointment
+        consultation.scheduled_start_time = timezone.make_aware(
+            timezone.datetime.combine(appointment.date, appointment.time)
+        )
+        
+        # Generate meeting ID
+        consultation.meeting_id = str(uuid.uuid4())
+        consultation.status = 'scheduled'
+        
+        consultation.save()
+        
+        messages.success(self.request, 'Telemedicine consultation scheduled successfully.')
+        return super().form_valid(form)
+
+
 class TeleMedicineSettingsView(LoginRequiredMixin, UpdateView):
     """
     Telemedicine ayarları
