@@ -491,6 +491,45 @@
                 <form method="post" id="registrationForm">
                     {% csrf_token %}
                     
+                    <!-- Account Information -->
+                    <div class="form-step">
+                        <h3 class="step-title">Account Information</h3>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="{{ form.username.id_for_label }}">
+                                    Username <span class="required">*</span>
+                                </label>
+                                <input type="text" 
+                                       id="{{ form.username.id_for_label }}" 
+                                       name="{{ form.username.name }}" 
+                                       class="form-control {% if form.username.errors %}is-invalid{% endif %}" 
+                                       placeholder="Choose a username"
+                                       value="{{ form.username.value|default:'' }}"
+                                       required>
+                                {% if form.username.errors %}
+                                    <div class="invalid-feedback">{{ form.username.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label" for="{{ form.email.id_for_label }}">
+                                    Email Address <span class="required">*</span>
+                                </label>
+                                <input type="email" 
+                                       id="{{ form.email.id_for_label }}" 
+                                       name="{{ form.email.name }}" 
+                                       class="form-control {% if form.email.errors %}is-invalid{% endif %}" 
+                                       placeholder="your.email@example.com"
+                                       value="{{ form.email.value|default:'' }}"
+                                       required>
+                                {% if form.email.errors %}
+                                    <div class="invalid-feedback">{{ form.email.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Personal Information -->
                     <div class="form-step">
                         <h3 class="step-title">Personal Information</h3>
@@ -531,39 +570,21 @@
 
                         <div class="form-row">
                             <div class="form-group">
-                                <label class="form-label" for="{{ form.email.id_for_label }}">
-                                    Email Address <span class="required">*</span>
-                                </label>
-                                <input type="email" 
-                                       id="{{ form.email.id_for_label }}" 
-                                       name="{{ form.email.name }}" 
-                                       class="form-control {% if form.email.errors %}is-invalid{% endif %}" 
-                                       placeholder="your.email@example.com"
-                                       value="{{ form.email.value|default:'' }}"
-                                       required>
-                                {% if form.email.errors %}
-                                    <div class="invalid-feedback">{{ form.email.errors.0 }}</div>
-                                {% endif %}
-                            </div>
-                            
-                            <div class="form-group">
-                                <label class="form-label" for="{{ form.phone.id_for_label }}">
+                                <label class="form-label" for="{{ form.phone_number.id_for_label }}">
                                     Phone Number <span class="required">*</span>
                                 </label>
                                 <input type="tel" 
-                                       id="{{ form.phone.id_for_label }}" 
-                                       name="{{ form.phone.name }}" 
-                                       class="form-control {% if form.phone.errors %}is-invalid{% endif %}" 
+                                       id="{{ form.phone_number.id_for_label }}" 
+                                       name="{{ form.phone_number.name }}" 
+                                       class="form-control {% if form.phone_number.errors %}is-invalid{% endif %}" 
                                        placeholder="+1 (555) 123-4567"
-                                       value="{{ form.phone.value|default:'' }}"
+                                       value="{{ form.phone_number.value|default:'' }}"
                                        required>
-                                {% if form.phone.errors %}
-                                    <div class="invalid-feedback">{{ form.phone.errors.0 }}</div>
+                                {% if form.phone_number.errors %}
+                                    <div class="invalid-feedback">{{ form.phone_number.errors.0 }}</div>
                                 {% endif %}
                             </div>
-                        </div>
-
-                        <div class="form-row">
+                            
                             <div class="form-group">
                                 <label class="form-label" for="{{ form.date_of_birth.id_for_label }}">
                                     Date of Birth <span class="required">*</span>
@@ -578,22 +599,25 @@
                                     <div class="invalid-feedback">{{ form.date_of_birth.errors.0 }}</div>
                                 {% endif %}
                             </div>
-                            
+                        </div>
+
+                        <div class="form-row single">
                             <div class="form-group">
-                                <label class="form-label" for="{{ form.gender.id_for_label }}">
-                                    Gender <span class="required">*</span>
+                                <label class="form-label" for="{{ form.blood_type.id_for_label }}">
+                                    Blood Type
                                 </label>
-                                <select id="{{ form.gender.id_for_label }}" 
-                                        name="{{ form.gender.name }}" 
-                                        class="form-control form-select {% if form.gender.errors %}is-invalid{% endif %}"
-                                        required>
-                                    <option value="">Select Gender</option>
-                                    {% for value, label in form.gender.field.choices %}
-                                        <option value="{{ value }}" {% if form.gender.value == value %}selected{% endif %}>{{ label }}</option>
+                                <select id="{{ form.blood_type.id_for_label }}" 
+                                        name="{{ form.blood_type.name }}" 
+                                        class="form-control form-select {% if form.blood_type.errors %}is-invalid{% endif %}">
+                                    <option value="">Select Blood Type (Optional)</option>
+                                    {% for value, label in form.blood_type.field.choices %}
+                                        {% if value %}
+                                            <option value="{{ value }}" {% if form.blood_type.value == value %}selected{% endif %}>{{ label }}</option>
+                                        {% endif %}
                                     {% endfor %}
                                 </select>
-                                {% if form.gender.errors %}
-                                    <div class="invalid-feedback">{{ form.gender.errors.0 }}</div>
+                                {% if form.blood_type.errors %}
+                                    <div class="invalid-feedback">{{ form.blood_type.errors.0 }}</div>
                                 {% endif %}
                             </div>
                         </div>
@@ -606,50 +630,16 @@
                         <div class="form-row single">
                             <div class="form-group">
                                 <label class="form-label" for="{{ form.address.id_for_label }}">
-                                    Street Address <span class="required">*</span>
+                                    Address <span class="required">*</span>
                                 </label>
-                                <input type="text" 
-                                       id="{{ form.address.id_for_label }}" 
-                                       name="{{ form.address.name }}" 
-                                       class="form-control {% if form.address.errors %}is-invalid{% endif %}" 
-                                       placeholder="123 Main Street"
-                                       value="{{ form.address.value|default:'' }}"
-                                       required>
+                                <textarea id="{{ form.address.id_for_label }}" 
+                                          name="{{ form.address.name }}" 
+                                          class="form-control {% if form.address.errors %}is-invalid{% endif %}" 
+                                          placeholder="Enter your full address"
+                                          rows="3"
+                                          required>{{ form.address.value|default:'' }}</textarea>
                                 {% if form.address.errors %}
                                     <div class="invalid-feedback">{{ form.address.errors.0 }}</div>
-                                {% endif %}
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label" for="{{ form.city.id_for_label }}">
-                                    City <span class="required">*</span>
-                                </label>
-                                <input type="text" 
-                                       id="{{ form.city.id_for_label }}" 
-                                       name="{{ form.city.name }}" 
-                                       class="form-control {% if form.city.errors %}is-invalid{% endif %}" 
-                                       placeholder="Your City"
-                                       value="{{ form.city.value|default:'' }}"
-                                       required>
-                                {% if form.city.errors %}
-                                    <div class="invalid-feedback">{{ form.city.errors.0 }}</div>
-                                {% endif %}
-                            </div>
-                            
-                            <div class="form-group">
-                                <label class="form-label" for="{{ form.state.id_for_label }}">
-                                    State/Province
-                                </label>
-                                <input type="text" 
-                                       id="{{ form.state.id_for_label }}" 
-                                       name="{{ form.state.name }}" 
-                                       class="form-control {% if form.state.errors %}is-invalid{% endif %}" 
-                                       placeholder="Your State"
-                                       value="{{ form.state.value|default:'' }}">
-                                {% if form.state.errors %}
-                                    <div class="invalid-feedback">{{ form.state.errors.0 }}</div>
                                 {% endif %}
                             </div>
                         </div>
