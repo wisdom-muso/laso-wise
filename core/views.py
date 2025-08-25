@@ -32,13 +32,13 @@ class HomeView(TemplateView):
 @login_required
 def dashboard(request):
     """
-    Kullanıcı rolüne göre dashboard görünümü sağlar
+    Provides dashboard view based on user role
     """
     user = request.user
     context = {'user': user}
     
     if user.is_patient():
-        # Hasta dashboard'u
+        # Patient dashboard
         upcoming_appointments = Appointment.objects.filter(
             patient=user,
             date__gte=timezone.now().date(),
@@ -56,7 +56,7 @@ def dashboard(request):
         return render(request, 'core/patient_dashboard.html', context)
     
     elif user.is_doctor():
-        # Doktor dashboard'u
+        # Doctor dashboard
         today_appointments = Appointment.objects.filter(
             doctor=user,
             date=timezone.now().date(),
@@ -73,7 +73,7 @@ def dashboard(request):
             appointment__in=Appointment.objects.filter(doctor=user)
         ).order_by('-created_at')[:5]
         
-        # Toplam hasta sayısı
+        # Total patient count
         # Get all appointments for this doctor
         doctor_appointments = Appointment.objects.filter(doctor=user)
         # Then get all patients from those appointments
@@ -82,12 +82,12 @@ def dashboard(request):
             patient_appointments__in=doctor_appointments
         ).distinct().count()
         
-        # Toplam tedavi sayısı
+        # Total treatment count
         total_treatments = Treatment.objects.filter(
             appointment__in=doctor_appointments
         ).count()
         
-        # Haftalık randevu istatistikleri
+        # Weekly appointment statistics
         from datetime import timedelta
         week_start = timezone.now().date() - timedelta(days=timezone.now().weekday())
         weekly_appointments = []
@@ -97,7 +97,7 @@ def dashboard(request):
             count = Appointment.objects.filter(doctor=user, date=day).count()
             weekly_appointments.append(count)
         
-        # Hasta yaş demografikleri
+        # Patient age demographics
         from django.db.models import Count, Case, When, IntegerField
         from datetime import date
         
@@ -124,7 +124,7 @@ def dashboard(request):
             else:
                 age_demographics[4] += 1
         
-        # En sık görülen teşhisler
+        # Most common diagnoses
         from django.db.models import Count
         doctor_appointments = Appointment.objects.filter(doctor=user)
         common_diagnoses_data = Treatment.objects.filter(
@@ -156,7 +156,7 @@ def dashboard(request):
         return render(request, 'core/doctor_dashboard.html', context)
     
     elif user.is_receptionist():
-        # Resepsiyonist dashboard'u
+        # Receptionist dashboard
         today_appointments = Appointment.objects.filter(
             date=timezone.now().date()
         ).order_by('time')
@@ -172,7 +172,7 @@ def dashboard(request):
         return render(request, 'core/receptionist_dashboard.html', context)
     
     elif user.is_admin_user() or user.is_superuser:
-        # Admin dashboard'u
+        # Admin dashboard
         total_patients = User.objects.filter(user_type='patient').count()
         total_doctors = User.objects.filter(user_type='doctor').count()
         total_appointments = Appointment.objects.count()
@@ -186,10 +186,10 @@ def dashboard(request):
         })
         return render(request, 'core/admin_dashboard.html', context)
     
-    # Varsayılan olarak genel dashboard'a yönlendir
+    # Default redirect to general dashboard
     return render(request, 'core/dashboard.html', context)
 
-# Hasta Kayıt
+# Patient Registration
 class PatientRegistrationView(CreateView):
     """
     Patient registration view for creating new patient accounts

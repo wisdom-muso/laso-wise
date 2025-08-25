@@ -105,13 +105,13 @@ class AppointmentForm(forms.ModelForm):
         user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
         
-        # Sadece hasta tipi kullanıcıları göster
+        # Show only patient type users
         self.fields['patient'].queryset = User.objects.filter(user_type='patient')
         
-        # Sadece doktor tipi kullanıcıları göster
+        # Show only doctor type users
         self.fields['doctor'].queryset = User.objects.filter(user_type='doctor')
         
-        # Eğer giriş yapan kullanıcı hasta ise, sadece kendisini seçebilir
+        # If the logged-in user is a patient, they can only select themselves
         if user and user.is_patient():
             self.fields['patient'].initial = user
             self.fields['patient'].widget = forms.HiddenInput()
@@ -119,13 +119,13 @@ class AppointmentForm(forms.ModelForm):
             self.fields['time'].help_text = _('Randevu almak istediğiniz saati seçiniz')
             self.fields['description'].help_text = _('Randevu sebebinizi kısaca açıklayınız')
         
-        # İleri tarihli randevular için kısıtlama ekleyelim
+        # Add restriction for future appointments
         today = datetime.date.today()
         self.fields['date'].widget.attrs['min'] = today.strftime('%Y-%m-%d')
 
 class TreatmentForm(forms.ModelForm):
     """
-    Tedavi oluşturma ve düzenleme formu.
+    Treatment creation and editing form.
     """
     class Meta:
         model = Treatment
@@ -137,7 +137,7 @@ class TreatmentForm(forms.ModelForm):
 
 class PrescriptionForm(forms.ModelForm):
     """
-    Reçete oluşturma ve düzenleme formu.
+    Prescription creation and editing form.
     """
     medication = forms.ModelChoiceField(
         queryset=Medication.objects.all().order_by('name'),
@@ -159,7 +159,7 @@ class PrescriptionForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
-        # İlk gelen instance varsa ve medication değeri doluysa, name alanını doldur
+        # If there's an initial instance and medication value is filled, populate the name field
         if self.instance and self.instance.pk and self.instance.medication:
             self.fields['name'].initial = self.instance.medication.name
             self.fields['medication'].initial = self.instance.medication
@@ -169,7 +169,7 @@ class PrescriptionForm(forms.ModelForm):
         medication = cleaned_data.get('medication')
         name = cleaned_data.get('name')
         
-        # Eğer ilaç veritabanından seçilmişse, ilaç adını otomatik doldur
+        # If medication is selected from database, automatically fill the medication name
         if medication and not name:
             cleaned_data['name'] = medication.name
         
@@ -185,7 +185,7 @@ PrescriptionFormSet = forms.inlineformset_factory(
 
 class DoctorCreationForm(forms.ModelForm):
     """
-    Doktor oluşturma formu
+    Doctor creation form
     """
     password1 = forms.CharField(
         label=_('Şifre'),
@@ -241,7 +241,7 @@ class DoctorUpdateForm(forms.ModelForm):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Telefon numarası ve uzmanlık alanı zorunlu değil
+        # Phone number and specialization fields are not required
         self.fields['phone_number'].required = False
         self.fields['specialization'].required = True
         
@@ -263,5 +263,5 @@ class MedicalHistoryForm(forms.ModelForm):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Sadece hasta tipi kullanıcıları göster
+        # Show only patient type users
         self.fields['patient'].queryset = User.objects.filter(user_type='patient') 

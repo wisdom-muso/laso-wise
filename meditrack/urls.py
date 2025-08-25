@@ -30,7 +30,7 @@ from core.health_check import health_check, readiness_check, liveness_check
 urlpatterns = [
     path('admin/', admin.site.urls),
     
-    # Ana sayfa - redirect to login if not authenticated, otherwise to dashboard
+    # Home page - redirect to login if not authenticated, otherwise to dashboard
     path('', HomeRedirectView.as_view(), name='home'),
     path('landing/', HomeView.as_view(), name='landing'),
     
@@ -41,7 +41,7 @@ urlpatterns = [
     path('login/', CustomLoginView.as_view(), name='login'),
     path('logout/', logout_view, name='logout'),
     
-    # Tema ayarları
+    # Theme settings
     path('theme/toggle/', toggle_theme, name='toggle-theme'),
     path('theme/preference/', get_theme_preference, name='get-theme-preference'),
     
@@ -50,20 +50,20 @@ urlpatterns = [
     path('readiness/', readiness_check, name='readiness-check'),
     path('liveness/', liveness_check, name='liveness-check'),
     
-    # Core uygulaması URL'leri
+    # Core app URLs
     path('core/', include('core.urls', namespace='core')),
     
-    # Appointments uygulaması URL'leri
+    # Appointments app URLs
     path('appointments/', include('appointments.urls')),
     
-    # Treatments uygulaması URL'leri
+    # Treatments app URLs
     path('treatments/', include('treatments.urls')),
     
-    # Telemedicine uygulaması URL'leri
+    # Telemedicine app URLs
     path('telemedicine/', include('telemedicine.urls')),
 ]
 
-# Media ve static dosyaları için URL'ler
+# Media and static files URLs
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
