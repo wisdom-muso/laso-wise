@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'corsheaders',
-    # Kendi uygulamalarımız
+    # Our own applications
     'users',
     'appointments',
     'treatments',
@@ -118,7 +118,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
-LANGUAGE_CODE = 'tr'
+LANGUAGE_CODE = 'en'
 
 TIME_ZONE = 'Europe/Istanbul'
 
@@ -142,23 +142,23 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Özel kullanıcı modeli
+# Custom user model
 AUTH_USER_MODEL = 'users.User'
 
-# Giriş/çıkış ayarları
+# Login/logout settings
 LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL = 'login'
 LOGIN_URL = 'login'
 
-# Email ayarları (geliştirme için console backend)
+# Email settings (console backend for development)
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # Unfold Admin Theme Settings
 UNFOLD = {
-    "SITE_TITLE": "MediTracked",
-    "SITE_HEADER": "MediTracked",
+    "SITE_TITLE": "Laso Healthcare",
+    "SITE_HEADER": "Laso Healthcare",
     "SITE_URL": "/",
-    "SITE_ICON": None,  # or a path to your logo
+    "SITE_ICON": "static/assets/images/logo.png",  # or a path to your logo
     "DASHBOARD_CALLBACK": None,
     "STYLES": [],  # Using default styles
     "SCRIPTS": [],  # Using default scripts
@@ -203,8 +203,8 @@ CORS_ALLOWED_ORIGINS = [
 
 # Internationalization Settings
 LANGUAGES = [
-    ('tr', 'Türkçe'),
     ('en', 'English'),
+    ('tr', 'Türkçe'),
     ('ar', 'العربية'),
     ('de', 'Deutsch'),
     ('fr', 'Français'),

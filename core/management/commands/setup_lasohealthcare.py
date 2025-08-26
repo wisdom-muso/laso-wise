@@ -78,7 +78,7 @@ class Command(BaseCommand):
         if not User.objects.filter(username='admin').exists():
             admin_user = User.objects.create_superuser(
                 username='admin',
-                email='admin@meditracked.com',
+                email='admin@lasohealthcare.com',
                 password='admin123',
                 first_name='Admin',
                 last_name='User',
@@ -262,7 +262,7 @@ class Command(BaseCommand):
         doctors_data = [
             {
                 'username': 'dr_sarah',
-                'email': 'sarah@meditracked.com',
+                'email': 'sarah@lasohealthcare.com',
                 'first_name': 'Sarah',
                 'last_name': 'Johnson',
                 'user_type': 'doctor',
@@ -271,7 +271,7 @@ class Command(BaseCommand):
             },
             {
                 'username': 'dr_michael',
-                'email': 'michael@meditracked.com',
+                'email': 'michael@lasohealthcare.com',
                 'first_name': 'Michael',
                 'last_name': 'Chen',
                 'user_type': 'doctor',
@@ -280,7 +280,7 @@ class Command(BaseCommand):
             },
             {
                 'username': 'dr_emma',
-                'email': 'emma@meditracked.com',
+                'email': 'emma@lasohealthcare.com',
                 'first_name': 'Emma',
                 'last_name': 'Davis',
                 'user_type': 'doctor',
@@ -357,7 +357,7 @@ class Command(BaseCommand):
         if not User.objects.filter(username='receptionist').exists():
             receptionist = User.objects.create_user(
                 username='receptionist',
-                email='receptionist@meditracked.com',
+                email='receptionist@lasohealthcare.com',
                 password='receptionist123',
                 first_name='Alice',
                 last_name='Brown',

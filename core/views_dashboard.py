@@ -22,7 +22,7 @@ User = get_user_model()
 
 class EnhancedDashboardView(LoginRequiredMixin, TemplateView):
     """
-    Gelişmiş dashboard görünümü
+    Enhanced dashboard view
     """
     template_name = 'dashboards/enhanced_dashboard.html'
     
@@ -37,7 +37,7 @@ class EnhancedDashboardView(LoginRequiredMixin, TemplateView):
         context['user'] = self.request.user
         context['current_date'] = timezone.now().date()
         
-        # Hızlı erişim linkleri
+        # Quick access links
         context['quick_actions'] = self.get_quick_actions()
         
         # Son aktiviteler
@@ -46,48 +46,48 @@ class EnhancedDashboardView(LoginRequiredMixin, TemplateView):
         return context
     
     def get_quick_actions(self):
-        """Kullanıcı tipine göre hızlı eylem linkleri"""
+        """Quick action links based on user type"""
         user = self.request.user
         actions = []
         
         if user.is_doctor():
             actions = [
-                {'title': 'Bugünün Randevuları', 'url': 'appointment-list', 'icon': 'calendar', 'color': 'primary'},
-                {'title': 'Yeni Tedavi', 'url': 'treatment-create', 'icon': 'plus', 'color': 'success'},
-                {'title': 'Lab Test İste', 'url': 'lab-test-create', 'icon': 'flask', 'color': 'info'},
-                {'title': 'Hasta Arama', 'url': 'patient-search', 'icon': 'search', 'color': 'warning'},
+                {'title': 'Today\'s Appointments', 'url': 'appointment-list', 'icon': 'calendar', 'color': 'primary'},
+                {'title': 'New Treatment', 'url': 'treatment-create', 'icon': 'plus', 'color': 'success'},
+                {'title': 'Request Lab Test', 'url': 'lab-test-create', 'icon': 'flask', 'color': 'info'},
+                {'title': 'Patient Search', 'url': 'patient-search', 'icon': 'search', 'color': 'warning'},
             ]
         elif user.is_patient():
             actions = [
-                {'title': 'Randevu Al', 'url': 'appointment-create', 'icon': 'calendar-plus', 'color': 'primary'},
-                {'title': 'Tedavi Geçmişi', 'url': 'patient-treatment-history', 'icon': 'history', 'color': 'info'},
-                {'title': 'Test Sonuçları', 'url': 'patient-lab-results', 'icon': 'chart-bar', 'color': 'success'},
-                {'title': 'Reçetelerim', 'url': 'patient-prescriptions', 'icon': 'pills', 'color': 'warning'},
+                {'title': 'Schedule Appointment', 'url': 'appointment-create', 'icon': 'calendar-plus', 'color': 'primary'},
+                {'title': 'Treatment History', 'url': 'patient-treatment-history', 'icon': 'history', 'color': 'info'},
+                {'title': 'Test Results', 'url': 'patient-lab-results', 'icon': 'chart-bar', 'color': 'success'},
+                {'title': 'My Prescriptions', 'url': 'patient-prescriptions', 'icon': 'pills', 'color': 'warning'},
             ]
         elif user.is_receptionist():
             actions = [
-                {'title': 'Yeni Randevu', 'url': 'appointment-create', 'icon': 'calendar-plus', 'color': 'primary'},
-                {'title': 'Hasta Kaydı', 'url': 'patient-register', 'icon': 'user-plus', 'color': 'success'},
-                {'title': 'Randevu Listesi', 'url': 'appointment-list', 'icon': 'list', 'color': 'info'},
-                {'title': 'Doktor Takvimi', 'url': 'doctor-calendar', 'icon': 'calendar', 'color': 'warning'},
+                {'title': 'New Appointment', 'url': 'appointment-create', 'icon': 'calendar-plus', 'color': 'primary'},
+                {'title': 'Patient Registration', 'url': 'patient-register', 'icon': 'user-plus', 'color': 'success'},
+                {'title': 'Appointment List', 'url': 'appointment-list', 'icon': 'list', 'color': 'info'},
+                {'title': 'Doctor Calendar', 'url': 'doctor-calendar', 'icon': 'calendar', 'color': 'warning'},
             ]
         elif user.is_admin_user():
             actions = [
-                {'title': 'Sistem Raporları', 'url': 'system-reports', 'icon': 'chart-line', 'color': 'primary'},
-                {'title': 'Kullanıcı Yönetimi', 'url': 'user-management', 'icon': 'users', 'color': 'success'},
-                {'title': 'Sistem Ayarları', 'url': 'system-settings', 'icon': 'cog', 'color': 'info'},
-                {'title': 'Veritabanı Bakımı', 'url': 'database-maintenance', 'icon': 'database', 'color': 'warning'},
+                {'title': 'System Reports', 'url': 'system-reports', 'icon': 'chart-line', 'color': 'primary'},
+                {'title': 'User Management', 'url': 'user-management', 'icon': 'users', 'color': 'success'},
+                {'title': 'System Settings', 'url': 'system-settings', 'icon': 'cog', 'color': 'info'},
+                {'title': 'Database Maintenance', 'url': 'database-maintenance', 'icon': 'database', 'color': 'warning'},
             ]
         
         return actions
     
     def get_recent_activities(self):
-        """Son aktiviteler"""
+        """Recent activities"""
         user = self.request.user
         activities = []
         
         if user.is_doctor():
-            # Son randevuları
+            # Recent appointments
             recent_appointments = Appointment.objects.filter(
                 doctor=user,
                 date__gte=timezone.now().date() - timedelta(days=7)
@@ -96,14 +96,14 @@ class EnhancedDashboardView(LoginRequiredMixin, TemplateView):
             for appointment in recent_appointments:
                 activities.append({
                     'type': 'appointment',
-                    'title': f'{appointment.patient.get_full_name()} ile randevu',
+                    'title': f'Appointment with {appointment.patient.get_full_name()}',
                     'date': appointment.date,
                     'time': appointment.time,
                     'status': appointment.status,
                     'url': f'/appointments/{appointment.id}/',
                 })
             
-            # Son tedaviler
+            # Recent treatments
             recent_treatments = Treatment.objects.filter(
                 appointment__doctor=user
             ).order_by('-created_at')[:3]
@@ -111,14 +111,14 @@ class EnhancedDashboardView(LoginRequiredMixin, TemplateView):
             for treatment in recent_treatments:
                 activities.append({
                     'type': 'treatment',
-                    'title': f'{treatment.appointment.patient.get_full_name()} tedavisi',
+                    'title': f'Treatment for {treatment.appointment.patient.get_full_name()}',
                     'date': treatment.created_at.date(),
                     'description': treatment.diagnosis[:50] + '...' if len(treatment.diagnosis) > 50 else treatment.diagnosis,
                     'url': f'/treatments/{treatment.id}/',
                 })
         
         elif user.is_patient():
-            # Son randevuları
+            # Recent appointments
             recent_appointments = Appointment.objects.filter(
                 patient=user
             ).order_by('-date', '-time')[:5]
@@ -126,14 +126,14 @@ class EnhancedDashboardView(LoginRequiredMixin, TemplateView):
             for appointment in recent_appointments:
                 activities.append({
                     'type': 'appointment',
-                    'title': f'Dr. {appointment.doctor.get_full_name()} ile randevu',
+                    'title': f'Appointment with Dr. {appointment.doctor.get_full_name()}',
                     'date': appointment.date,
                     'time': appointment.time,
                     'status': appointment.status,
                     'url': f'/appointments/{appointment.id}/',
                 })
             
-            # Bekleyen test sonuçları
+            # Pending test results
             pending_tests = LabTest.objects.filter(
                 patient=user,
                 status__in=['requested', 'in_progress']
@@ -142,7 +142,7 @@ class EnhancedDashboardView(LoginRequiredMixin, TemplateView):
             for test in pending_tests:
                 activities.append({
                     'type': 'lab_test',
-                    'title': f'{test.test_name} - Test bekleniyor',
+                    'title': f'{test.test_name} - Test pending',
                     'date': test.requested_date.date(),
                     'status': test.status,
                     'url': f'/lab-tests/{test.id}/',
@@ -157,7 +157,7 @@ class EnhancedDashboardView(LoginRequiredMixin, TemplateView):
 @login_required
 def dashboard_analytics_api(request):
     """
-    Dashboard için AJAX API endpoint
+    AJAX API endpoint for dashboard
     """
     date_range = request.GET.get('range', 30)
     try:
@@ -174,10 +174,10 @@ def dashboard_analytics_api(request):
 @login_required
 def patient_health_summary_api(request, patient_id):
     """
-    Hasta sağlık özeti API
+    Patient health summary API
     """
     if not (request.user.is_doctor() or request.user.is_admin_user()):
-        return JsonResponse({'error': 'Yetkisiz erişim'}, status=403)
+        return JsonResponse({'error': 'Unauthorized access'}, status=403)
     
     patient = get_object_or_404(User, id=patient_id, user_type='patient')
     summary = ReportGenerator.generate_patient_health_summary(patient)
@@ -217,25 +217,23 @@ def patient_health_summary_api(request, patient_id):
 
 class DoctorPerformanceView(LoginRequiredMixin, TemplateView):
     """
-    Doktor performans dashboard'u
+    Doctor performance dashboard
     """
-    template_name = 'dashboards/doctor_performance.html'
-    
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_doctor():
             from django.core.exceptions import PermissionDenied
-            raise PermissionDenied("Bu sayfaya sadece doktorlar erişebilir.")
+            raise PermissionDenied("This page is only accessible to doctors.")
         return super().dispatch(request, *args, **kwargs)
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
-        # Farklı zaman aralıkları için performans verileri
+        # Performance data for different time periods
         periods = [
-            ('Bu Hafta', 7),
-            ('Bu Ay', 30),
-            ('Son 3 Ay', 90),
-            ('Bu Yıl', 365)
+            ('This Week', 7),
+            ('This Month', 30),
+            ('Last 3 Months', 90),
+            ('This Year', 365)
         ]
         
         performance_data = {}
@@ -246,14 +244,14 @@ class DoctorPerformanceView(LoginRequiredMixin, TemplateView):
         context['performance_data'] = performance_data
         context['doctor'] = self.request.user
         
-        # Hasta memnuniyet verileri (gelecekte eklenebilir)
+        # Patient satisfaction data (to be added in the future)
         context['satisfaction_ratings'] = self.get_satisfaction_data()
         
         return context
     
     def get_satisfaction_data(self):
-        """Hasta memnuniyet verileri (placeholder)"""
-        # Bu gelecekte gerçek verilerle doldurulabilir
+        """Patient satisfaction data (placeholder)"""
+        # This can be filled with real data in the future
         return {
             'average_rating': 4.8,
             'total_reviews': 156,
@@ -269,20 +267,18 @@ class DoctorPerformanceView(LoginRequiredMixin, TemplateView):
 
 class SystemReportsView(LoginRequiredMixin, TemplateView):
     """
-    Sistem raporları (sadece admin)
+    System reports (admin only)
     """
-    template_name = 'dashboards/system_reports.html'
-    
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_admin_user():
             from django.core.exceptions import PermissionDenied
-            raise PermissionDenied("Bu sayfaya sadece adminler erişebilir.")
+            raise PermissionDenied("This page is only accessible to administrators.")
         return super().dispatch(request, *args, **kwargs)
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
-        # Sistem geneli istatistikler
+        # System-wide statistics
         context['system_stats'] = {
             'total_users': User.objects.count(),
             'total_doctors': User.objects.filter(user_type='doctor').count(),
@@ -292,20 +288,20 @@ class SystemReportsView(LoginRequiredMixin, TemplateView):
             'total_lab_tests': LabTest.objects.count(),
         }
         
-        # En aktif doktorlar
+        # Most active doctors
         context['top_doctors'] = User.objects.filter(
             user_type='doctor'
         ).annotate(
             appointment_count=Count('doctor_appointments')
         ).order_by('-appointment_count')[:10]
         
-        # Aylık büyüme verileri
+        # Monthly growth data
         context['monthly_growth'] = self.get_monthly_growth_data()
         
         return context
     
     def get_monthly_growth_data(self):
-        """Aylık büyüme verilerini hesapla"""
+        """Calculate monthly growth data"""
         months_data = []
         
         for i in range(12):  # Son 12 ay

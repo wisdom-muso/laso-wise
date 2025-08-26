@@ -4,13 +4,13 @@ from django.utils.translation import gettext_lazy as _
 
 class User(AbstractUser):
     """
-    MediTrack sistemi için özel kullanıcı modeli.
-    Her kullanıcı hasta, doktor, resepsiyonist veya admin olabilir.
+    Custom user model
+    Each user can be a patient, doctor, receptionist, or admin.
     """
     USER_TYPE_CHOICES = [
-        ('patient', _('Hasta')),
-        ('doctor', _('Doktor')),
-        ('receptionist', _('Resepsiyonist')),
+        ('patient', _('Patient')),
+        ('doctor', _('Doctor')),
+        ('receptionist', _('Receptionist')),
         ('admin', _('Admin')),
     ]
     
@@ -18,7 +18,7 @@ class User(AbstractUser):
         max_length=20,
         choices=USER_TYPE_CHOICES,
         default='patient',
-        verbose_name=_('Kullanıcı Tipi')
+        verbose_name='User Type'
     )
     
     # Doktorlar için ek alanlar
@@ -26,31 +26,31 @@ class User(AbstractUser):
         max_length=100, 
         blank=True, 
         null=True,
-        verbose_name=_('Uzmanlık Alanı')
+        verbose_name='Specialization'
     )
     
     # Hastalar için ek alanlar
     date_of_birth = models.DateField(
         blank=True, 
         null=True, 
-        verbose_name=_('Doğum Tarihi')
+        verbose_name='Date of Birth'
     )
     phone_number = models.CharField(
         max_length=20, 
         blank=True, 
         null=True,
-        verbose_name=_('Telefon Numarası')
+        verbose_name='Phone Number'
     )
     address = models.TextField(
         blank=True, 
         null=True,
-        verbose_name=_('Adres')
+        verbose_name='Address'
     )
     blood_type = models.CharField(
         max_length=10, 
         blank=True, 
         null=True,
-        verbose_name=_('Kan Grubu')
+        verbose_name='Blood Type'
     )
     
     def is_patient(self):
@@ -66,8 +66,8 @@ class User(AbstractUser):
         return self.user_type == 'admin'
     
     class Meta:
-        verbose_name = _('Kullanıcı')
-        verbose_name_plural = _('Kullanıcılar')
+        verbose_name = 'User'
+        verbose_name_plural = 'Users'
         
     def __str__(self):
         return f"{self.get_full_name()} ({self.get_user_type_display()})"

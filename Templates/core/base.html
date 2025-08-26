@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% block title %}MediTrack - Klinik Hasta Takip ve Randevu Sistemi{% endblock %}</title>
+    <title>{% block title %}Laso Healthcare - Klinik Hasta Takip ve Randevu Sistemi{% endblock %}</title>
     
     <!-- Favicon -->
     {% load static %}
@@ -92,7 +92,7 @@
                         </div>
                         <!-- Logo -->
                         <a href="{% url 'home' %}" class="app-sidebar-logo me-5">
-                            <h3 class="text-primary m-0 fs-4">MediTrack</h3>
+                            <h3 class="text-primary m-0 fs-4">Laso Healthcare</h3>
                         </a>
                     </div>
                     
@@ -221,7 +221,7 @@
             <div id="kt_app_sidebar" class="app-sidebar flex-column" data-kt-drawer="true" data-kt-drawer-name="app-sidebar" data-kt-drawer-activate="{default: true, lg: false}" data-kt-drawer-overlay="true" data-kt-drawer-width="225px" data-kt-drawer-direction="start" data-kt-drawer-toggle="#kt_app_sidebar_mobile_toggle">
                 <div class="app-sidebar-logo px-6" id="kt_app_sidebar_logo">
                     <a href="{% url 'home' %}">
-                        <h3 class="text-primary m-0">MediTrack</h3>
+                        <h3 class="text-primary m-0">Laso Healthcare</h3>
                     </a>
                 </div>
                 
@@ -331,7 +331,7 @@
                                         <span class="menu-icon">
                                             <i class="fas fa-x-ray fs-2"></i>
                                         </span>
-                                        <span class="menu-title">Tıbbi Görüntüler</span>
+                                        <span class="menu-title">Medical Images</span>
                                     </a>
                                 </div>
                                 
@@ -382,14 +382,14 @@
                                 </div>
                                 {% endif %}
                                 
-                                <!-- Hasta Kaydı -->
+                                <!-- Patient Registration -->
                                 {% if user.is_receptionist or user.is_admin_user %}
                                 <div class="menu-item">
                                     <a class="menu-link" href="{% url 'core:patient-register' %}">
                                         <span class="menu-icon">
                                             <i class="ki-outline ki-user-add fs-2"></i>
                                         </span>
-                                        <span class="menu-title">Hasta Kaydı</span>
+                                        <span class="menu-title">Patient Registration</span>
                                     </a>
                                 </div>
                                 {% endif %}
@@ -431,10 +431,10 @@
                         <div class="app-container container-fluid d-flex flex-column flex-md-row flex-center flex-md-stack py-3">
                             <div class="text-gray-900 order-2 order-md-1">
                                 <span class="text-muted fw-semibold me-1">2024 &copy;</span>
-                                <a href="{% url 'home' %}" class="text-gray-800 text-hover-primary">MediTrack</a>
+                                <a href="{% url 'home' %}" class="text-gray-800 text-hover-primary">Laso Healthcare</a>
                             </div>
                             <div class="text-gray-900 order-1 order-md-2">
-                                <span class="text-muted fw-semibold">Geliştirici:</span>
+                                <span class="text-muted fw-semibold">Developer:</span>
                                 <span class="text-gray-800 text-hover-primary ms-1">K. Umut Araz</span>
                             </div>
                         </div>

@@ -40,7 +40,7 @@ class Command(BaseCommand):
                 CommunicationNotification.objects.create(
                     user=appointment.patient,
                     title=f"Randevu Hatırlatması: {appointment.date.strftime('%d.%m.%Y')}",
-                    message=f"Yarın saat {appointment.time.strftime('%H:%M')} için Dr. {appointment.doctor.get_full_name()} ile randevunuz bulunmaktadır.",
+                    message=f"You have an appointment with Dr. {appointment.doctor.get_full_name()} tomorrow at {appointment.time.strftime('%H:%M')}.",
                     related_url=f"/appointments/{appointment.id}/",
                     notification_type="appointment"
                 )

@@ -80,7 +80,7 @@ class CalendarView(LoginRequiredMixin, ListView):
         colors = {
             'planned': '#3699FF',  # Mavi
             'completed': '#1BC5BD',  # Yeşil
-            'cancelled': '#F64E60',  # Kırmızı
+            'cancelled': '#F64E60',  # Red
         }
         return colors.get(status, '#3699FF')
 

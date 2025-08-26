@@ -97,7 +97,7 @@ MEDICATIONS = [
 ]
 
 class Command(BaseCommand):
-    help = 'MediTrack sistemi için örnek veriler oluşturur'
+    help = 'Laso Healthcare sistemi için örnek veriler oluşturur'
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -150,7 +150,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        self.stdout.write(self.style.SUCCESS('MediTrack örnek veri oluşturma başlatılıyor...'))
+        self.stdout.write(self.style.SUCCESS('Laso Healthcare örnek veri oluşturma başlatılıyor...'))
         
         # Admin kullanıcısı oluştur
         self.create_admin_user()
@@ -211,7 +211,7 @@ class Command(BaseCommand):
         admin, created = User.objects.get_or_create(
             username='admin',
             defaults={
-                'email': 'admin@meditrack.com',
+                'email': 'admin@lasohealthcare.com',
                 'first_name': 'Admin',
                 'last_name': 'Kullanıcı',
                 'user_type': 'admin',
@@ -232,14 +232,14 @@ class Command(BaseCommand):
         receptionist_data = [
             {
                 'username': 'ayse',
-                'email': 'ayse@meditrack.com',
+                'email': 'ayse@lasohealthcare.com',
                 'first_name': 'Ayşe',
                 'last_name': 'Yılmaz',
                 'password': 'password123'
             },
             {
                 'username': 'mehmet',
-                'email': 'mehmet@meditrack.com',
+                'email': 'mehmet@lasohealthcare.com',
                 'first_name': 'Mehmet',
                 'last_name': 'Demir',
                 'password': 'password123'
@@ -277,7 +277,7 @@ class Command(BaseCommand):
             user, created = User.objects.get_or_create(
                 username=username,
                 defaults={
-                    'email': f'{username}@meditrack.com',
+                    'email': f'{username}@lasohealthcare.com',
                     'first_name': first_name,
                     'last_name': last_name,
                     'user_type': 'doctor',

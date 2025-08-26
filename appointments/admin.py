@@ -13,7 +13,7 @@ class AppointmentAdmin(admin.ModelAdmin):
         (None, {
             'fields': ('patient', 'doctor')
         }),
-        (_('Randevu Bilgileri'), {
+        (_('Appointment Information'), {
             'fields': ('date', 'time', 'description', 'status')
         }),
     )

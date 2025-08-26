@@ -41,24 +41,24 @@ urlpatterns = [
     ), name='login'),
     path('logout/', logout_view, name='logout'),
     
-    # Tema ayarları
+    # Theme settings
     path('theme/toggle/', toggle_theme, name='toggle-theme'),
     path('theme/preference/', get_theme_preference, name='get-theme-preference'),
     
-    # Core uygulaması URL'leri
+    # Core app URLs
     path('core/', include('core.urls', namespace='core')),
     
-    # Appointments uygulaması URL'leri
+    # Appointments app URLs
     path('appointments/', include('appointments.urls')),
     
-    # Treatments uygulaması URL'leri
+    # Treatments app URLs
     path('treatments/', include('treatments.urls')),
     
-    # Telemedicine uygulaması URL'leri
+    # Telemedicine app URLs
     path('telemedicine/', include('telemedicine.urls')),
 ]
 
-# Media ve static dosyaları için URL'ler
+# URLs for media and static files
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

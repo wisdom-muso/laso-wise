@@ -152,22 +152,22 @@ def send_appointment_reminder_email(appointment):
     """
     Randevu hatırlatma e-postası gönderir
     """
-    subject = f'MediTrack - Randevu Hatırlatması: {appointment.date.strftime("%d.%m.%Y")}'
+    subject = f'MediTrack - Appointment Reminder: {appointment.date.strftime("%d.%m.%Y")}'
     
-    message = f"""Sayın {appointment.patient.get_full_name()},
+    message = f"""Dear {appointment.patient.get_full_name()},
 
-Bu e-posta, yaklaşan randevunuzu hatırlatmak için gönderilmiştir.
+This email is a reminder for your upcoming appointment.
 
-Randevu Bilgileri:
-Tarih: {appointment.date.strftime("%d.%m.%Y")}
-Saat: {appointment.time.strftime("%H:%M")}
-Doktor: Dr. {appointment.doctor.get_full_name()}
-Açıklama: {appointment.description}
+Appointment Details:
+Date: {appointment.date.strftime("%d.%m.%Y")}
+Time: {appointment.time.strftime("%H:%M")}
+Doctor: Dr. {appointment.doctor.get_full_name()}
+Description: {appointment.description}
 
-Randevunuza zamanında gelmenizi rica ederiz. Herhangi bir değişiklik için lütfen kliniğimizle iletişime geçiniz.
+Please arrive on time for your appointment. If you need to make any changes, please contact our clinic.
 
-Saygılarımızla,
-MediTrack Sağlık Sistemi
+Sincerely,
+MediTrack Healthcare System
 """
     
     send_mail(

@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 'verbose_name': 'Randevu',
-                'verbose_name_plural': 'Randevular',
+                'verbose_name_plural': 'Appointments',
                 'ordering': ['-date', '-time'],
             },
         ),

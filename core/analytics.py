@@ -1,5 +1,5 @@
 """
-Advanced Analytics and Dashboard Data Provider for MediTracked
+Advanced Analytics and Dashboard Data Provider for Laso Healthcare
 """
 from django.db.models import Count, Q, Avg, F
 from django.utils import timezone

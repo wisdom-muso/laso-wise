@@ -5,7 +5,7 @@ import sys
 
 
 class Command(BaseCommand):
-    help = 'Generate and apply all migrations for MediTracked system'
+    help = 'Generate and apply all migrations for Laso Healthcare system'
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -20,7 +20,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        self.stdout.write(self.style.SUCCESS('🔄 Managing MediTracked Migrations...'))
+        self.stdout.write(self.style.SUCCESS('🔄 Managing Laso Healthcare Migrations...'))
         
         apps = ['core', 'users', 'appointments', 'treatments', 'telemedicine']
         
