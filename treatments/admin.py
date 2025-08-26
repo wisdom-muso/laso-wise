@@ -16,17 +16,17 @@ class TreatmentAdmin(admin.ModelAdmin):
     
     def get_patient(self, obj):
         return obj.appointment.patient
-    get_patient.short_description = _('Hasta')
+    get_patient.short_description = _('Patient')
     get_patient.admin_order_field = 'appointment__patient__username'
     
     def get_doctor(self, obj):
         return obj.appointment.doctor
-    get_doctor.short_description = _('Doktor')
+    get_doctor.short_description = _('Doctor')
     get_doctor.admin_order_field = 'appointment__doctor__username'
     
     def get_date(self, obj):
         return obj.appointment.date
-    get_date.short_description = _('Tarih')
+    get_date.short_description = _('Date')
     get_date.admin_order_field = 'appointment__date'
 
 @admin.register(Prescription)
@@ -37,11 +37,11 @@ class PrescriptionAdmin(admin.ModelAdmin):
     
     def get_patient(self, obj):
         return obj.treatment.appointment.patient
-    get_patient.short_description = _('Hasta')
+    get_patient.short_description = _('Patient')
     
     def get_doctor(self, obj):
         return obj.treatment.appointment.doctor
-    get_doctor.short_description = _('Doktor')
+    get_doctor.short_description = _('Doctor')
 
 # Yeni modeller için admin kayıtları
 try:

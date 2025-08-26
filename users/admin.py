@@ -6,11 +6,11 @@ from .models import User
 class CustomUserAdmin(UserAdmin):
     fieldsets = (
         (None, {'fields': ('username', 'password')}),
-        (_('Kişisel Bilgiler'), {'fields': ('first_name', 'last_name', 'email', 'user_type')}),
-        (_('Doktor Bilgileri'), {'fields': ('specialization',), 'classes': ('collapse',)}),
-        (_('Hasta Bilgileri'), {'fields': ('date_of_birth', 'phone_number', 'address', 'blood_type'), 'classes': ('collapse',)}),
-        (_('İzinler'), {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
-        (_('Önemli Tarihler'), {'fields': ('last_login', 'date_joined')}),
+        (_('Personal Information'), {'fields': ('first_name', 'last_name', 'email', 'user_type')}),
+        (_('Doctor Information'), {'fields': ('specialization',), 'classes': ('collapse',)}),
+        (_('Patient Information'), {'fields': ('date_of_birth', 'phone_number', 'address', 'blood_type'), 'classes': ('collapse',)}),
+        (_('Permissions'), {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
+        (_('Important Dates'), {'fields': ('last_login', 'date_joined')}),
     )
     add_fieldsets = (
         (None, {
