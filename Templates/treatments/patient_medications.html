@@ -1,21 +1,21 @@
 {% extends 'core/base.html' %}
-{% load i18n %}
+{% load static %}
 
-{% block title %}{% translate "Hasta İlaçları" %}: {{ patient.get_full_name }}{% endblock %}
+{% block title %}Patient Medications: {{ patient.get_full_name }}{% endblock %}
 
 {% block content %}
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="mb-0">{% translate "Hasta İlaçları" %}: {{ patient.get_full_name }}</h1>
+        <h1 class="mb-0">Patient Medications: {{ patient.get_full_name }}</h1>
         <a href="{% url 'patient-detail' patient.id %}" class="btn btn-outline-primary">
-            <i class="fas fa-user me-1"></i> {% translate "Hasta Profiline Dön" %}
+            <i class="fas fa-user me-1"></i> Back to Patient Profile
         </a>
     </div>
 
     <div class="card shadow-sm mb-4">
         <div class="card-header bg-light d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">{% translate "Reçete Edilen İlaçlar" %}</h5>
-            <span class="badge bg-secondary">{{ page_obj.paginator.count }} {% translate "kayıt" %}</span>
+            <h5 class="mb-0">Prescribed Medications</h5>
+            <span class="badge bg-secondary">{{ page_obj.paginator.count }} records</span>
         </div>
         <div class="card-body p-0">
             {% if page_obj %}
@@ -23,107 +23,118 @@
                 <table class="table table-hover mb-0">
                     <thead class="table-light">
                         <tr>
-                            <th>{% translate "İlaç Adı" %}</th>
-                            <th>{% translate "Doz" %}</th>
-                            <th>{% translate "Reçete Tarihi" %}</th>
-                            <th>{% translate "Doktor" %}</th>
-                            <th>{% translate "Kullanım Talimatı" %}</th>
+                            <th>Medication Name</th>
+                            <th>Dosage</th>
+                            <th>Prescription Date</th>
+                            <th>Doctor</th>
+                            <th>Instructions</th>
+                            <th>Status</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for prescription in page_obj %}
                         <tr>
-                            <td>{{ prescription.name }}</td>
+                            <td>
+                                <strong>{{ prescription.name }}</strong>
+                                {% if prescription.medication %}
+                                <br><small class="text-muted">{{ prescription.medication.active_ingredient }}</small>
+                                {% endif %}
+                            </td>
                             <td>{{ prescription.dosage }}</td>
-                            <td>{{ prescription.created_at|date:"d.m.Y" }}</td>
+                            <td>{{ prescription.created_at|date:"M d, Y" }}</td>
                             <td>Dr. {{ prescription.treatment.appointment.doctor.get_full_name }}</td>
-                            <td>{{ prescription.instructions|truncatechars:60 }}</td>
+                            <td>
+                                {% if prescription.instructions %}
+                                {{ prescription.instructions|truncatechars:60 }}
+                                {% else %}
+                                <span class="text-muted">No specific instructions</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if prescription.is_active %}
+                                <span class="badge bg-success">Active</span>
+                                {% else %}
+                                <span class="badge bg-secondary">Inactive</span>
+                                {% endif %}
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
+            
+            <!-- Pagination -->
+            {% if is_paginated %}
+            <div class="card-footer">
+                <nav aria-label="Medications pagination">
+                    <ul class="pagination justify-content-center mb-0">
+                        {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1">First</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                        </li>
+                        {% endif %}
+                        
+                        <li class="page-item active">
+                            <span class="page-link">
+                                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                            </span>
+                        </li>
+                        
+                        {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+            {% endif %}
             {% else %}
-            <div class="p-4 text-center">
-                <p class="text-muted mb-0">{% translate "Bu hasta için kayıtlı ilaç bulunamadı." %}</p>
+            <div class="text-center py-5">
+                <i class="fas fa-pills fa-3x text-muted mb-3"></i>
+                <h5>No medications prescribed</h5>
+                <p class="text-muted">{{ patient.get_full_name }} has no prescribed medications on record.</p>
             </div>
             {% endif %}
         </div>
-        {% if page_obj.has_other_pages %}
-        <div class="card-footer">
-            <nav>
-                <ul class="pagination justify-content-center mb-0">
-                    {% if page_obj.has_previous %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page=1">
-                            <i class="fas fa-angle-double-left"></i>
-                        </a>
-                    </li>
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
-                            <i class="fas fa-angle-left"></i>
-                        </a>
-                    </li>
-                    {% endif %}
-                    
-                    <li class="page-item disabled">
-                        <span class="page-link">
-                            {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
-                        </span>
-                    </li>
-                    
-                    {% if page_obj.has_next %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">
-                            <i class="fas fa-angle-right"></i>
-                        </a>
-                    </li>
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">
-                            <i class="fas fa-angle-double-right"></i>
-                        </a>
-                    </li>
-                    {% endif %}
-                </ul>
-            </nav>
-        </div>
-        {% endif %}
     </div>
 
+    <!-- Current Medications Summary -->
     <div class="card shadow-sm">
-        <div class="card-header bg-light">
-            <h5 class="mb-0">{% translate "İlaç Kullanım Talimatları" %}</h5>
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">
+                <i class="fas fa-capsules me-2"></i>
+                Current Active Medications Summary
+            </h5>
         </div>
         <div class="card-body">
-            <div class="alert alert-info">
-                <h5 class="alert-heading">{% translate "Önemli Hatırlatma" %}</h5>
-                <p>{% translate "İlaçların doktor tarafından önerilen şekilde ve dozda kullanılması önemlidir. İlaç kullanımı ile ilgili herhangi bir sorunuz olması durumunda lütfen doktorunuza danışınız." %}</p>
-                <hr>
-                <p class="mb-0">{% translate "Reçete edilmiş ilaçlarınızla ilgili yan etkiler, kontrendikasyonlar veya diğer sorularınız için eczacınıza da danışabilirsiniz." %}</p>
-            </div>
-            
-            {% if patient.medical_history.all %}
-            <div class="mt-4">
-                <h5>{% translate "Düzenli Kullanılan İlaçlar" %}</h5>
-                <ul class="list-group">
-                    {% for med_history in patient.medical_history.all %}
-                    {% if med_history.condition_type == 'medication' and med_history.is_active %}
-                    <li class="list-group-item">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6 class="mb-1">{{ med_history.condition_name }}</h6>
-                                {% if med_history.notes %}
-                                <small class="text-muted">{{ med_history.notes }}</small>
-                                {% endif %}
-                            </div>
-                            {% if med_history.diagnosed_date %}
-                            <span class="badge bg-secondary">{% translate "Başlangıç" %}: {{ med_history.diagnosed_date|date:"d.m.Y" }}</span>
-                            {% endif %}
+            {% if active_medications %}
+            <div class="row">
+                {% for medication in active_medications %}
+                <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="card border-success">
+                        <div class="card-body">
+                            <h6 class="card-title text-success">{{ medication.name }}</h6>
+                            <p class="card-text">
+                                <strong>Dosage:</strong> {{ medication.dosage }}<br>
+                                <strong>Frequency:</strong> {{ medication.frequency|default:"As prescribed" }}<br>
+                                <strong>Started:</strong> {{ medication.created_at|date:"M d, Y" }}
+                            </p>
                         </div>
-                    </li>
-                    {% endif %}
-                    {% endfor %}
-                </ul>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-3">
+                <i class="fas fa-info-circle text-info me-2"></i>
+                <span class="text-muted">No active medications at this time.</span>
             </div>
             {% endif %}
         </div>

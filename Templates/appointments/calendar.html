@@ -1,7 +1,7 @@
 {% extends 'core/base.html' %}
 {% load static %}
 
-{% block title %}Randevu Takvimi - Laso Healthcare{% endblock %}
+{% block title %}Appointment Calendar - Laso Healthcare{% endblock %}
 
 {% block extra_css %}
 <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.css" rel="stylesheet">
@@ -28,22 +28,22 @@
         color: #5E6278;
     }
     .fc-button-primary {
-        background-color: #f5f8fa !important;
-        border-color: #f5f8fa !important;
-        color: #5E6278 !important;
+        background-color: var(--teal-500) !important;
+        border-color: var(--teal-500) !important;
+        color: #ffffff !important;
     }
     .fc-button-primary:hover {
-        background-color: #e4e6ef !important;
-        border-color: #e4e6ef !important;
+        background-color: var(--teal-600) !important;
+        border-color: var(--teal-600) !important;
     }
     .fc-button-active {
-        background-color: #3699FF !important;
-        border-color: #3699FF !important;
+        background-color: var(--teal-700) !important;
+        border-color: var(--teal-700) !important;
         color: #ffffff !important;
     }
     .fc-button-active:hover {
-        background-color: #187de4 !important;
-        border-color: #187de4 !important;
+        background-color: var(--teal-800) !important;
+        border-color: var(--teal-800) !important;
     }
     .fc-daygrid-event {
         border-radius: 4px;
@@ -54,62 +54,105 @@
         font-size: 0.85rem;
     }
     .fc-day-today {
-        background-color: rgba(54, 153, 255, 0.1) !important;
+        background-color: rgba(20, 184, 166, 0.1) !important;
+    }
+    .legend-item {
+        display: inline-flex;
+        align-items: center;
+        margin-right: 15px;
+        margin-bottom: 5px;
+    }
+    .legend-color {
+        width: 12px;
+        height: 12px;
+        border-radius: 2px;
+        margin-right: 5px;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="card mb-5 mb-xl-10">
-    <div class="card-header border-0">
-        <div class="card-title m-0">
-            <h3 class="fw-bold m-0">Randevu Takvimi</h3>
-        </div>
-        <div class="card-toolbar">
-            <a href="{% url 'core:appointment-list' %}" class="btn btn-sm btn-light-primary me-3">
-                <i class="ki-outline ki-calendar-tick fs-2"></i>Randevu Listesi
-            </a>
-            {% if user.is_doctor or user.is_receptionist or user.is_admin_user %}
-            <a href="{% url 'core:appointment-create' %}" class="btn btn-sm btn-primary">
-                <i class="ki-outline ki-plus fs-2"></i>Yeni Randevu
-            </a>
-            {% endif %}
-        </div>
-    </div>
-    
-    <div class="card-body py-5">
-        <!-- Filtreler -->
-        <div class="mb-5">
-            <div class="row g-3">
-                {% if user.is_receptionist or user.is_admin_user %}
-                <div class="col-md-4">
-                    <label class="form-label">Doktor</label>
-                    <select id="doctor-filter" class="form-select">
-                        <option value="">Tüm Doktorlar</option>
-                        {% for doctor in doctors %}
-                        <option value="{{ doctor.id }}">Dr. {{ doctor.get_full_name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                {% endif %}
-                <div class="col-md-4">
-                    <label class="form-label">Durum</label>
-                    <select id="status-filter" class="form-select">
-                        <option value="">Tüm Durumlar</option>
-                        <option value="planned">Planlandı</option>
-                        <option value="completed">Tamamlandı</option>
-                        <option value="cancelled">İptal Edildi</option>
-                    </select>
-                </div>
-                <div class="col-md-4 d-flex align-items-end">
-                    <button id="apply-filters" class="btn btn-primary">Filtrele</button>
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2><i class="fas fa-calendar-alt text-primary"></i> Appointment Calendar</h2>
+                <div class="btn-group" role="group">
+                    {% if user.is_doctor or user.is_receptionist or user.is_admin_user %}
+                    <a href="{% url 'core:appointment-create' %}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> New Appointment
+                    </a>
+                    {% endif %}
+                    <a href="{% url 'core:appointment-list' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-list"></i> List View
+                    </a>
                 </div>
             </div>
         </div>
-        
-        <!-- Takvim -->
-        <div class="calendar-container p-5">
-            <div id="calendar"></div>
+    </div>
+
+    <!-- Legend -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body py-3">
+                    <h6 class="mb-2">Legend:</h6>
+                    <div class="d-flex flex-wrap">
+                        <div class="legend-item">
+                            <div class="legend-color" style="background-color: #14b8a6;"></div>
+                            <span>Scheduled</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background-color: #22c55e;"></div>
+                            <span>Completed</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background-color: #ef4444;"></div>
+                            <span>Cancelled</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background-color: #f59e0b;"></div>
+                            <span>Pending</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Calendar -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card calendar-container">
+                <div class="card-body">
+                    <div id="calendar"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Appointment Modal -->
+<div class="modal fade" id="appointmentModal" tabindex="-1" aria-labelledby="appointmentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="appointmentModalLabel">Appointment Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="appointmentDetails">
+                    <!-- Appointment details will be loaded here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <a href="#" id="viewAppointmentBtn" class="btn btn-primary">View Full Details</a>
+                {% if user.is_doctor or user.is_receptionist or user.is_admin_user %}
+                <a href="#" id="editAppointmentBtn" class="btn btn-warning">Edit</a>
+                {% endif %}
+            </div>
         </div>
     </div>
 </div>
@@ -117,73 +160,114 @@
 
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/locales-all.min.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        var calendarEl = document.getElementById('calendar');
-        
-        var calendar = new FullCalendar.Calendar(calendarEl, {
-            locale: 'tr',
-            initialView: 'dayGridMonth',
-            headerToolbar: {
-                left: 'prev,next today',
-                center: 'title',
-                right: 'dayGridMonth,timeGridWeek,timeGridDay'
-            },
-            events: [
-                {% for event in calendar_data %}
-                {
-                    id: '{{ event.id }}',
-                    title: '{{ event.title|escapejs }}',
-                    start: '{{ event.start }}',
-                    end: '{{ event.end }}',
-                    url: '{{ event.url }}',
-                    backgroundColor: '{{ event.backgroundColor }}',
-                    borderColor: '{{ event.borderColor }}'
-                }{% if not forloop.last %},{% endif %}
-                {% endfor %}
-            ],
-            eventClick: function(info) {
-                if (info.event.url) {
-                    window.location.href = info.event.url;
-                    return false;
-                }
-            },
-            eventTimeFormat: {
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: false
+document.addEventListener('DOMContentLoaded', function() {
+    var calendarEl = document.getElementById('calendar');
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        height: 'auto',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay'
+        },
+        events: '{% url "calendar-events" %}',
+        eventClick: function(info) {
+            showAppointmentModal(info.event);
+        },
+        eventClassNames: function(arg) {
+            return ['fc-event-' + arg.event.extendedProps.status];
+        },
+        eventColor: function(event) {
+            switch(event.extendedProps.status) {
+                case 'planned': return '#14b8a6';
+                case 'completed': return '#22c55e';
+                case 'cancelled': return '#ef4444';
+                default: return '#f59e0b';
             }
-        });
-        
-        calendar.render();
-        
-        // Filtre butonuna tıklandığında
-        document.getElementById('apply-filters').addEventListener('click', function() {
-            var doctorFilter = document.getElementById('doctor-filter') ? document.getElementById('doctor-filter').value : '';
-            var statusFilter = document.getElementById('status-filter').value;
-            
-            // Tüm etkinlikleri filtrele
-            calendar.getEvents().forEach(function(event) {
-                var shouldShow = true;
-                
-                // Doktor filtresi
-                if (doctorFilter && event.extendedProps && event.extendedProps.doctorId && event.extendedProps.doctorId != doctorFilter) {
-                    shouldShow = false;
-                }
-                
-                // Durum filtresi
-                if (statusFilter && event.extendedProps && event.extendedProps.status && event.extendedProps.status != statusFilter) {
-                    shouldShow = false;
-                }
-                
-                if (shouldShow) {
-                    event.setProp('display', 'auto');
-                } else {
-                    event.setProp('display', 'none');
-                }
-            });
-        });
+        },
+        dayCellClassNames: function(date) {
+            var today = new Date();
+            if (date.date.toDateString() === today.toDateString()) {
+                return ['fc-day-today'];
+            }
+            return [];
+        }
     });
+    
+    calendar.render();
+    
+    function showAppointmentModal(event) {
+        var modal = new bootstrap.Modal(document.getElementById('appointmentModal'));
+        var appointmentId = event.id;
+        
+        // Update modal content
+        document.getElementById('appointmentModalLabel').textContent = 'Appointment: ' + event.title;
+        
+        var detailsHtml = `
+            <div class="row">
+                <div class="col-md-6">
+                    <strong>Date:</strong> ${event.start.toLocaleDateString()}
+                </div>
+                <div class="col-md-6">
+                    <strong>Time:</strong> ${event.start.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div class="col-md-6">
+                    <strong>Patient:</strong> ${event.extendedProps.patient || 'N/A'}
+                </div>
+                <div class="col-md-6">
+                    <strong>Doctor:</strong> ${event.extendedProps.doctor || 'N/A'}
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div class="col-md-6">
+                    <strong>Status:</strong> 
+                    <span class="badge bg-${getStatusColor(event.extendedProps.status)}">${getStatusText(event.extendedProps.status)}</span>
+                </div>
+                <div class="col-md-6">
+                    <strong>Duration:</strong> ${event.extendedProps.duration || '30'} minutes
+                </div>
+            </div>
+            ${event.extendedProps.description ? `
+            <div class="row mt-2">
+                <div class="col-12">
+                    <strong>Description:</strong><br>
+                    ${event.extendedProps.description}
+                </div>
+            </div>
+            ` : ''}
+        `;
+        
+        document.getElementById('appointmentDetails').innerHTML = detailsHtml;
+        
+        // Update action buttons
+        document.getElementById('viewAppointmentBtn').href = `/core/appointments/${appointmentId}/`;
+        {% if user.is_doctor or user.is_receptionist or user.is_admin_user %}
+        document.getElementById('editAppointmentBtn').href = `/core/appointments/${appointmentId}/update/`;
+        {% endif %}
+        
+        modal.show();
+    }
+    
+    function getStatusColor(status) {
+        switch(status) {
+            case 'planned': return 'primary';
+            case 'completed': return 'success';
+            case 'cancelled': return 'danger';
+            default: return 'warning';
+        }
+    }
+    
+    function getStatusText(status) {
+        switch(status) {
+            case 'planned': return 'Scheduled';
+            case 'completed': return 'Completed';
+            case 'cancelled': return 'Cancelled';
+            default: return 'Pending';
+        }
+    }
+});
 </script>
-{% endblock %} 
+{% endblock %}

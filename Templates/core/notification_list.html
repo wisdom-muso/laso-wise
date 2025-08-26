@@ -1,7 +1,7 @@
 {% extends 'core/base.html' %}
 {% load static %}
 
-{% block title %}Bildirimler - Laso Healthcare{% endblock %}
+{% block title %}Notifications - Laso Healthcare{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -15,8 +15,8 @@
     }
     
     .notification-unread {
-        border-left: 3px solid #009ef7;
-        background-color: #f1faff;
+        border-left: 3px solid var(--teal-500);
+        background-color: rgba(20, 184, 166, 0.05);
     }
     
     .notification-time {
@@ -45,183 +45,201 @@
 <div class="card">
     <div class="card-header border-0 pt-6">
         <div class="card-title">
-            <h3 class="card-label">Bildirimlerim</h3>
+            <h3 class="card-label">My Notifications</h3>
         </div>
         <div class="card-toolbar">
-            <div class="d-flex align-items-center position-relative my-1">
-                <a href="{% url 'core:mark-all-notifications-read' %}" class="btn btn-sm btn-light-primary me-3">
-                    <i class="ki-outline ki-check-square fs-2"></i>Tümünü Okundu İşaretle
-                </a>
-            </div>
+            {% if unread_notifications_count > 0 %}
+            <button type="button" class="btn btn-sm btn-primary" id="mark-all-read">
+                <i class="ki-outline ki-check-square fs-2"></i>Mark All as Read
+            </button>
+            {% endif %}
         </div>
     </div>
-    
-    <div class="card-body py-3">
+
+    <div class="card-body">
         {% if notifications %}
-            <div class="table-responsive">
-                <div class="d-flex flex-column gap-3">
-                    {% for notification in notifications %}
-                        <div class="notification-item p-5 rounded {% if not notification.is_read %}notification-unread{% endif %}">
-                            <div class="d-flex flex-stack mb-2">
-                                <div class="d-flex align-items-center">
-                                    <div class="symbol symbol-35px me-3">
-                                        {% if notification.notification_type == 'appointment' %}
-                                            <span class="symbol-label bg-light-primary">
-                                                <i class="ki-outline ki-calendar fs-2 text-primary"></i>
-                                            </span>
-                                        {% elif notification.notification_type == 'test_result' %}
-                                            <span class="symbol-label bg-light-success">
-                                                <i class="fas fa-flask fs-2 text-success"></i>
-                                            </span>
-                                        {% elif notification.notification_type == 'prescription' %}
-                                            <span class="symbol-label bg-light-info">
-                                                <i class="fas fa-pills fs-2 text-info"></i>
-                                            </span>
-                                        {% elif notification.notification_type == 'message' %}
-                                            <span class="symbol-label bg-light-warning">
-                                                <i class="ki-outline ki-message-text-2 fs-2 text-warning"></i>
-                                            </span>
-                                        {% else %}
-                                            <span class="symbol-label bg-light-danger">
-                                                <i class="ki-outline ki-notification-status fs-2 text-danger"></i>
-                                            </span>
-                                        {% endif %}
-                                    </div>
-                                    <div class="ms-1">
-                                        <a href="{% if notification.related_url %}{{ notification.related_url }}{% else %}#{% endif %}" class="fs-5 fw-bold text-gray-900 text-hover-primary">{{ notification.title }}</a>
-                                        <div class="text-gray-600 fs-7">{{ notification.message }}</div>
-                                    </div>
-                                </div>
-                                <div class="d-flex align-items-center">
-                                    <span class="notification-time me-3">{{ notification.created_at|date:"d M Y H:i" }}</span>
-                                    <div class="notification-actions">
-                                        {% if not notification.is_read %}
-                                            <a href="{% url 'core:mark-notification-read' notification.id %}" class="btn btn-sm btn-icon btn-light-primary btn-active-light-primary me-1" data-bs-toggle="tooltip" title="Okundu İşaretle">
-                                                <i class="ki-outline ki-check fs-2"></i>
-                                            </a>
-                                        {% endif %}
-                                    </div>
+            <div class="notification-list">
+                {% for notification in notifications %}
+                <div class="notification-item {% if not notification.is_read %}notification-unread{% endif %} 
+                          d-flex align-items-center p-4 border-bottom" 
+                     data-notification-id="{{ notification.id }}">
+                    
+                    <!-- Icon -->
+                    <div class="me-4">
+                        {% if notification.notification_type == 'appointment' %}
+                            <div class="symbol symbol-40px">
+                                <div class="symbol-label bg-light-primary">
+                                    <i class="ki-outline ki-calendar fs-2 text-primary"></i>
                                 </div>
                             </div>
+                        {% elif notification.notification_type == 'treatment' %}
+                            <div class="symbol symbol-40px">
+                                <div class="symbol-label bg-light-success">
+                                    <i class="ki-outline ki-notepad-bookmark fs-2 text-success"></i>
+                                </div>
+                            </div>
+                        {% elif notification.notification_type == 'system' %}
+                            <div class="symbol symbol-40px">
+                                <div class="symbol-label bg-light-info">
+                                    <i class="ki-outline ki-information fs-2 text-info"></i>
+                                </div>
+                            </div>
+                        {% elif notification.notification_type == 'reminder' %}
+                            <div class="symbol symbol-40px">
+                                <div class="symbol-label bg-light-warning">
+                                    <i class="ki-outline ki-notification-status fs-2 text-warning"></i>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="symbol symbol-40px">
+                                <div class="symbol-label bg-light-dark">
+                                    <i class="ki-outline ki-notification-bing fs-2 text-dark"></i>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Content -->
+                    <div class="flex-grow-1">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <h6 class="mb-1 fw-bold text-gray-900">{{ notification.title }}</h6>
+                                <p class="mb-1 text-gray-700 fs-6">{{ notification.message }}</p>
+                                <span class="notification-time">{{ notification.created_at|date:"M d, Y g:i A" }}</span>
+                            </div>
+                            
+                            <!-- Actions -->
+                            <div class="notification-actions d-flex gap-2">
+                                {% if not notification.is_read %}
+                                <button type="button" class="btn btn-sm btn-light-primary mark-read-btn" 
+                                        data-notification-id="{{ notification.id }}">
+                                    <i class="ki-outline ki-check fs-3"></i>
+                                </button>
+                                {% endif %}
+                                
+                                {% if notification.related_url %}
+                                <a href="{{ notification.related_url }}" class="btn btn-sm btn-primary">
+                                    <i class="ki-outline ki-arrow-right fs-3"></i>
+                                </a>
+                                {% endif %}
+                            </div>
                         </div>
-                    {% endfor %}
+                    </div>
                 </div>
+                {% endfor %}
             </div>
-            
+
             <!-- Pagination -->
             {% if is_paginated %}
-            <div class="d-flex justify-content-center py-4">
-                <ul class="pagination">
+            <div class="d-flex justify-content-center mt-6">
+                <div class="pagination">
                     {% if page_obj.has_previous %}
-                        <li class="page-item"><a class="page-link" href="?page=1">&laquo; İlk</a></li>
-                        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">&lsaquo;</a></li>
+                        <a href="?page=1" class="btn btn-sm btn-light-primary me-2">First</a>
+                        <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-sm btn-primary me-2">Previous</a>
                     {% endif %}
                     
-                    {% for i in paginator.page_range %}
-                        {% if page_obj.number == i %}
-                            <li class="page-item active"><a class="page-link" href="#">{{ i }}</a></li>
-                        {% elif i > page_obj.number|add:'-3' and i < page_obj.number|add:'3' %}
-                            <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
-                        {% endif %}
-                    {% endfor %}
+                    <span class="btn btn-sm btn-primary me-2">
+                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                    </span>
                     
                     {% if page_obj.has_next %}
-                        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">&rsaquo;</a></li>
-                        <li class="page-item"><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Son &raquo;</a></li>
+                        <a href="?page={{ page_obj.next_page_number }}" class="btn btn-sm btn-primary me-2">Next</a>
+                        <a href="?page={{ page_obj.paginator.num_pages }}" class="btn btn-sm btn-light-primary">Last</a>
                     {% endif %}
-                </ul>
+                </div>
             </div>
             {% endif %}
-            
         {% else %}
-            <div class="text-center p-10">
-                <div class="mb-5">
-                    <i class="ki-outline ki-notification-status fs-5tx text-muted"></i>
+            <div class="text-center py-10">
+                <div class="symbol symbol-100px mx-auto mb-5">
+                    <div class="symbol-label bg-light-primary">
+                        <i class="ki-outline ki-notification-status fs-4x text-primary"></i>
+                    </div>
                 </div>
-                <div class="fs-4 fw-bold text-gray-600 mb-2">Henüz bildiriminiz bulunmuyor</div>
-                <div class="fs-6 text-gray-500">Bildirimleriniz burada görüntülenecek</div>
+                <h5 class="text-gray-900 fw-bold mb-2">No Notifications</h5>
+                <div class="fs-6 text-gray-500">Your notifications will appear here</div>
             </div>
         {% endif %}
     </div>
 </div>
-{% endblock %}
 
-{% block extra_js %}
 <script>
-    // Bildirim işaretleme işlemi için AJAX kullanımı
     document.addEventListener('DOMContentLoaded', function() {
-        const notificationLinks = document.querySelectorAll('a[href^="{% url 'core:mark-notification-read' 0 %}"'.replace('/0/', '/'));
-        
-        notificationLinks.forEach(link => {
-            link.addEventListener('click', function(e) {
-                e.preventDefault();
+        // Individual notification mark as read
+        document.querySelectorAll('.mark-read-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const notificationId = this.dataset.notificationId;
                 
-                const url = this.getAttribute('href');
-                
-                fetch(url, {
+                fetch(`{% url 'core:mark-notification-read' 0 %}`.replace('0', notificationId), {
+                    method: 'POST',
                     headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'Content-Type': 'application/json',
+                    },
                 })
                 .then(response => response.json())
                 .then(data => {
-                    if (data.status === 'success') {
-                        // Bildirimin görünümünü güncelle
-                        const notificationItem = this.closest('.notification-item');
+                    if (data.success) {
+                        // Update notification appearance
+                        const notificationItem = document.querySelector(`[data-notification-id="${notificationId}"]`);
                         notificationItem.classList.remove('notification-unread');
+                        
+                        // Hide mark as read button
                         this.style.display = 'none';
                         
-                        // Bildirim sayacını güncelle
-                        const countBadge = document.querySelector('.position-absolute.badge.rounded-pill.bg-danger');
-                        if (countBadge) {
-                            const currentCount = parseInt(countBadge.textContent);
-                            if (currentCount > 1) {
-                                countBadge.textContent = currentCount - 1;
-                            } else {
-                                countBadge.remove();
-                            }
-                        }
+                        // Update notification counter
+                        updateNotificationCounter();
                     }
-                });
+                })
+                .catch(error => console.error('Error:', error));
             });
         });
-        
-        // Tümünü okundu işaretle
-        const markAllReadLink = document.querySelector('a[href="{% url 'core:mark-all-notifications-read' %}"]');
-        if (markAllReadLink) {
-            markAllReadLink.addEventListener('click', function(e) {
-                e.preventDefault();
-                
-                const url = this.getAttribute('href');
-                
-                fetch(url, {
+
+        // Mark all as read
+        const markAllReadBtn = document.getElementById('mark-all-read');
+        if (markAllReadBtn) {
+            markAllReadBtn.addEventListener('click', function() {
+                fetch('{% url "core:mark-all-notifications-read" %}', {
+                    method: 'POST',
                     headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'Content-Type': 'application/json',
+                    },
                 })
                 .then(response => response.json())
                 .then(data => {
-                    if (data.status === 'success') {
-                        // Tüm bildirimlerin görünümünü güncelle
-                        const notificationItems = document.querySelectorAll('.notification-item');
-                        notificationItems.forEach(item => {
+                    if (data.success) {
+                        // Update all notification appearances
+                        document.querySelectorAll('.notification-unread').forEach(item => {
                             item.classList.remove('notification-unread');
                         });
                         
-                        // Tüm işaretleme butonlarını gizle
-                        const markButtons = document.querySelectorAll('.notification-actions .btn');
-                        markButtons.forEach(btn => {
+                        // Hide all mark as read buttons
+                        document.querySelectorAll('.mark-read-btn').forEach(btn => {
                             btn.style.display = 'none';
                         });
                         
-                        // Bildirim sayacını güncelle
-                        const countBadge = document.querySelector('.position-absolute.badge.rounded-pill.bg-danger');
-                        if (countBadge) {
-                            countBadge.remove();
-                        }
+                        // Hide mark all read button
+                        this.style.display = 'none';
+                        
+                        // Update notification counter
+                        updateNotificationCounter();
                     }
-                });
+                })
+                .catch(error => console.error('Error:', error));
             });
+        }
+
+        function updateNotificationCounter() {
+            const counter = document.querySelector('.badge.badge-primary');
+            if (counter) {
+                const unreadCount = document.querySelectorAll('.notification-unread').length;
+                if (unreadCount === 0) {
+                    counter.style.display = 'none';
+                } else {
+                    counter.textContent = unreadCount;
+                }
+            }
         }
     });
 </script>
