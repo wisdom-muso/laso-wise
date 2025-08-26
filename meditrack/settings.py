@@ -184,22 +184,105 @@ if EMAIL_BACKEND == 'django.core.mail.backends.smtp.EmailBackend':
 
 # Unfold Admin Theme Settings
 UNFOLD = {
-    "SITE_TITLE": "Laso Healthcare",
-    "SITE_HEADER": "Laso Healthcare",
+    "SITE_TITLE": "Laso Healthcare Admin",
+    "SITE_HEADER": "Laso Healthcare - Clinical Management System",
     "SITE_URL": "/",
-    "SITE_ICON": None,  # or a path to your logo
+    "SITE_ICON": None,
     "DASHBOARD_CALLBACK": None,
     "STYLES": [
-        "css/admin_custom.css",  # Custom CSS for teal theme
+        "css/admin_custom.css",
     ],
-    "SCRIPTS": [],  # Using default scripts
+    "SCRIPTS": [],
     "SIDEBAR": {
         "show_search": True,
         "show_all_applications": True,
-        "navigation": []
+        "navigation": [
+            {
+                "title": "Patient Management",
+                "separator": True,
+                "items": [
+                    {
+                        "title": "Patients",
+                        "icon": "people",
+                        "link": "/admin/users/user/?user_type__exact=patient",
+                    },
+                    {
+                        "title": "Medical History",
+                        "icon": "assignment",
+                        "link": "/admin/core/medicalhistory/",
+                    },
+                ]
+            },
+            {
+                "title": "Clinical Operations",
+                "separator": True,
+                "items": [
+                    {
+                        "title": "Appointments",
+                        "icon": "event",
+                        "link": "/admin/appointments/appointment/",
+                    },
+                    {
+                        "title": "Treatments",
+                        "icon": "local_hospital",
+                        "link": "/admin/treatments/treatment/",
+                    },
+                    {
+                        "title": "Medications",
+                        "icon": "medication",
+                        "link": "/admin/treatments/medication/",
+                    },
+                ]
+            },
+            {
+                "title": "Medical Records",
+                "separator": True,
+                "items": [
+                    {
+                        "title": "Lab Tests",
+                        "icon": "science",
+                        "link": "/admin/treatments/labtest/",
+                    },
+                    {
+                        "title": "Medical Images",
+                        "icon": "image",
+                        "link": "/admin/treatments/medicalimage/",
+                    },
+                    {
+                        "title": "Reports",
+                        "icon": "description",
+                        "link": "/admin/treatments/report/",
+                    },
+                ]
+            },
+        ]
     },
-    "TABS": [],
-    "EXTENSIONS": {},
+    "TABS": [
+        {
+            "models": [
+                "users.user",
+                "core.medicalhistory",
+            ],
+            "items": [
+                {
+                    "title": "Patients",
+                    "link": "/admin/users/user/?user_type__exact=patient",
+                },
+                {
+                    "title": "Doctors",
+                    "link": "/admin/users/user/?user_type__exact=doctor",
+                },
+            ]
+        },
+    ],
+    "EXTENSIONS": {
+        "modeltranslation": {
+            "flags": {
+                "en": "🇺🇸",
+                "tr": "🇹🇷",
+            },
+        },
+    },
     "COLORMODE": {
         "default": "light",
         "toggle": True,
@@ -211,7 +294,7 @@ UNFOLD = {
             "200": "#99f6e4",
             "300": "#5eead4",
             "400": "#2dd4bf",
-            "500": "#14b8a6",  # Main teal color
+            "500": "#14b8a6",
             "600": "#0d9488",
             "700": "#0f766e", 
             "800": "#115e59",

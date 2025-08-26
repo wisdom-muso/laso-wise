@@ -19,7 +19,7 @@ from .views_imaging import (
 )
 
 urlpatterns = [
-    # Laboratuvar Testleri
+    # Laboratory Tests
     path('lab-tests/', LabTestListView.as_view(), name='lab-test-list'),
     path('patients/<int:patient_id>/lab-tests/', LabTestListView.as_view(), name='lab-test-list'),
     path('treatments/<int:treatment_id>/lab-tests/create/', LabTestCreateView.as_view(), name='lab-test-create'),
@@ -28,29 +28,29 @@ urlpatterns = [
     path('lab-tests/<int:pk>/update/', LabTestUpdateView.as_view(), name='lab-test-update'),
     path('lab-tests/<int:pk>/delete/', LabTestDeleteView.as_view(), name='lab-test-delete'),
     
-    # Test Sonuçları
+    # Test Results
     path('lab-tests/<int:lab_test_id>/results/create/', TestResultCreateView.as_view(), name='test-result-create'),
     path('test-results/<int:pk>/update/', TestResultUpdateView.as_view(), name='test-result-update'),
     
-    # İlaç Yönetimi
+    # Medication Management
     path('medications/', MedicationListView.as_view(), name='medication_list'),
     path('medications/<int:pk>/', MedicationDetailView.as_view(), name='medication_detail'),
     path('medications/create/', MedicationCreateView.as_view(), name='medication_create'),
     path('medications/<int:pk>/update/', MedicationUpdateView.as_view(), name='medication_update'),
     path('medications/<int:pk>/delete/', MedicationDeleteView.as_view(), name='medication_delete'),
     
-    # İlaç Etkileşimleri
+    # Drug Interactions
     path('interactions/', InteractionListView.as_view(), name='interaction_list'),
     path('interactions/<int:pk>/', InteractionDetailView.as_view(), name='interaction_detail'),
     path('interactions/create/', InteractionCreateView.as_view(), name='interaction_create'),
     path('interactions/<int:pk>/update/', InteractionUpdateView.as_view(), name='interaction_update'),
     path('interactions/<int:pk>/delete/', InteractionDeleteView.as_view(), name='interaction_delete'),
     
-    # Hasta İlaçları
+    # Patient Medications
     path('patients/<int:patient_id>/medications/', patient_medications, name='patient_medications'),
     path('api/medications/search/', medication_search_api, name='medication_search_api'),
     
-    # Tıbbi Görüntülemeler
+    # Medical Imaging
     path('medical-images/', MedicalImageListView.as_view(), name='medical-image-list'),
     path('patients/<int:patient_id>/medical-images/', MedicalImageListView.as_view(), name='medical-image-list'),
     path('treatments/<int:treatment_id>/medical-images/', MedicalImageListView.as_view(), name='medical-image-list'),
@@ -61,7 +61,7 @@ urlpatterns = [
     path('medical-images/<int:pk>/delete/', MedicalImageDeleteView.as_view(), name='medical-image-delete'),
     path('medical-images/<int:pk>/file/', serve_medical_image, name='serve-medical-image'),
     
-    # Raporlar
+    # Reports
     path('reports/', ReportListView.as_view(), name='report-list'),
     path('patients/<int:patient_id>/reports/', ReportListView.as_view(), name='report-list'),
     path('treatments/<int:treatment_id>/reports/', ReportListView.as_view(), name='report-list'),

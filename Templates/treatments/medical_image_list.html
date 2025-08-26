@@ -1,37 +1,33 @@
 {% extends 'core/base.html' %}
-{% load i18n %}
+{% load static %}
 
-{% block title %}{% translate "Tıbbi Görüntüler" %}{% endblock %}
+{% block title %}Medical Images{% endblock %}
 
 {% block content %}
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="mb-0">{% translate "Tıbbi Görüntüler" %}</h1>
+        <h1 class="mb-0">Medical Images</h1>
         {% if patient %}
             <span class="fs-5 text-muted">{{ patient.get_full_name }}</span>
         {% endif %}
         
         {% if treatment %}
-            <span class="fs-5 text-muted">Tedavi: {{ treatment }}</span>
+            <span class="fs-5 text-muted">Treatment: {{ treatment }}</span>
         {% endif %}
         
         <div>
             {% if perms.treatments.add_medicalimage or user.is_doctor %}
                 {% if patient %}
                     <a href="{% url 'medical-image-create' patient_id=patient.id %}" class="btn btn-primary">
-                        <i class="fas fa-plus me-1"></i> {% translate "Yeni Görüntü Ekle" %}
+                        <i class="fas fa-plus me-1"></i> Add New Image
                     </a>
                 {% elif treatment %}
                     <a href="{% url 'medical-image-create' treatment_id=treatment.id %}" class="btn btn-primary">
-                        <i class="fas fa-plus me-1"></i> {% translate "Yeni Görüntü Ekle" %}
+                        <i class="fas fa-plus me-1"></i> Add New Image
                     </a>
                 {% else %}
-                    <!-- 
-                    This URL requires a patient_id or treatment_id parameter, so we need to direct
-                    the user to select a patient or treatment first 
-                    -->
                     <a href="{% url 'core:patient-list' %}" class="btn btn-primary">
-                        <i class="fas fa-plus me-1"></i> {% translate "Önce Hasta Seçin" %}
+                        <i class="fas fa-plus me-1"></i> Select Patient First
                     </a>
                 {% endif %}
             {% endif %}
@@ -40,28 +36,32 @@
 
     <div class="card mb-4 shadow-sm">
         <div class="card-header bg-light">
-            <h5 class="mb-0">{% translate "Görüntü Ara" %}</h5>
+            <h5 class="mb-0">Search Images</h5>
         </div>
         <div class="card-body">
             <form method="get" class="row g-3">
                 <div class="col-md-3">
-                    {{ search_form.image_type.label_tag }}
-                    {{ search_form.image_type }}
+                    <label for="id_image_type" class="form-label">Image Type</label>
+                    <select name="image_type" class="form-select" id="id_image_type">
+                        <option value="">All Types</option>
+                        <option value="x_ray" {% if request.GET.image_type == 'x_ray' %}selected{% endif %}>X-Ray</option>
+                        <option value="ct_scan" {% if request.GET.image_type == 'ct_scan' %}selected{% endif %}>CT Scan</option>
+                        <option value="mri" {% if request.GET.image_type == 'mri' %}selected{% endif %}>MRI</option>
+                        <option value="ultrasound" {% if request.GET.image_type == 'ultrasound' %}selected{% endif %}>Ultrasound</option>
+                        <option value="mammography" {% if request.GET.image_type == 'mammography' %}selected{% endif %}>Mammography</option>
+                        <option value="other" {% if request.GET.image_type == 'other' %}selected{% endif %}>Other</option>
+                    </select>
                 </div>
                 <div class="col-md-3">
-                    {{ search_form.body_part.label_tag }}
-                    {{ search_form.body_part }}
+                    <label for="id_date_from" class="form-label">Date From</label>
+                    <input type="date" name="date_from" class="form-control" id="id_date_from" value="{{ request.GET.date_from }}">
                 </div>
-                <div class="col-md-2">
-                    {{ search_form.date_from.label_tag }}
-                    {{ search_form.date_from }}
+                <div class="col-md-3">
+                    <label for="id_date_to" class="form-label">Date To</label>
+                    <input type="date" name="date_to" class="form-control" id="id_date_to" value="{{ request.GET.date_to }}">
                 </div>
-                <div class="col-md-2">
-                    {{ search_form.date_to.label_tag }}
-                    {{ search_form.date_to }}
-                </div>
-                <div class="col-md-2 d-flex align-items-end">
-                    <button type="submit" class="btn btn-primary w-100">{% translate "Ara" %}</button>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">Search</button>
                 </div>
             </form>
         </div>
@@ -69,93 +69,139 @@
 
     <div class="card shadow-sm">
         <div class="card-header bg-light d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">{% translate "Tıbbi Görüntüler" %}</h5>
-            <span class="badge bg-secondary">{{ page_obj.paginator.count }} {% translate "kayıt" %}</span>
+            <h5 class="mb-0">Medical Images</h5>
+            <span class="badge bg-secondary">{{ page_obj.paginator.count }} images</span>
         </div>
         <div class="card-body">
             {% if medical_images %}
-                <div class="row">
-                    {% for image in medical_images %}
-                    <div class="col-md-4 col-lg-3 mb-4">
-                        <div class="card h-100 shadow-sm">
-                            <div class="card-img-top position-relative" style="height: 200px; overflow: hidden;">
-                                <img src="{% url 'serve-medical-image' image.pk %}" class="img-fluid" alt="{{ image.body_part }}" style="object-fit: cover; width: 100%; height: 100%;">
-                                <div class="position-absolute top-0 end-0 p-2">
-                                    <span class="badge bg-primary">{{ image.get_image_type_display }}</span>
-                                </div>
+            <div class="row">
+                {% for image in medical_images %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100 border">
+                        <div class="position-relative">
+                            {% if image.image_file %}
+                            <img src="{% url 'serve-medical-image' image.pk %}" 
+                                 class="card-img-top" 
+                                 style="height: 200px; object-fit: cover;" 
+                                 alt="{{ image.title }}">
+                            {% else %}
+                            <div class="card-img-top d-flex align-items-center justify-content-center bg-light" 
+                                 style="height: 200px;">
+                                <i class="fas fa-image fa-3x text-muted"></i>
                             </div>
-                            <div class="card-body">
-                                <h6 class="card-title mb-1">{{ image.body_part }}</h6>
-                                <p class="text-muted small mb-2">{{ image.taken_date|date:"d.m.Y" }}</p>
-                                {% if image.description %}
-                                    <p class="card-text small text-truncate">{{ image.description }}</p>
+                            {% endif %}
+                            
+                            <div class="position-absolute top-0 end-0 m-2">
+                                {% if image.image_type == 'x_ray' %}
+                                <span class="badge bg-primary">X-Ray</span>
+                                {% elif image.image_type == 'ct_scan' %}
+                                <span class="badge bg-info">CT Scan</span>
+                                {% elif image.image_type == 'mri' %}
+                                <span class="badge bg-success">MRI</span>
+                                {% elif image.image_type == 'ultrasound' %}
+                                <span class="badge bg-warning">Ultrasound</span>
+                                {% elif image.image_type == 'mammography' %}
+                                <span class="badge bg-danger">Mammography</span>
+                                {% else %}
+                                <span class="badge bg-secondary">Other</span>
                                 {% endif %}
                             </div>
-                            <div class="card-footer bg-transparent">
-                                <div class="btn-group btn-group-sm w-100">
-                                    <a href="{% url 'medical-image-detail' image.pk %}" class="btn btn-outline-primary">
-                                        <i class="fas fa-eye"></i> {% translate "Görüntüle" %}
-                                    </a>
-                                    {% if perms.treatments.change_medicalimage %}
-                                        <a href="{% url 'medical-image-update' image.pk %}" class="btn btn-outline-secondary">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                    {% endif %}
-                                </div>
+                        </div>
+                        
+                        <div class="card-body">
+                            <h6 class="card-title">{{ image.title }}</h6>
+                            <p class="card-text text-muted small">
+                                <strong>Patient:</strong> {{ image.patient.get_full_name }}<br>
+                                <strong>Date:</strong> {{ image.image_date|date:"M d, Y" }}<br>
+                                {% if image.doctor %}
+                                <strong>Doctor:</strong> {{ image.doctor.get_full_name }}<br>
+                                {% endif %}
+                                {% if image.notes %}
+                                <strong>Notes:</strong> {{ image.notes|truncatechars:100 }}
+                                {% endif %}
+                            </p>
+                        </div>
+                        
+                        <div class="card-footer bg-light">
+                            <div class="btn-group w-100" role="group">
+                                <a href="{% url 'medical-image-detail' image.pk %}" 
+                                   class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
+                                {% if perms.treatments.change_medicalimage or user.is_doctor %}
+                                <a href="{% url 'medical-image-update' image.pk %}" 
+                                   class="btn btn-sm btn-outline-warning">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                                {% endif %}
+                                {% if perms.treatments.delete_medicalimage or user.is_doctor %}
+                                <a href="{% url 'medical-image-delete' image.pk %}" 
+                                   class="btn btn-sm btn-outline-danger">
+                                    <i class="fas fa-trash"></i> Delete
+                                </a>
+                                {% endif %}
                             </div>
                         </div>
                     </div>
-                    {% endfor %}
                 </div>
-            {% else %}
-                <div class="p-4 text-center">
-                    <p class="text-muted mb-0">{% translate "Arama kriterlerinize uygun görüntü bulunamadı." %}</p>
-                </div>
-            {% endif %}
-        </div>
-        {% if is_paginated %}
-            <div class="card-footer bg-light">
-                <nav aria-label="Page navigation">
-                    <ul class="pagination justify-content-center mb-0">
+                {% endfor %}
+            </div>
+            
+            <!-- Pagination -->
+            {% if is_paginated %}
+            <div class="d-flex justify-content-center mt-4">
+                <nav aria-label="Medical images pagination">
+                    <ul class="pagination">
                         {% if page_obj.has_previous %}
-                            <li class="page-item">
-                                <a class="page-link" href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="First">
-                                    <span aria-hidden="true">&laquo;&laquo;</span>
-                                </a>
-                            </li>
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="Previous">
-                                    <span aria-hidden="true">&laquo;</span>
-                                </a>
-                            </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1{% if request.GET.image_type %}&image_type={{ request.GET.image_type }}{% endif %}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}">First</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.image_type %}&image_type={{ request.GET.image_type }}{% endif %}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}">Previous</a>
+                        </li>
                         {% endif %}
-
-                        {% for num in page_obj.paginator.page_range %}
-                            {% if page_obj.number == num %}
-                                <li class="page-item active"><a class="page-link" href="#">{{ num }}</a></li>
-                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                                <li class="page-item">
-                                    <a class="page-link" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a>
-                                </li>
-                            {% endif %}
-                        {% endfor %}
-
+                        
+                        <li class="page-item active">
+                            <span class="page-link">
+                                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                            </span>
+                        </li>
+                        
                         {% if page_obj.has_next %}
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="Next">
-                                    <span aria-hidden="true">&raquo;</span>
-                                </a>
-                            </li>
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="Last">
-                                    <span aria-hidden="true">&raquo;&raquo;</span>
-                                </a>
-                            </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.image_type %}&image_type={{ request.GET.image_type }}{% endif %}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}">Next</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.image_type %}&image_type={{ request.GET.image_type }}{% endif %}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}">Last</a>
+                        </li>
                         {% endif %}
                     </ul>
                 </nav>
             </div>
-        {% endif %}
+            {% endif %}
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-x-ray fa-3x text-muted mb-3"></i>
+                <h5>No medical images found</h5>
+                <p class="text-muted">No medical images match your search criteria.</p>
+                {% if perms.treatments.add_medicalimage or user.is_doctor %}
+                    {% if patient %}
+                        <a href="{% url 'medical-image-create' patient_id=patient.id %}" class="btn btn-primary">
+                            <i class="fas fa-plus me-1"></i> Add First Image
+                        </a>
+                    {% elif treatment %}
+                        <a href="{% url 'medical-image-create' treatment_id=treatment.id %}" class="btn btn-primary">
+                            <i class="fas fa-plus me-1"></i> Add First Image
+                        </a>
+                    {% else %}
+                        <a href="{% url 'core:patient-list' %}" class="btn btn-primary">
+                            <i class="fas fa-plus me-1"></i> Select Patient First
+                        </a>
+                    {% endif %}
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
     </div>
 </div>
 {% endblock %}
