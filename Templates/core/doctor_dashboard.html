@@ -1,6 +1,6 @@
 {% extends 'core/base.html' %}
 
-{% block title %}Doktor Dashboard - Laso Healthcare{% endblock %}
+{% block title %}Doctor Dashboard - Laso Healthcare{% endblock %}
 
 {% block content %}
 <div class="row g-5 g-xl-10 mb-5 mb-xl-10">
@@ -119,17 +119,17 @@
                         {% else %}
                         <div class="text-center py-10">
                             <i class="ki-outline ki-calendar-tick fs-4x text-muted mb-5"></i>
-                            <div class="text-muted fw-semibold fs-6 mb-5">Bugün için planlanmış randevunuz bulunmamaktadır.</div>
+                            <div class="text-muted fw-semibold fs-6 mb-5">No appointments scheduled for today.</div>
                         </div>
                         {% endif %}
                     </div>
                 </div>
                 
-                <!-- Yaklaşan Randevular -->
+                <!-- Upcoming Appointments -->
                 <div class="card mb-5 mb-xl-10">
                     <div class="card-header border-0">
                         <div class="card-title m-0">
-                            <h3 class="fw-bold m-0">Yaklaşan Randevular</h3>
+                            <h3 class="fw-bold m-0">Upcoming Appointments</h3>
                         </div>
                     </div>
                     
@@ -139,11 +139,11 @@
                             <table class="table table-row-dashed table-row-gray-300 align-middle gs-0 gy-4">
                                 <thead>
                                     <tr class="fw-bold text-muted">
-                                        <th class="min-w-150px">Hasta</th>
-                                        <th class="min-w-140px">Tarih</th>
-                                        <th class="min-w-120px">Saat</th>
-                                        <th class="min-w-100px">Durum</th>
-                                        <th class="min-w-100px text-end">İşlemler</th>
+                                        <th class="min-w-150px">Patient</th>
+                                        <th class="min-w-140px">Date</th>
+                                        <th class="min-w-120px">Time</th>
+                                        <th class="min-w-100px">Status</th>
+                                        <th class="min-w-100px text-end">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -194,11 +194,11 @@
                     </div>
                 </div>
                 
-                <!-- Son Tedaviler -->
+                <!-- Recent Treatments -->
                 <div class="card mb-5 mb-xl-10">
                     <div class="card-header border-0">
                         <div class="card-title m-0">
-                            <h3 class="fw-bold m-0">Son Tedaviler</h3>
+                            <h3 class="fw-bold m-0">Recent Treatments</h3>
                         </div>
                     </div>
                     
@@ -208,10 +208,10 @@
                             <table class="table table-row-dashed table-row-gray-300 align-middle gs-0 gy-4">
                                 <thead>
                                     <tr class="fw-bold text-muted">
-                                        <th class="min-w-150px">Hasta</th>
-                                        <th class="min-w-140px">Tarih</th>
-                                        <th class="min-w-120px">Teşhis</th>
-                                        <th class="min-w-100px text-end">İşlemler</th>
+                                        <th class="min-w-150px">Patient</th>
+                                        <th class="min-w-140px">Date</th>
+                                        <th class="min-w-120px">Diagnosis</th>
+                                        <th class="min-w-100px text-end">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
