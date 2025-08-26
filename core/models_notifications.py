@@ -13,71 +13,71 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 
 
 class NotificationType(models.TextChoices):
-    """Bildirim türleri"""
-    APPOINTMENT_REMINDER = 'appointment_reminder', _('Randevu Hatırlatması')
-    APPOINTMENT_CANCELLED = 'appointment_cancelled', _('Randevu İptali')
-    APPOINTMENT_CONFIRMED = 'appointment_confirmed', _('Randevu Onayı')
-    LAB_RESULT_READY = 'lab_result_ready', _('Lab Sonucu Hazır')
-    PRESCRIPTION_READY = 'prescription_ready', _('Reçete Hazır')
-    TREATMENT_COMPLETED = 'treatment_completed', _('Tedavi Tamamlandı')
-    MEDICATION_REMINDER = 'medication_reminder', _('İlaç Hatırlatması')
-    SYSTEM_MAINTENANCE = 'system_maintenance', _('Sistem Bakımı')
-    DOCTOR_SCHEDULE_CHANGE = 'doctor_schedule_change', _('Doktor Program Değişikliği')
-    EMERGENCY_ALERT = 'emergency_alert', _('Acil Durum Uyarısı')
+    """Notification types"""
+    APPOINTMENT_REMINDER = 'appointment_reminder', _('Appointment Reminder')
+    APPOINTMENT_CANCELLED = 'appointment_cancelled', _('Appointment Cancelled')
+    APPOINTMENT_CONFIRMED = 'appointment_confirmed', _('Appointment Confirmed')
+    LAB_RESULT_READY = 'lab_result_ready', _('Lab Result Ready')
+    PRESCRIPTION_READY = 'prescription_ready', _('Prescription Ready')
+    TREATMENT_COMPLETED = 'treatment_completed', _('Treatment Completed')
+    MEDICATION_REMINDER = 'medication_reminder', _('Medication Reminder')
+    SYSTEM_MAINTENANCE = 'system_maintenance', _('System Maintenance')
+    DOCTOR_SCHEDULE_CHANGE = 'doctor_schedule_change', _('Doctor Schedule Change')
+    EMERGENCY_ALERT = 'emergency_alert', _('Emergency Alert')
 
 
 class NotificationPriority(models.TextChoices):
-    """Bildirim öncelik seviyeleri"""
-    LOW = 'low', _('Düşük')
+    """Notification priority levels"""
+    LOW = 'low', _('Low')
     NORMAL = 'normal', _('Normal')
-    HIGH = 'high', _('Yüksek')
-    URGENT = 'urgent', _('Acil')
+    HIGH = 'high', _('High')
+    URGENT = 'urgent', _('Urgent')
 
 
 class Notification(models.Model):
     """
     Gelişmiş bildirim modeli
     """
-    # Alıcı - Use null=True for migration purposes
+    # Recipient - Use null=True for migration purposes
     recipient = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='notifications',
-        verbose_name=_('Alıcı'),
+        verbose_name=_('Recipient'),
         null=True
     )
     
-    # Gönderen (opsiyonel, sistem bildirimleri için None olabilir)
+    # Sender (optional, can be None for system notifications)
     sender = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='sent_notifications',
         null=True,
         blank=True,
-        verbose_name=_('Gönderen')
+        verbose_name=_('Sender')
     )
     
-    # Bildirim detayları
+    # Notification details
     notification_type = models.CharField(
         max_length=30,
         choices=NotificationType.choices,
-        verbose_name=_('Bildirim Türü')
+        verbose_name=_('Notification Type')
     )
     
     priority = models.CharField(
         max_length=10,
         choices=NotificationPriority.choices,
         default=NotificationPriority.NORMAL,
-        verbose_name=_('Öncelik')
+        verbose_name=_('Priority')
     )
     
     title = models.CharField(
         max_length=200,
-        verbose_name=_('Başlık')
+        verbose_name=_('Title')
     )
     
     message = models.TextField(
-        verbose_name=_('Mesaj')
+        verbose_name=_('Message')
     )
     
     # İlişkili nesne (Generic Foreign Key ile herhangi bir modele bağlanabilir)
@@ -90,50 +90,50 @@ class Notification(models.Model):
     object_id = models.PositiveIntegerField(null=True, blank=True)
     related_object = GenericForeignKey('content_type', 'object_id')
     
-    # Durum
+    # Status
     is_read = models.BooleanField(
         default=False,
-        verbose_name=_('Okundu mu?')
+        verbose_name=_('Is Read?')
     )
     
     is_sent_via_email = models.BooleanField(
         default=False,
-        verbose_name=_('E-posta ile gönderildi mi?')
+        verbose_name=_('Sent via Email?')
     )
     
     is_sent_via_sms = models.BooleanField(
         default=False,
-        verbose_name=_('SMS ile gönderildi mi?')
+        verbose_name=_('Sent via SMS?')
     )
     
-    # Zamanlama
+    # Timing
     created_at = models.DateTimeField(
         auto_now_add=True,
-        verbose_name=_('Oluşturulma Tarihi')
+        verbose_name=_('Created At')
     )
     
     read_at = models.DateTimeField(
         null=True,
         blank=True,
-        verbose_name=_('Okunma Tarihi')
+        verbose_name=_('Read At')
     )
     
     scheduled_for = models.DateTimeField(
         null=True,
         blank=True,
-        verbose_name=_('Zamanlanmış Gönderim')
+        verbose_name=_('Scheduled For')
     )
     
-    # Ek veriler (JSON formatında)
+    # Extra data (in JSON format)
     extra_data = models.JSONField(
         default=dict,
         blank=True,
-        verbose_name=_('Ek Veriler')
+        verbose_name=_('Extra Data')
     )
     
     class Meta:
-        verbose_name = _('Bildirim')
-        verbose_name_plural = _('Bildirimler')
+        verbose_name = _('Notification')
+        verbose_name_plural = _('Notifications')
         ordering = ['-created_at']
         indexes = [
             models.Index(fields=['recipient', 'is_read']),
@@ -180,196 +180,196 @@ class Notification(models.Model):
 
 class NotificationPreference(models.Model):
     """
-    Kullanıcı bildirim tercihleri
+    User notification preferences
     """
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='notification_preferences',
-        verbose_name=_('Kullanıcı')
+        verbose_name=_('User')
     )
     
-    # E-posta bildirimleri
+    # Email notifications
     email_appointment_reminders = models.BooleanField(
         default=True,
-        verbose_name=_('Randevu hatırlatmaları (E-posta)')
+        verbose_name=_('Appointment reminders (Email)')
     )
     
     email_lab_results = models.BooleanField(
         default=True,
-        verbose_name=_('Lab sonuçları (E-posta)')
+        verbose_name=_('Lab results (Email)')
     )
     
     email_prescription_ready = models.BooleanField(
         default=True,
-        verbose_name=_('Reçete hazır (E-posta)')
+        verbose_name=_('Prescription ready (Email)')
     )
     
     email_system_updates = models.BooleanField(
         default=False,
-        verbose_name=_('Sistem güncellemeleri (E-posta)')
+        verbose_name=_('System updates (Email)')
     )
     
-    # SMS bildirimleri
+    # SMS notifications
     sms_appointment_reminders = models.BooleanField(
         default=False,
-        verbose_name=_('Randevu hatırlatmaları (SMS)')
+        verbose_name=_('Appointment reminders (SMS)')
     )
     
     sms_emergency_alerts = models.BooleanField(
         default=True,
-        verbose_name=_('Acil durum uyarıları (SMS)')
+        verbose_name=_('Emergency alerts (SMS)')
     )
     
-    # Push bildirimleri
+    # Push notifications
     push_notifications = models.BooleanField(
         default=True,
-        verbose_name=_('Push bildirimleri')
+        verbose_name=_('Push notifications')
     )
     
-    # Hatırlatma zamanları
+    # Reminder times
     appointment_reminder_hours = models.PositiveIntegerField(
         default=24,
-        verbose_name=_('Randevu hatırlatma saati (saat önce)')
+        verbose_name=_('Appointment reminder hours (hours before)')
     )
     
     medication_reminder_enabled = models.BooleanField(
         default=False,
-        verbose_name=_('İlaç hatırlatmaları aktif')
+        verbose_name=_('Medication reminders enabled')
     )
     
     medication_reminder_times = models.JSONField(
         default=list,
-        verbose_name=_('İlaç hatırlatma saatleri'),
-        help_text=_('["08:00", "12:00", "18:00"] formatında')
+        verbose_name=_('Medication reminder times'),
+        help_text=_('In format: ["08:00", "12:00", "18:00"]')
     )
     
     class Meta:
-        verbose_name = _('Bildirim Tercihi')
-        verbose_name_plural = _('Bildirim Tercihleri')
+        verbose_name = _('Notification Preference')
+        verbose_name_plural = _('Notification Preferences')
     
     def __str__(self):
-        return f"{self.user} - Bildirim Tercihleri"
+        return f"{self.user} - Notification Preferences"
 
 
 class NotificationTemplate(models.Model):
     """
-    Bildirim şablonları
+    Notification templates
     """
     notification_type = models.CharField(
         max_length=30,
         choices=NotificationType.choices,
         unique=True,
-        verbose_name=_('Bildirim Türü')
+        verbose_name=_('Notification Type')
     )
     
     title_template = models.CharField(
         max_length=200,
-        verbose_name=_('Başlık Şablonu'),
-        help_text=_('Django template syntax kullanabilirsiniz: {{ variable }}')
+        verbose_name=_('Title Template'),
+        help_text=_('You can use Django template syntax: {{ variable }}')
     )
     
     message_template = models.TextField(
-        verbose_name=_('Mesaj Şablonu'),
-        help_text=_('Django template syntax kullanabilirsiniz')
+        verbose_name=_('Message Template'),
+        help_text=_('You can use Django template syntax')
     )
     
     email_template = models.TextField(
         blank=True,
-        verbose_name=_('E-posta Şablonu (HTML)'),
-        help_text=_('E-posta için özel HTML şablon')
+        verbose_name=_('Email Template (HTML)'),
+        help_text=_('Custom HTML template for email')
     )
     
     sms_template = models.CharField(
         max_length=160,
         blank=True,
-        verbose_name=_('SMS Şablonu'),
-        help_text=_('SMS için kısa metin (160 karakter max)')
+        verbose_name=_('SMS Template'),
+        help_text=_('Short text for SMS (max 160 characters)')
     )
     
     is_active = models.BooleanField(
         default=True,
-        verbose_name=_('Aktif mi?')
+        verbose_name=_('Is Active?')
     )
     
     created_at = models.DateTimeField(
         auto_now_add=True,
-        verbose_name=_('Oluşturulma Tarihi')
+        verbose_name=_('Created At')
     )
     
     updated_at = models.DateTimeField(
         auto_now=True,
-        verbose_name=_('Güncellenme Tarihi')
+        verbose_name=_('Updated At')
     )
     
     class Meta:
-        verbose_name = _('Bildirim Şablonu')
-        verbose_name_plural = _('Bildirim Şablonları')
+        verbose_name = _('Notification Template')
+        verbose_name_plural = _('Notification Templates')
     
     def __str__(self):
-        return f"{self.get_notification_type_display()} Şablonu"
+        return f"{self.get_notification_type_display()} Template"
 
 
 class NotificationLog(models.Model):
     """
-    Gönderilen bildirimlerin logları
+    Logs of sent notifications
     """
     notification = models.ForeignKey(
         Notification,
         on_delete=models.CASCADE,
         related_name='logs',
-        verbose_name=_('Bildirim')
+        verbose_name=_('Notification')
     )
     
     delivery_method = models.CharField(
         max_length=20,
         choices=[
             ('web', _('Web')),
-            ('email', _('E-posta')),
+            ('email', _('Email')),
             ('sms', _('SMS')),
             ('push', _('Push'))
         ],
-        verbose_name=_('Gönderim Yöntemi')
+        verbose_name=_('Delivery Method')
     )
     
     status = models.CharField(
         max_length=20,
         choices=[
-            ('pending', _('Beklemede')),
-            ('sent', _('Gönderildi')),
-            ('delivered', _('Teslim Edildi')),
-            ('failed', _('Başarısız')),
-            ('bounced', _('Geri Döndü'))
+            ('pending', _('Pending')),
+            ('sent', _('Sent')),
+            ('delivered', _('Delivered')),
+            ('failed', _('Failed')),
+            ('bounced', _('Bounced'))
         ],
         default='pending',
-        verbose_name=_('Durum')
+        verbose_name=_('Status')
     )
     
     error_message = models.TextField(
         blank=True,
-        verbose_name=_('Hata Mesajı')
+        verbose_name=_('Error Message')
     )
     
     sent_at = models.DateTimeField(
         null=True,
         blank=True,
-        verbose_name=_('Gönderilme Tarihi')
+        verbose_name=_('Sent At')
     )
     
     delivered_at = models.DateTimeField(
         null=True,
         blank=True,
-        verbose_name=_('Teslim Edilme Tarihi')
+        verbose_name=_('Delivered At')
     )
     
     created_at = models.DateTimeField(
         auto_now_add=True,
-        verbose_name=_('Oluşturulma Tarihi')
+        verbose_name=_('Created At')
     )
     
     class Meta:
-        verbose_name = _('Bildirim Logu')
-        verbose_name_plural = _('Bildirim Logları')
+        verbose_name = _('Notification Log')
+        verbose_name_plural = _('Notification Logs')
         ordering = ['-created_at']
     
     def __str__(self):
