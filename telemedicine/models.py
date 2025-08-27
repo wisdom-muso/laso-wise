@@ -499,6 +499,13 @@ class TeleMedicineConsultation(models.Model):
         verbose_name=_('Consultation Notes')
     )
     
+    # Backward compatibility field
+    notes = models.TextField(
+        blank=True,
+        verbose_name=_('Notes'),
+        help_text=_('General notes about the consultation')
+    )
+    
     patient_feedback = models.TextField(
         blank=True,
         verbose_name=_('Patient Feedback')
