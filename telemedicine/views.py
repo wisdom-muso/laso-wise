@@ -560,7 +560,7 @@ def create_telemedicine_appointment(request):
                 )
             
             messages.success(request, "Telemedicine appointment created successfully.")
-            return redirect('telemedicine-appointment-detail', pk=appointment.pk)
+            return redirect('telemedicine:appointment-detail', pk=appointment.pk)
     else:
         form = TelemedicineAppointmentForm(user=request.user)
         
@@ -574,7 +574,7 @@ def start_video_session(request, appointment_id):
     # Yetki kontrolü
     if not (request.user == appointment.doctor or request.user == appointment.patient):
         messages.error(request, "You do not have permission to access this session.")
-        return redirect('telemedicine-appointment-list')
+        return redirect('telemedicine:appointment-list')
     
     # Appointment time check
     now = timezone.now()
@@ -584,11 +584,11 @@ def start_video_session(request, appointment_id):
     # Allow access 10 minutes before or 30 minutes after appointment
     if time_diff > 10:
         messages.warning(request, f"The session has not started yet. Your appointment is at {appointment.time.strftime('%H:%M')}.")
-        return redirect('telemedicine-appointment-detail', pk=appointment_id)
+        return redirect('telemedicine:appointment-detail', pk=appointment_id)
     
     if time_diff < -30:
         messages.warning(request, "This appointment has expired. Please create a new appointment.")
-        return redirect('telemedicine-appointment-list')
+        return redirect('telemedicine:appointment-list')
     
     # Aktif görüşme var mı kontrol et
     active_session = VideoSession.objects.filter(
