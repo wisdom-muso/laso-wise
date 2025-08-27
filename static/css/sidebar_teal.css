@@ -32,15 +32,27 @@
 }
 
 .app-sidebar .menu-icon {
-    color: var(--teal-700) !important;
+    background: linear-gradient(135deg, var(--teal-700), var(--teal-500)) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+    transition: all 0.3s ease !important;
 }
 
 .app-sidebar .menu-link:hover .menu-icon {
-    color: var(--teal-500) !important;
+    background: linear-gradient(135deg, var(--teal-500), var(--teal-300)) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+    transform: scale(1.1) !important;
 }
 
 .app-sidebar .menu-link.active .menu-icon {
-    color: var(--teal-500) !important;
+    background: linear-gradient(135deg, var(--teal-500), var(--teal-300)) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+    transform: scale(1.05) !important;
 }
 
 /* Override any blue colors with teal */

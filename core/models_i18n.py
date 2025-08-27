@@ -1,6 +1,6 @@
 """
 Internationalization Management for Laso Healthcare
-Çoklu dil desteği yönetimi
+Multi-language support management
 """
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -10,30 +10,30 @@ import json
 
 class Language(models.Model):
     """
-    Desteklenen diller
+    Supported languages
     """
     code = models.CharField(
         max_length=10,
         unique=True,
-        verbose_name=_('Dil Kodu'),
-        help_text=_('ISO 639-1 dil kodu (örn: tr, en, de)')
+        verbose_name=_('Language Code'),
+        help_text=_('ISO 639-1 language code (e.g: tr, en, de)')
     )
     
     name = models.CharField(
         max_length=100,
-        verbose_name=_('Dil Adı')
+        verbose_name=_('Language Name')
     )
     
     native_name = models.CharField(
         max_length=100,
-        verbose_name=_('Yerel Adı'),
-        help_text=_('Dilin kendi dilindeki adı')
+        verbose_name=_('Native Name'),
+        help_text=_('Name of the language in its own language')
     )
     
     flag_emoji = models.CharField(
         max_length=10,
         blank=True,
-        verbose_name=_('Bayrak Emoji')
+        verbose_name=_('Flag Emoji')
     )
     
     is_active = models.BooleanField(

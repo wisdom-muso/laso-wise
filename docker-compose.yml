@@ -52,7 +52,7 @@ services:
     environment:
       - DEBUG=${DEBUG:-False}
       - SECRET_KEY=${SECRET_KEY}
-      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-localhost,127.0.0.1}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-localhost,127.0.0.1,host.docker.internal}
       - USE_SQLITE=${USE_SQLITE:-True}
       - LOG_TO_FILE=${LOG_TO_FILE:-False}
       - EMAIL_BACKEND=${EMAIL_BACKEND}
@@ -91,7 +91,7 @@ services:
       target: production
     container_name: laso_celery
     restart: unless-stopped
-    command: celery -A laso worker -l info
+    command: celery -A meditrack worker -l info
     environment:
       - DEBUG=${DEBUG:-False}
       - SECRET_KEY=${SECRET_KEY}
@@ -117,7 +117,7 @@ services:
       target: production
     container_name: laso_celery_beat
     restart: unless-stopped
-    command: celery -A laso beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    command: celery -A meditrack beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
     environment:
       - DEBUG=${DEBUG:-False}
       - SECRET_KEY=${SECRET_KEY}

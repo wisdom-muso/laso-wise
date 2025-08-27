@@ -18,7 +18,7 @@ class AppointmentAdmin(admin.ModelAdmin):
         }),
     )
 
-# Doktor uygunluk sistemleri için admin kayıtları
+# Admin registrations for doctor availability systems
 try:
     from .models_availability import DoctorAvailability, DoctorTimeOff
     

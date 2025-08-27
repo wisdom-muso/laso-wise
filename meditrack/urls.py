@@ -74,6 +74,9 @@ urlpatterns = [
 ]
 
 # URLs for media and static files
+# Always add media files
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+# Add static files in debug mode or when not using WhiteNoise
 if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

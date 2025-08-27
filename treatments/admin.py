@@ -43,7 +43,7 @@ class PrescriptionAdmin(admin.ModelAdmin):
         return obj.treatment.appointment.doctor
     get_doctor.short_description = _('Doctor')
 
-# Yeni modeller için admin kayıtları
+# Admin registrations for new models
 try:
     from .models_medical_history import MedicalHistory
 
@@ -79,11 +79,11 @@ try:
         
         def get_test_name(self, obj):
             return obj.lab_test.test_name
-        get_test_name.short_description = _('Test Adı')
+        get_test_name.short_description = _('Test Name')
         
         def get_patient(self, obj):
             return obj.lab_test.patient
-        get_patient.short_description = _('Hasta')
+        get_patient.short_description = _('Patient')
 except ImportError:
     pass
 
