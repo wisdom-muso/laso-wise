@@ -35,7 +35,7 @@ def health_check(request):
         }
         health_status['status'] = 'unhealthy'
     
-    # Cache/Redis health check
+    # Cache/Redis health check (non-critical)
     try:
         cache.set('health_check', 'ok', timeout=60)
         cache_value = cache.get('health_check')
@@ -43,18 +43,18 @@ def health_check(request):
             health_status['checks']['cache'] = {'status': 'healthy'}
         else:
             health_status['checks']['cache'] = {
-                'status': 'unhealthy',
+                'status': 'degraded',
                 'error': 'Cache value mismatch'
             }
-            health_status['status'] = 'unhealthy'
+            # Don't mark overall status as unhealthy for cache issues
     except Exception as e:
         health_status['checks']['cache'] = {
-            'status': 'unhealthy',
+            'status': 'degraded',
             'error': str(e)
         }
-        health_status['status'] = 'unhealthy'
+        # Don't mark overall status as unhealthy for cache issues
     
-    # Redis direct check (if configured)
+    # Redis direct check (if configured) - non-critical
     if hasattr(settings, 'REDIS_URL') and settings.REDIS_URL:
         try:
             r = redis.from_url(settings.REDIS_URL)
@@ -62,10 +62,10 @@ def health_check(request):
             health_status['checks']['redis'] = {'status': 'healthy'}
         except Exception as e:
             health_status['checks']['redis'] = {
-                'status': 'unhealthy',
+                'status': 'degraded',
                 'error': str(e)
             }
-            health_status['status'] = 'unhealthy'
+            # Don't mark overall status as unhealthy for Redis issues
     
     # Application-specific checks
     try:

@@ -42,7 +42,7 @@
         <div class="col-md-8">
             <div class="card shadow mb-4">
                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                    <h6 class="m-0 font-weight-bold text-primary">Randevu Bilgileri</h6>
+                    <h6 class="m-0 font-weight-bold text-primary">Appointment Information</h6>
                     <span class="badge bg-{{ appointment.status|yesno:'success,danger,primary' }}">
                         {{ appointment.get_status_display }}
                     </span>
@@ -51,11 +51,11 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label class="form-label fw-bold">Hasta:</label>
+                                <label class="form-label fw-bold">Patient:</label>
                                 <div>{{ appointment.patient.get_full_name }}</div>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label fw-bold">Doktor:</label>
+                                <label class="form-label fw-bold">Doctor:</label>
                                 <div>{{ appointment.doctor.get_full_name }}</div>
                             </div>
                             <div class="mb-3">
@@ -121,10 +121,10 @@
             </div>
             {% endif %}
             
-            <!-- Hasta Bilgileri -->
+            <!-- Patient Information -->
             <div class="card shadow mb-4">
                 <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Hasta Bilgileri</h6>
+                    <h6 class="m-0 font-weight-bold text-primary">Patient Information</h6>
                 </div>
                 <div class="card-body">
                     <div class="mb-3">
@@ -154,7 +154,7 @@
                     {% endif %}
                     
                     <a href="{% url 'patient-detail' appointment.patient.id %}" class="btn btn-sm btn-primary">
-                        <i class="fas fa-user"></i> Hasta Profili
+                        <i class="fas fa-user"></i> Patient Profile
                     </a>
                 </div>
             </div>
