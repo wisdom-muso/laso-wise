@@ -60,8 +60,8 @@ RUN mkdir -p /app/staticfiles /app/media /app/logs && \
 # Switch to app user
 USER app
 
-# Collect static files
-RUN python manage.py collectstatic --noinput --clear
+# Collect static files with verbose output
+RUN python manage.py collectstatic --noinput --clear --verbosity=1
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
