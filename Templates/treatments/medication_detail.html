@@ -15,7 +15,7 @@
             {% endif %}
             {% if perms.treatments.delete_medication %}
             <a href="{% url 'medication_delete' medication.pk %}" class="btn btn-outline-danger">
-                <i class="fas fa-trash me-1"></i> {% translate "Sil" %}
+                <i class="fas fa-trash me-1"></i> {% translate "Delete" %}
             </a>
             {% endif %}
         </div>
@@ -41,7 +41,7 @@
                         <div class="col-md-8">{{ medication.drug_code|default:"-" }}</div>
                     </div>
                     <div class="row mb-3">
-                        <div class="col-md-4 fw-bold">{% translate "Reçete Durumu" %}:</div>
+                        <div class="col-md-4 fw-bold">{% translate "Prescription Status" %}:</div>
                         <div class="col-md-8">
                             {% if medication.is_prescription %}
                             <span class="badge bg-warning">{% translate "Prescription" %}</span>
@@ -51,17 +51,17 @@
                         </div>
                     </div>
                     <div class="row mb-3">
-                        <div class="col-md-4 fw-bold">{% translate "Eklenme Tarihi" %}:</div>
+                        <div class="col-md-4 fw-bold">{% translate "Date Added" %}:</div>
                         <div class="col-md-8">{{ medication.created_at|date:"d F Y, H:i" }}</div>
                     </div>
                     <div class="row mb-3">
-                        <div class="col-md-4 fw-bold">{% translate "Son Güncelleme" %}:</div>
+                        <div class="col-md-4 fw-bold">{% translate "Last Updated" %}:</div>
                         <div class="col-md-8">{{ medication.updated_at|date:"d F Y, H:i" }}</div>
                     </div>
                     {% if medication.description %}
                     <hr>
                     <div class="mb-3">
-                        <h6 class="fw-bold">{% translate "Açıklama" %}:</h6>
+                        <h6 class="fw-bold">{% translate "Description" %}:</h6>
                         <p class="mb-0">{{ medication.description|linebreaks }}</p>
                     </div>
                     {% endif %}

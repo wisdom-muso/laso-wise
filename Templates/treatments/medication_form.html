@@ -131,12 +131,12 @@
                 
                 <div class="d-flex justify-content-between mt-4">
                     <a href="{% url 'medication_list' %}" class="btn btn-outline-secondary">
-                        <i class="fas fa-times me-1"></i> {% translate "İptal" %}
+                        <i class="fas fa-times me-1"></i> {% translate "Cancel" %}
                     </a>
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-save me-1"></i>
                         {% if form.instance.pk %}
-                        {% translate "Değişiklikleri Kaydet" %}
+                        {% translate "Save Changes" %}
                         {% else %}
                         {% translate "Add Medication" %}
                         {% endif %}

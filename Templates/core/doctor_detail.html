@@ -1,13 +1,13 @@
 {% extends 'core/base.html' %}
 {% load static %}
 
-{% block title %}{{ doctor.get_full_name }} - Doktor Detayı{% endblock %}
+{% block title %}{{ doctor.get_full_name }} - Doctor Details{% endblock %}
 
 {% block content %}
 <div class="container py-4">
     <div class="card shadow">
         <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-            <h4 class="mb-0">Doktor Bilgileri</h4>
+            <h4 class="mb-0">Doctor Information</h4>
             {% if user.is_admin_user or user.is_superuser %}
             <div>
                 <a href="{% url 'doctor-update' doctor.id %}" class="btn btn-sm btn-light">
@@ -36,7 +36,7 @@
                         </div>
                         <div class="col-md-6">
                             <h5>Profesyonel Bilgiler</h5>
-                            <p><strong>Uzmanlık:</strong> {{ doctor.specialization }}</p>
+                            <p><strong>Specialization:</strong> {{ doctor.specialization }}</p>
                             <p><strong>Ünvan:</strong> {{ doctor.title }}</p>
                         </div>
                     </div>
@@ -49,12 +49,12 @@
                     {% endif %}
                     
                     <div class="mt-4">
-                        <h5>Doktor Hizmetleri</h5>
+                        <h5>Doctor Services</h5>
                         <div class="row mt-3">
                             {% if user.is_admin_user or user.is_superuser or user.is_doctor or user.is_receptionist %}
                             <div class="col-md-6 mb-3">
                                 <a href="{% url 'doctor-availability-list' doctor.id %}" class="btn btn-info btn-block w-100">
-                                    <i class="ki-outline ki-time fs-2 me-2"></i> Çalışma Saatleri
+                                    <i class="ki-outline ki-time fs-2 me-2"></i> Working Hours
                                 </a>
                             </div>
                             {% endif %}
@@ -76,7 +76,7 @@
                             {% if user.is_patient %}
                             <div class="col-md-6 mb-3">
                                 <a href="{% url 'appointment-create' %}?doctor={{ doctor.id }}" class="btn btn-success btn-block w-100">
-                                    <i class="ki-outline ki-calendar-add fs-2 me-2"></i> Randevu Al
+                                    <i class="ki-outline ki-calendar-add fs-2 me-2"></i> Book Appointment
                                 </a>
                             </div>
                             {% endif %}
