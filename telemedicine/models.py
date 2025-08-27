@@ -8,11 +8,12 @@ from django.utils import timezone
 from django.core.validators import URLValidator
 from appointments.models import Appointment
 import uuid
+from datetime import datetime
 
 
 class TelemedicineAppointment(models.Model):
     """
-    Tele-tıp randevu modeli
+    Telemedicine appointment model
     """
     STATUS_CHOICES = [
         ('scheduled', _('Scheduled')),
@@ -94,9 +95,9 @@ class TelemedicineAppointment(models.Model):
         return f"{self.patient} - Dr. {self.doctor} - {self.date} {self.time}"
     
     def is_past(self):
-        """Randevu geçmiş mi?"""
+        """Is the appointment in the past?"""
         now = timezone.now()
-        appointment_datetime = timezone.make_aware(timezone.datetime.combine(self.date, self.time))
+        appointment_datetime = timezone.make_aware(datetime.combine(self.date, self.time))
         return appointment_datetime < now
 
 
@@ -190,7 +191,7 @@ class VideoSession(models.Model):
 
 class TelemedDocument(models.Model):
     """
-    Tele-tıp belge modeli
+    Telemedicine document model
     """
     appointment = models.ForeignKey(
         TelemedicineAppointment,
@@ -207,11 +208,11 @@ class TelemedDocument(models.Model):
     document_type = models.CharField(
         max_length=50,
         choices=[
-            ('lab_result', _('Laboratuvar Sonucu')),
+            ('lab_result', _('Lab Result')),
             ('prescription', _('Reçete')),
-            ('medical_image', _('Tıbbi Görüntü')),
+            ('medical_image', _('Medical Image')),
             ('referral', _('Sevk')),
-            ('other', _('Diğer')),
+            ('other', _('Other')),
         ],
         verbose_name=_('Document Type')
     )
@@ -249,7 +250,7 @@ class TelemedDocument(models.Model):
 
 class TelemedPrescription(models.Model):
     """
-    Tele-tıp reçete modeli
+    Telemedicine prescription model
     """
     appointment = models.ForeignKey(
         TelemedicineAppointment,
@@ -260,7 +261,7 @@ class TelemedPrescription(models.Model):
     
     medications = models.JSONField(
         verbose_name=_('Medications'),
-        help_text=_('İlaç listesi ve dozaj bilgileri')
+        help_text=_('Medication list and dosage information')
     )
     
     instructions = models.TextField(
@@ -300,7 +301,7 @@ class TelemedPrescription(models.Model):
 
 class TelemedNote(models.Model):
     """
-    Tele-tıp not modeli
+    Telemedicine note model
     """
     appointment = models.ForeignKey(
         TelemedicineAppointment,
@@ -321,8 +322,8 @@ class TelemedNote(models.Model):
     note_type = models.CharField(
         max_length=50,
         choices=[
-            ('diagnosis', _('Teşhis')),
-            ('treatment_plan', _('Tedavi Planı')),
+            ('diagnosis', _('Diagnosis')),
+            ('treatment_plan', _('Treatment Plan')),
             ('follow_up', _('Takip')),
             ('general', _('Genel Not')),
         ],
@@ -333,7 +334,7 @@ class TelemedNote(models.Model):
     is_private = models.BooleanField(
         default=False,
         verbose_name=_('Private Note?'),
-        help_text=_('Özel notlar sadece doktor tarafından görülebilir')
+        help_text=_('Private notes can only be viewed by the doctor')
     )
     
     created_by = models.ForeignKey(
@@ -364,13 +365,13 @@ class TelemedNote(models.Model):
 
 class TeleMedicineConsultation(models.Model):
     """
-    Uzaktan sağlık konsültasyonu modeli
+    Remote healthcare consultation model
     """
     CONSULTATION_TYPE_CHOICES = [
-        ('video', _('Video Görüşme')),
-        ('audio', _('Ses Görüşmesi')),
-        ('chat', _('Metin Sohbeti')),
-        ('hybrid', _('Karma (Video + Chat)')),
+        ('video', _('Video Call')),
+        ('audio', _('Audio Call')),
+        ('chat', _('Text Chat')),
+        ('hybrid', _('Hybrid (Video + Chat)')),
     ]
     
     STATUS_CHOICES = [
@@ -378,7 +379,7 @@ class TeleMedicineConsultation(models.Model):
         ('waiting', _('Bekleniyor')),
         ('in_progress', _('Devam Ediyor')),
         ('completed', _('Tamamlandı')),
-        ('cancelled', _('İptal Edildi')),
+        ('cancelled', _('Cancelled')),
         ('no_show', _('Katılım Sağlanmadı')),
         ('technical_issue', _('Teknik Sorun')),
     ]
@@ -405,7 +406,7 @@ class TeleMedicineConsultation(models.Model):
         verbose_name=_('Durum')
     )
     
-    # Video konferans bilgileri
+    # Video conference information
     meeting_id = models.UUIDField(
         default=uuid.uuid4,
         unique=True,
@@ -415,7 +416,7 @@ class TeleMedicineConsultation(models.Model):
     meeting_url = models.URLField(
         blank=True,
         verbose_name=_('Meeting URL'),
-        help_text=_('Video konferans bağlantısı')
+        help_text=_('Video conference link')
     )
     
     meeting_password = models.CharField(
@@ -492,7 +493,7 @@ class TeleMedicineConsultation(models.Model):
         verbose_name=_('Technical Issues')
     )
     
-    # Konsültasyon detayları
+    # Consultation details
     consultation_notes = models.TextField(
         blank=True,
         verbose_name=_('Consultation Notes')
@@ -538,7 +539,7 @@ class TeleMedicineConsultation(models.Model):
         default=list,
         blank=True,
         verbose_name=_('Shared Files'),
-        help_text=_('Konsültasyon sırasında paylaşılan dosya listesi')
+        help_text=_('List of files shared during consultation')
     )
     
     # Güvenlik ve gizlilik
@@ -572,22 +573,22 @@ class TeleMedicineConsultation(models.Model):
         return f"{self.appointment.patient} - {self.appointment.doctor} - {self.scheduled_start_time}"
     
     def get_duration(self):
-        """Konsültasyon süresini hesapla"""
+        """Calculate consultation duration"""
         if self.actual_start_time and self.end_time:
             duration = self.end_time - self.actual_start_time
             return duration.total_seconds() / 60  # Dakika cinsinden
         return 0
     
     def is_active(self):
-        """Konsültasyon aktif mi?"""
+        """Is the consultation active?"""
         return self.status == 'in_progress'
     
     def can_join(self, user):
-        """Kullanıcı konsültasyona katılabilir mi?"""
+        """Can the user join the consultation?"""
         if self.status not in ['scheduled', 'waiting', 'in_progress']:
             return False
         
-        # Sadece doktor ve hasta katılabilir
+        # Only doctor and patient can join
         return user in [self.appointment.doctor, self.appointment.patient]
     
     def get_join_url(self):
@@ -599,7 +600,7 @@ class TeleMedicineConsultation(models.Model):
         return f"/telemedicine/join/{self.meeting_id}/"
     
     def mark_as_started(self, user):
-        """Konsültasyonu başlatıldı olarak işaretle"""
+        """Mark consultation as started"""
         if not self.actual_start_time:
             self.actual_start_time = timezone.now()
             self.status = 'in_progress'
@@ -612,7 +613,7 @@ class TeleMedicineConsultation(models.Model):
             self.save()
     
     def mark_as_completed(self):
-        """Konsültasyonu tamamlandı olarak işaretle"""
+        """Mark consultation as completed"""
         if not self.end_time:
             self.end_time = timezone.now()
             self.status = 'completed'
@@ -693,7 +694,7 @@ class TeleMedicineSettings(models.Model):
         verbose_name=_('User')
     )
     
-    # Video ayarları
+    # Video settings
     default_camera_enabled = models.BooleanField(
         default=True,
         verbose_name=_('Default Camera Enabled')
@@ -755,7 +756,7 @@ class TeleMedicineSettings(models.Model):
     # Gelişmiş ayarlar
     max_consultation_duration = models.PositiveIntegerField(
         default=60,
-        verbose_name=_('Maksimum Konsültasyon Süresi (Dakika)')
+        verbose_name=_('Maximum Consultation Duration (Minutes)')
     )
     
     auto_end_consultation = models.BooleanField(
