@@ -8,7 +8,7 @@ User = get_user_model()
 
 class LabTestForm(forms.ModelForm):
     """
-    Laboratuvar testi oluşturma ve düzenleme formu.
+    Laboratory test creation and editing form.
     """
     class Meta:
         model = LabTest

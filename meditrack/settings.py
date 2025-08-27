@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'corsheaders',
-    # Kendi uygulamalarımız
+    # Our applications
     'users',
     'appointments',
     'treatments',
@@ -191,6 +191,8 @@ UNFOLD = {
     "DASHBOARD_CALLBACK": None,
     "STYLES": [
         "css/admin_custom.css",
+        "css/sidebar_teal.css",
+        "css/teal_theme_override.css",
     ],
     "SCRIPTS": [],
     "SIDEBAR": {
