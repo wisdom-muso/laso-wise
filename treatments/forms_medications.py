@@ -52,7 +52,7 @@ class PrescriptionMedicationForm(forms.ModelForm):
     """
     medication = forms.ModelChoiceField(
         queryset=Medication.objects.all(),
-        label=_('İlaç Seçimi'),
+        label=_('Medication Selection'),
         required=False,
         widget=forms.Select(attrs={'class': 'form-select'})
     )
@@ -76,7 +76,7 @@ class PrescriptionMedicationForm(forms.ModelForm):
         name = cleaned_data.get('name')
         
         if not medication and not name:
-            raise forms.ValidationError(_("İlaç seçimi yapmalı veya ilaç adı girmelisiniz."))
+            raise forms.ValidationError(_("You must select a medication or enter a medication name."))
             
         # If medication is selected, populate name field
         if medication and not name:
@@ -89,13 +89,13 @@ class MedicationSearchForm(forms.Form):
     Form for searching medications in the database
     """
     search_query = forms.CharField(
-        label=_('Arama'),
+        label=_('Search'),
         required=False,
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('İlaç adı, etken madde veya açıklama')})
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Medication name, active ingredient or description')})
     )
     is_prescription = forms.ChoiceField(
-        label=_('Reçete Durumu'),
+        label=_('Prescription Status'),
         required=False,
-        choices=[('', _('Hepsi')), ('True', _('Reçeteli')), ('False', _('Reçetesiz'))],
+        choices=[('', _('All')), ('True', _('Prescription')), ('False', _('Over-the-counter'))],
         widget=forms.Select(attrs={'class': 'form-select'})
     )

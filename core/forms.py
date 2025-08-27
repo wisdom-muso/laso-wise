@@ -125,7 +125,7 @@ class AppointmentForm(forms.ModelForm):
 
 class TreatmentForm(forms.ModelForm):
     """
-    Tedavi oluşturma ve düzenleme formu.
+    Treatment creation and editing form.
     """
     class Meta:
         model = Treatment
@@ -141,10 +141,10 @@ class PrescriptionForm(forms.ModelForm):
     """
     medication = forms.ModelChoiceField(
         queryset=Medication.objects.all().order_by('name'),
-        label=_('Veritabanından İlaç Seç'),
+        label=_('Select Medication from Database'),
         required=False,
         widget=forms.Select(attrs={'class': 'form-select select2'}),
-        help_text=_('İlaç veritabanından seçim yaparsanız, ilaç etkileşimleri otomatik kontrol edilir.')
+        help_text=_('If you select from the medication database, drug interactions will be automatically checked.')
     )
     
     class Meta:
@@ -185,7 +185,7 @@ PrescriptionFormSet = forms.inlineformset_factory(
 
 class DoctorCreationForm(forms.ModelForm):
     """
-    Doktor oluşturma formu
+    Doctor creation form
     """
     password1 = forms.CharField(
         label=_('Şifre'),
@@ -205,8 +205,8 @@ class DoctorCreationForm(forms.ModelForm):
             'username': forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Kullanıcı Adı')}),
             'first_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Ad')}),
             'last_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Soyad')}),
-            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': _('E-posta')}),
-            'specialization': forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Uzmanlık Alanı')}),
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': _('Email')}),
+            'specialization': forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Specialization')}),
         }
     
     def clean_password2(self):
@@ -226,7 +226,7 @@ class DoctorCreationForm(forms.ModelForm):
 
 class DoctorUpdateForm(forms.ModelForm):
     """
-    Doktor güncelleme formu
+    Doctor update form
     """
     class Meta:
         model = User
@@ -234,20 +234,20 @@ class DoctorUpdateForm(forms.ModelForm):
         widgets = {
             'first_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Ad')}),
             'last_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Soyad')}),
-            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': _('E-posta')}),
-            'specialization': forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Uzmanlık Alanı')}),
-            'phone_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Telefon')}),
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': _('Email')}),
+            'specialization': forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Specialization')}),
+            'phone_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Phone')}),
         }
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Telefon numarası ve uzmanlık alanı zorunlu değil
+        # Phone number and specialization are not required
         self.fields['phone_number'].required = False
         self.fields['specialization'].required = True
         
 class MedicalHistoryForm(forms.ModelForm):
     """
-    Hasta sağlık geçmişi ekleme ve düzenleme formu.
+    Patient medical history addition and editing form.
     """
     class Meta:
         model = MedicalHistory

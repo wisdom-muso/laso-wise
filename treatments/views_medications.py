@@ -83,7 +83,7 @@ class MedicationCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateVi
     permission_required = 'treatments.add_medication'
     
     def form_valid(self, form):
-        messages.success(self.request, _("İlaç başarıyla eklendi."))
+        messages.success(self.request, _("Medication added successfully."))
         return super().form_valid(form)
 
 class MedicationUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
@@ -99,7 +99,7 @@ class MedicationUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateVi
         return reverse('medication_detail', kwargs={'pk': self.object.pk})
     
     def form_valid(self, form):
-        messages.success(self.request, _("İlaç bilgileri başarıyla güncellendi."))
+        messages.success(self.request, _("Medication information updated successfully."))
         return super().form_valid(form)
 
 class MedicationDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
@@ -112,7 +112,7 @@ class MedicationDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteVi
     permission_required = 'treatments.delete_medication'
     
     def delete(self, request, *args, **kwargs):
-        messages.success(request, _("İlaç başarıyla silindi."))
+        messages.success(request, _("Medication deleted successfully."))
         return super().delete(request, *args, **kwargs)
 
 # Medication Interaction views
@@ -144,7 +144,7 @@ class InteractionCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateV
     permission_required = 'treatments.add_medicationinteraction'
     
     def form_valid(self, form):
-        messages.success(self.request, _("İlaç etkileşimi başarıyla eklendi."))
+        messages.success(self.request, _("Medication interaction added successfully."))
         return super().form_valid(form)
 
 class InteractionUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
@@ -160,7 +160,7 @@ class InteractionUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateV
         return reverse('interaction_detail', kwargs={'pk': self.object.pk})
     
     def form_valid(self, form):
-        messages.success(self.request, _("İlaç etkileşimi başarıyla güncellendi."))
+        messages.success(self.request, _("Medication interaction updated successfully."))
         return super().form_valid(form)
 
 class InteractionDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
@@ -173,7 +173,7 @@ class InteractionDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteV
     permission_required = 'treatments.delete_medicationinteraction'
     
     def delete(self, request, *args, **kwargs):
-        messages.success(request, _("İlaç etkileşimi başarıyla silindi."))
+        messages.success(request, _("Medication interaction deleted successfully."))
         return super().delete(request, *args, **kwargs)
 
 # Patient medication views and utilities

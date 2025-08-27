@@ -20,15 +20,15 @@ class Migration(migrations.Migration):
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=100, verbose_name='Şablon Adı')),
                 ('template_type', models.CharField(choices=[('appointment_reminder', 'Randevu Hatırlatma'), ('appointment_confirmation', 'Randevu Onayı'), ('appointment_cancellation', 'Randevu İptali'), ('test_result', 'Test Sonucu Bildirimi'), ('prescription', 'Reçete Bildirimi'), ('welcome', 'Hoş Geldiniz'), ('password_reset', 'Şifre Sıfırlama'), ('custom', 'Özel Şablon')], max_length=30, verbose_name='Şablon Tipi')),
-                ('subject', models.CharField(max_length=200, verbose_name='E-posta Konusu')),
-                ('content', models.TextField(help_text='HTML kullanabilirsiniz. Değişkenler için {{değişken_adı}} formatını kullanın.', verbose_name='E-posta İçeriği')),
+                ('subject', models.CharField(max_length=200, verbose_name='Email Subject')),
+                ('content', models.TextField(help_text='You can use HTML. Use {{variable_name}} format for variables.', verbose_name='Email Content')),
                 ('is_active', models.BooleanField(default=True, verbose_name='Aktif mi?')),
                 ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='Oluşturulma Tarihi')),
                 ('updated_at', models.DateTimeField(auto_now=True, verbose_name='Güncellenme Tarihi')),
             ],
             options={
-                'verbose_name': 'E-posta Şablonu',
-                'verbose_name_plural': 'E-posta Şablonları',
+                'verbose_name': 'Email Template',
+                'verbose_name_plural': 'Email Templates',
             },
         ),
         migrations.CreateModel(
@@ -85,7 +85,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 'verbose_name': 'Mesaj',
-                'verbose_name_plural': 'Mesajlar',
+                'verbose_name_plural': 'Messages',
                 'ordering': ['-created_at'],
             },
         ),

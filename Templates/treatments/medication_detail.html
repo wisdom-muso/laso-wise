@@ -25,11 +25,11 @@
         <div class="col-md-8">
             <div class="card shadow-sm mb-4">
                 <div class="card-header bg-light">
-                    <h5 class="mb-0">{% translate "İlaç Bilgileri" %}</h5>
+                    <h5 class="mb-0">{% translate "Medication Information" %}</h5>
                 </div>
                 <div class="card-body">
                     <div class="row mb-3">
-                        <div class="col-md-4 fw-bold">{% translate "İlaç Adı" %}:</div>
+                        <div class="col-md-4 fw-bold">{% translate "Medication Name" %}:</div>
                         <div class="col-md-8">{{ medication.name }}</div>
                     </div>
                     <div class="row mb-3">
@@ -37,16 +37,16 @@
                         <div class="col-md-8">{{ medication.active_ingredient }}</div>
                     </div>
                     <div class="row mb-3">
-                        <div class="col-md-4 fw-bold">{% translate "İlaç Kodu" %}:</div>
+                        <div class="col-md-4 fw-bold">{% translate "Drug Code" %}:</div>
                         <div class="col-md-8">{{ medication.drug_code|default:"-" }}</div>
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-4 fw-bold">{% translate "Reçete Durumu" %}:</div>
                         <div class="col-md-8">
                             {% if medication.is_prescription %}
-                            <span class="badge bg-warning">{% translate "Reçeteli" %}</span>
+                            <span class="badge bg-warning">{% translate "Prescription" %}</span>
                             {% else %}
-                            <span class="badge bg-success">{% translate "Reçetesiz" %}</span>
+                            <span class="badge bg-success">{% translate "Over-the-counter" %}</span>
                             {% endif %}
                         </div>
                     </div>
@@ -95,7 +95,7 @@
         <div class="col-md-4">
             <div class="card shadow-sm mb-4">
                 <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">{% translate "İlaç Etkileşimleri" %}</h5>
+                    <h5 class="mb-0">{% translate "Medication Interactions" %}</h5>
                     {% if perms.treatments.add_medicationinteraction %}
                     <a href="{% url 'interaction_create' %}" class="btn btn-sm btn-outline-primary">
                         <i class="fas fa-plus"></i>
@@ -145,7 +145,7 @@
 
     <div class="mt-4">
         <a href="{% url 'medication_list' %}" class="btn btn-outline-secondary">
-            <i class="fas fa-arrow-left me-1"></i> {% translate "İlaç Listesine Dön" %}
+            <i class="fas fa-arrow-left me-1"></i> {% translate "Back to Medication List" %}
         </a>
     </div>
 </div>

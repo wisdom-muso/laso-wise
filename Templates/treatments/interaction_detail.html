@@ -1,12 +1,12 @@
 {% extends 'core/base.html' %}
 {% load i18n %}
 
-{% block title %}{% translate "İlaç Etkileşimi" %}{% endblock %}
+{% block title %}{% translate "Medication Interaction" %}{% endblock %}
 
 {% block content %}
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="mb-0">{% translate "İlaç Etkileşimi Detayı" %}</h1>
+        <h1 class="mb-0">{% translate "Medication Interaction Details" %}</h1>
         <div>
             {% if perms.treatments.change_medicationinteraction %}
             <a href="{% url 'interaction_update' interaction.pk %}" class="btn btn-outline-primary me-2">
@@ -30,7 +30,7 @@
                 <div class="col-md-6">
                     <div class="card h-100">
                         <div class="card-header bg-primary text-white">
-                            <h6 class="mb-0">{% translate "İlaç 1" %}</h6>
+                            <h6 class="mb-0">{% translate "Medication 1" %}</h6>
                         </div>
                         <div class="card-body">
                             <h5 class="card-title">
@@ -40,7 +40,7 @@
                             </h5>
                             <h6 class="card-subtitle mb-2 text-muted">{{ interaction.medication1.active_ingredient }}</h6>
                             {% if interaction.medication1.is_prescription %}
-                            <span class="badge bg-warning">{% translate "Reçeteli" %}</span>
+                            <span class="badge bg-warning">{% translate "Prescription" %}</span>
                             {% else %}
                             <span class="badge bg-success">{% translate "Reçetesiz" %}</span>
                             {% endif %}
@@ -60,7 +60,7 @@
                             </h5>
                             <h6 class="card-subtitle mb-2 text-muted">{{ interaction.medication2.active_ingredient }}</h6>
                             {% if interaction.medication2.is_prescription %}
-                            <span class="badge bg-warning">{% translate "Reçeteli" %}</span>
+                            <span class="badge bg-warning">{% translate "Prescription" %}</span>
                             {% else %}
                             <span class="badge bg-success">{% translate "Reçetesiz" %}</span>
                             {% endif %}

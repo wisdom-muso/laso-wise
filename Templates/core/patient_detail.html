@@ -84,11 +84,11 @@
             </div>
         </div>
         
-        <!-- Hasta Randevuları -->
+        <!-- Patient Appointments -->
         <div class="col-md-8 mb-4">
             <div class="card shadow h-100">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h3 class="card-title">Randevular</h3>
+                    <h3 class="card-title">Appointments</h3>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
@@ -204,12 +204,12 @@
         <div class="col-12 col-md-4 mb-4">
             <div class="card shadow">
                 <div class="card-header bg-light">
-                    <h3 class="card-title">İlaçlar</h3>
+                    <h3 class="card-title">Medications</h3>
                 </div>
                 <div class="card-body">
                     <p>Hastaya reçete edilen ilaçlar ve kullanım bilgileri.</p>
                     <a href="{% url 'patient_medications' patient.id %}" class="btn btn-success">
-                        <i class="fas fa-pills"></i> İlaçları Görüntüle
+                        <i class="fas fa-pills"></i> View Medications
                     </a>
                 </div>
             </div>
@@ -218,12 +218,12 @@
         <div class="col-12 col-md-4 mb-4">
             <div class="card shadow">
                 <div class="card-header bg-light">
-                    <h3 class="card-title">Laboratuvar Testleri</h3>
+                    <h3 class="card-title">Lab Tests</h3>
                 </div>
                 <div class="card-body">
                     <p>Hastanın laboratuvar test sonuçları ve tahlilleri.</p>
                     <a href="{% url 'lab-test-list' %}?patient={{ patient.id }}" class="btn btn-info">
-                        <i class="fas fa-flask"></i> Laboratuvar Sonuçlarını Görüntüle
+                        <i class="fas fa-flask"></i> View Lab Results
                     </a>
                 </div>
             </div>
@@ -234,12 +234,12 @@
         <div class="col-12 col-md-4 mb-4">
             <div class="card shadow">
                 <div class="card-header bg-light">
-                    <h3 class="card-title">Tıbbi Görüntüler</h3>
+                    <h3 class="card-title">Medical Images</h3>
                 </div>
                 <div class="card-body">
                     <p>Hastanın röntgen, MR, BT gibi tıbbi görüntüleme kayıtları.</p>
                     <a href="{% url 'medical-image-list' patient_id=patient.id %}" class="btn btn-primary">
-                        <i class="fas fa-x-ray"></i> Tıbbi Görüntüleri Görüntüle
+                        <i class="fas fa-x-ray"></i> View Medical Images
                     </a>
                 </div>
             </div>
@@ -248,12 +248,12 @@
         <div class="col-12 col-md-4 mb-4">
             <div class="card shadow">
                 <div class="card-header bg-light">
-                    <h3 class="card-title">Tıbbi Raporlar</h3>
+                    <h3 class="card-title">Medical Reports</h3>
                 </div>
                 <div class="card-body">
                     <p>Hastaya ait tüm tıbbi raporlar ve belgeler.</p>
                     <a href="{% url 'report-list' patient_id=patient.id %}" class="btn btn-warning">
-                        <i class="fas fa-file-medical-alt"></i> Raporları Görüntüle
+                        <i class="fas fa-file-medical-alt"></i> View Reports
                     </a>
                 </div>
             </div>
