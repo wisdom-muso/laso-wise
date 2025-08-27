@@ -149,24 +149,23 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# WhiteNoise configuration for static files
+# WhiteNoise configuration for static files - Simplified for stability
 # For Django 4.2+ use STORAGES setting, fall back to STATICFILES_STORAGE for older versions
 STORAGES = {
     'default': {
         'BACKEND': 'django.core.files.storage.FileSystemStorage',
     },
     'staticfiles': {
-        'BACKEND': 'core.storage.ForgivingCompressedStaticFilesStorage',
+        'BACKEND': 'whitenoise.storage.CompressedStaticFilesStorage',
     },
 }
 
 # Fallback for older Django versions  
-STATICFILES_STORAGE = 'core.storage.ForgivingCompressedStaticFilesStorage'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
-# WhiteNoise settings
+# WhiteNoise settings - More conservative approach
 WHITENOISE_USE_FINDERS = True
-WHITENOISE_AUTOREFRESH = True
-WHITENOISE_SKIP_COMPRESS_EXTENSIONS = ['js.map', 'css.map']
+WHITENOISE_AUTOREFRESH = DEBUG
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
