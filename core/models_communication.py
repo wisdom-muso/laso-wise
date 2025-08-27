@@ -4,52 +4,52 @@ from django.conf import settings
 
 class CommunicationNotification(models.Model):
     """
-    Bildirim modeli. Sistem içinde kullanıcılara gönderilen bildirimleri temsil eder.
+    Notification model. Represents notifications sent to users within the system.
     """
     NOTIFICATION_TYPE_CHOICES = [
-        ('appointment', _('Randevu Bildirimi')),
-        ('test_result', _('Test Sonucu Bildirimi')),
-        ('prescription', _('Reçete Bildirimi')),
-        ('message', _('Mesaj Bildirimi')),
-        ('system', _('Sistem Bildirimi')),
+        ('appointment', _('Appointment Notification')),
+        ('test_result', _('Test Result Notification')),
+        ('prescription', _('Prescription Notification')),
+        ('message', _('Message Notification')),
+        ('system', _('System Notification')),
     ]
     
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='communication_notifications',
-        verbose_name=_('Kullanıcı')
+        verbose_name=_('User')
     )
     notification_type = models.CharField(
         max_length=20,
         choices=NOTIFICATION_TYPE_CHOICES,
-        verbose_name=_('Bildirim Tipi')
+        verbose_name=_('Notification Type')
     )
     title = models.CharField(
         max_length=200,
-        verbose_name=_('Başlık')
+        verbose_name=_('Title')
     )
     message = models.TextField(
-        verbose_name=_('Mesaj')
+        verbose_name=_('Message')
     )
     related_url = models.CharField(
         max_length=255,
         blank=True,
         null=True,
-        verbose_name=_('İlgili URL')
+        verbose_name=_('Related URL')
     )
     is_read = models.BooleanField(
         default=False,
-        verbose_name=_('Okundu mu?')
+        verbose_name=_('Is Read?')
     )
     created_at = models.DateTimeField(
         auto_now_add=True,
-        verbose_name=_('Oluşturulma Tarihi')
+        verbose_name=_('Created Date')
     )
     
     class Meta:
-        verbose_name = _('İletişim Bildirimi')
-        verbose_name_plural = _('İletişim Bildirimleri')
+        verbose_name = _('Communication Notification')
+        verbose_name_plural = _('Communication Notifications')
         ordering = ['-created_at']
     
     def __str__(self):
@@ -88,7 +88,7 @@ class Message(models.Model):
     )
     is_read = models.BooleanField(
         default=False,
-        verbose_name=_('Okundu mu?')
+        verbose_name=_('Is Read?')
     )
     parent_message = models.ForeignKey(
         'self',
@@ -100,7 +100,7 @@ class Message(models.Model):
     )
     created_at = models.DateTimeField(
         auto_now_add=True,
-        verbose_name=_('Oluşturulma Tarihi')
+        verbose_name=_('Created Date')
     )
     
     class Meta:
@@ -153,7 +153,7 @@ class EmailTemplate(models.Model):
     )
     created_at = models.DateTimeField(
         auto_now_add=True,
-        verbose_name=_('Oluşturulma Tarihi')
+        verbose_name=_('Created Date')
     )
     updated_at = models.DateTimeField(
         auto_now=True,

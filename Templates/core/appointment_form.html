@@ -1,7 +1,7 @@
 {% extends 'core/base.html' %}
 {% load static %}
 
-{% block title %}{% if form.instance.id %}Randevu Düzenle{% else %}Yeni Randevu{% endif %}{% endblock %}
+{% block title %}{% if form.instance.id %}Edit Appointment{% else %}New Appointment{% endif %}{% endblock %}
 
 {% block content %}
 <div class="container py-4">
@@ -9,7 +9,7 @@
         <div class="col-md-8">
             <div class="card shadow">
                 <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">{% if form.instance.id %}Randevu Düzenle{% else %}Yeni Randevu{% endif %}</h4>
+                    <h4 class="mb-0">{% if form.instance.id %}Edit Appointment{% else %}New Appointment{% endif %}</h4>
                 </div>
                 <div class="card-body">
                     <form method="post" novalidate>

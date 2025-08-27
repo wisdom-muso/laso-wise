@@ -761,12 +761,12 @@ class TeleMedicineSettings(models.Model):
     
     auto_end_consultation = models.BooleanField(
         default=True,
-        verbose_name=_('Otomatik Sonlandır')
+        verbose_name=_('Auto End')
     )
     
     class Meta:
-        verbose_name = _('Telemedicine Ayarları')
-        verbose_name_plural = _('Telemedicine Ayarları')
+        verbose_name = _('Telemedicine Settings')
+        verbose_name_plural = _('Telemedicine Settings')
     
     def __str__(self):
-        return f"{self.user} Ayarları"
+        return f"{self.user} Settings"

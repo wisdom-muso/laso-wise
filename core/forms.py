@@ -88,7 +88,7 @@ class PatientRegistrationForm(UserCreationForm):
 
 class AppointmentForm(forms.ModelForm):
     """
-    Randevu oluşturma ve düzenleme formu.
+    Appointment creation and editing form.
     """
     class Meta:
         model = Appointment
@@ -105,21 +105,21 @@ class AppointmentForm(forms.ModelForm):
         user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
         
-        # Sadece hasta tipi kullanıcıları göster
+        # Show only patient type users
         self.fields['patient'].queryset = User.objects.filter(user_type='patient')
         
-        # Sadece doktor tipi kullanıcıları göster
+        # Show only doctor type users
         self.fields['doctor'].queryset = User.objects.filter(user_type='doctor')
         
-        # Eğer giriş yapan kullanıcı hasta ise, sadece kendisini seçebilir
+        # If logged in user is a patient, they can only select themselves
         if user and user.is_patient():
             self.fields['patient'].initial = user
             self.fields['patient'].widget = forms.HiddenInput()
-            self.fields['date'].help_text = _('Randevu almak istediğiniz tarihi seçiniz')
-            self.fields['time'].help_text = _('Randevu almak istediğiniz saati seçiniz')
-            self.fields['description'].help_text = _('Randevu sebebinizi kısaca açıklayınız')
+            self.fields['date'].help_text = _('Select the date you want to schedule an appointment')
+            self.fields['time'].help_text = _('Select the time you want to schedule an appointment')
+            self.fields['description'].help_text = _('Briefly describe the reason for your appointment')
         
-        # İleri tarihli randevular için kısıtlama ekleyelim
+        # Add restriction for future appointments
         today = datetime.date.today()
         self.fields['date'].widget.attrs['min'] = today.strftime('%Y-%m-%d')
 

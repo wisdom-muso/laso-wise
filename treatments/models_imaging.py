@@ -5,7 +5,7 @@ from treatments.models import Treatment
 
 class MedicalImage(models.Model):
     """
-    Tıbbi görüntü modeli. Röntgen, MR, BT gibi görüntüleri temsil eder.
+    Medical image model. Represents images like X-ray, MRI, CT scans.
     """
     IMAGE_TYPE_CHOICES = [
         ('xray', _('Röntgen')),
@@ -62,8 +62,8 @@ class MedicalImage(models.Model):
     )
     
     class Meta:
-        verbose_name = _('Tıbbi Görüntü')
-        verbose_name_plural = _('Tıbbi Görüntüler')
+        verbose_name = _('Medical Image')
+        verbose_name_plural = _('Medical Images')
         ordering = ['-created_at']
     
     def __str__(self):
@@ -139,7 +139,7 @@ class Report(models.Model):
     
     class Meta:
         verbose_name = _('Rapor')
-        verbose_name_plural = _('Raporlar')
+        verbose_name_plural = _('Reports')
         ordering = ['-created_at']
     
     def __str__(self):

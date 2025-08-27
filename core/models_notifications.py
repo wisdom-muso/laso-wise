@@ -36,7 +36,7 @@ class NotificationPriority(models.TextChoices):
 
 class Notification(models.Model):
     """
-    Gelişmiş bildirim modeli
+    Advanced notification model
     """
     # Recipient - Use null=True for migration purposes
     recipient = models.ForeignKey(
