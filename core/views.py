@@ -220,7 +220,7 @@ class AppointmentListView(LoginRequiredMixin, ListView):
         queryset = super().get_queryset()
         user = self.request.user
         
-        # Filtreleme
+        # Filtering
         status = self.request.GET.get('status')
         search = self.request.GET.get('search')
         
@@ -360,7 +360,7 @@ class TreatmentCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     success_url = reverse_lazy('core:appointment-list')
     
     def test_func(self):
-        # Sadece doktorlar tedavi oluşturabilir
+        # Only doctors can create treatments
         return self.request.user.is_doctor()
     
     def get_context_data(self, **kwargs):
@@ -387,7 +387,7 @@ class TreatmentCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         
         # Doctor can only add treatment to their own appointments
         if appointment.doctor != self.request.user:
-            messages.error(self.request, _('Bu randevu için tedavi ekleyemezsiniz.'))
+            messages.error(self.request, _('You cannot add treatment for this appointment.'))
             return redirect('appointment-list')
         
         # Mark appointment status as completed
@@ -419,7 +419,7 @@ class TreatmentUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     
     def test_func(self):
         treatment = self.get_object()
-        # Sadece tedaviyi oluşturan doktor güncelleyebilir
+        # Only the doctor who created the treatment can update it
         return self.request.user.is_doctor() and treatment.appointment.doctor == self.request.user
     
     def get_context_data(self, **kwargs):
@@ -552,7 +552,7 @@ class DoctorListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         queryset = User.objects.filter(user_type='doctor')
         
-        # Arama
+        # Search
         search = self.request.GET.get('search')
         if search:
             queryset = queryset.filter(
@@ -566,7 +566,7 @@ class DoctorListView(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
-        # Şu anda müsait olan doktorları bul
+        # Find currently available doctors
         from appointments.models_availability import DoctorAvailability, DoctorTimeOff
         from datetime import datetime
         
@@ -574,7 +574,7 @@ class DoctorListView(LoginRequiredMixin, ListView):
         current_weekday = now.weekday()  # 0 = Pazartesi, 6 = Pazar
         current_time = now.time()
         
-        # Bugün çalışan doktorlar
+        # Doctors working today
         working_doctors = User.objects.filter(
             user_type='doctor',
             availabilities__weekday=current_weekday,
@@ -583,7 +583,7 @@ class DoctorListView(LoginRequiredMixin, ListView):
             availabilities__is_active=True
         ).distinct()
         
-        # Bugün izinli olan doktorları çıkar
+        # Exclude doctors on leave today
         today = now.date()
         on_leave_doctor_ids = DoctorTimeOff.objects.filter(
             start_date__lte=today,
@@ -607,7 +607,7 @@ class DoctorCreationView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     success_url = reverse_lazy('doctor-list')
     
     def test_func(self):
-        # Sadece admin kullanıcılar doktor ekleyebilir
+        # Only admin users can add doctors
         return self.request.user.is_admin_user() or self.request.user.is_superuser
     
     def form_valid(self, form):
@@ -629,7 +629,7 @@ class DoctorDetailView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         doctor = self.get_object()
-        # İhtiyaç duyulan ek verileri ekleyebiliriz
+        # Additional data can be added as needed
         return context
 
 class DoctorUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
@@ -642,7 +642,7 @@ class DoctorUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     success_url = reverse_lazy('doctor-list')
     
     def test_func(self):
-        # Sadece admin kullanıcılar doktor bilgilerini güncelleyebilir
+        # Only admin users can update doctor information
         return self.request.user.is_admin_user() or self.request.user.is_superuser
     
     def get_context_data(self, **kwargs):
@@ -661,12 +661,12 @@ def analytics_dashboard(request):
     """
     Advanced analytics dashboard view
     """
-    # Kullanıcı rolüne göre erişim kontrolü
+    # Access control based on user role
     if not (request.user.is_doctor() or request.user.is_admin_user()):
-        messages.error(request, _('Bu sayfaya erişim izniniz bulunmamaktadır.'))
+        messages.error(request, _('You do not have permission to access this page.'))
         return redirect('home')
     
-    # Analitik verilerini hazırla
+    # Prepare analytics data
     analytics = DashboardAnalytics(user=request.user)
     dashboard_data = analytics.get_comprehensive_dashboard_data()
     

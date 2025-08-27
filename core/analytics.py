@@ -18,7 +18,7 @@ User = get_user_model()
 
 class DashboardAnalytics:
     """
-    Dashboard için gelişmiş analitik veriler sağlar
+    Provides advanced analytics data for Dashboard
     """
     
     def __init__(self, user=None, date_range_days=30):
@@ -28,7 +28,7 @@ class DashboardAnalytics:
         self.end_date = timezone.now().date()
     
     def get_appointment_stats(self):
-        """Randevu istatistikleri"""
+        """Appointment statistics"""
         queryset = Appointment.objects.filter(
             date__range=[self.start_date, self.end_date]
         )
@@ -44,12 +44,12 @@ class DashboardAnalytics:
         cancelled = queryset.filter(status='cancelled').count()
         planned = queryset.filter(status='planned').count()
         
-        # Günlük randevu dağılımı
+        # Daily appointment distribution
         daily_appointments = defaultdict(int)
         for appointment in queryset:
             day_key = appointment.date.strftime('%Y-%m-%d')
             daily_appointments[day_key] += 1
-        # Günlük randevu sayısını sıralı hale getir
+        # Sort daily appointment counts
         daily_appointments= sorted(daily_appointments.items())
         
         return {
@@ -62,7 +62,7 @@ class DashboardAnalytics:
         }
     
     def get_patient_stats(self):
-        """Hasta istatistikleri"""
+        """Patient statistics"""
         if not self.user or not (self.user.is_doctor() or self.user.is_admin_user()):
             return {}
         
@@ -73,13 +73,13 @@ class DashboardAnalytics:
             patient_appointments__date__gte=self.start_date
         ).distinct().count()
         
-        # Aktif kronik hastalık sayısı
+        # Active chronic disease count
         chronic_conditions = MedicalHistory.objects.filter(
             condition_type='chronic',
             is_active=True
         ).count()
         
-        # Yeni hasta kayıtları
+        # New patient registrations
         new_patients = patients.filter(
             date_joined__date__range=[self.start_date, self.end_date]
         ).count()
@@ -92,7 +92,7 @@ class DashboardAnalytics:
         }
     
     def get_treatment_stats(self):
-        """Tedavi istatistikleri"""
+        """Treatment statistics"""
         queryset = Treatment.objects.filter(
             created_at__date__range=[self.start_date, self.end_date]
         )
@@ -102,12 +102,12 @@ class DashboardAnalytics:
         
         total_treatments = queryset.count()
         
-        # En sık verilen teşhisler
+        # Most common diagnoses
         common_diagnoses = queryset.values('diagnosis').annotate(
             count=Count('diagnosis')
         ).order_by('-count')[:10]
         
-        # Reçete istatistikleri
+        # Prescription statistics
         prescriptions_count = Prescription.objects.filter(
             treatment__in=queryset
         ).count()
@@ -124,7 +124,7 @@ class DashboardAnalytics:
         }
     
     def get_lab_test_stats(self):
-        """Laboratuvar test istatistikleri"""
+        """Laboratory test statistics"""
         queryset = LabTest.objects.filter(
             requested_date__date__range=[self.start_date, self.end_date]
         )
@@ -136,7 +136,7 @@ class DashboardAnalytics:
         completed_tests = queryset.filter(status='completed').count()
         pending_tests = queryset.filter(status__in=['requested', 'in_progress']).count()
         
-        # En sık istenen testler
+        # Most frequently requested tests
         popular_tests = queryset.values('test_name').annotate(
             count=Count('test_name')
         ).order_by('-count')[:10]
@@ -150,7 +150,7 @@ class DashboardAnalytics:
         }
     
     def get_doctor_performance(self):
-        """Doktor performans metrikleri"""
+        """Doctor performance metrics"""
         if not self.user or not self.user.is_doctor():
             return {}
         
@@ -162,13 +162,13 @@ class DashboardAnalytics:
         total_appointments = appointments.count()
         completed_appointments = appointments.filter(status='completed').count()
         
-        # Ortalama tedavi süresi (saniye)
+        # Average treatment duration (seconds)
         treatments = Treatment.objects.filter(
             appointment__doctor=self.user,
             created_at__date__range=[self.start_date, self.end_date]
         )
         
-        # Hasta memnuniyet skoru (gelecekte eklenebilir)
+        # Patient satisfaction score (can be added in future)
         # satisfaction_score = self.calculate_satisfaction_score()
         
         return {
@@ -180,10 +180,10 @@ class DashboardAnalytics:
         }
     
     def get_monthly_trends(self):
-        """Aylık trend verileri"""
+        """Monthly trend data"""
         months_data = []
         
-        for i in range(6):  # Son 6 ay
+        for i in range(6):  # Last 6 months
             month_start = (timezone.now().date().replace(day=1) - timedelta(days=i*30)).replace(day=1)
             month_end = (month_start.replace(day=calendar.monthrange(month_start.year, month_start.month)[1]))
             
@@ -205,7 +205,7 @@ class DashboardAnalytics:
         return list(reversed(months_data))
     
     def get_comprehensive_dashboard_data(self):
-        """Tüm dashboard verilerini toplar"""
+        """Collects all dashboard data"""
         return {
             'appointment_stats': self.get_appointment_stats(),
             'patient_stats': self.get_patient_stats(),
@@ -223,12 +223,12 @@ class DashboardAnalytics:
 
 class ReportGenerator:
     """
-    Çeşitli raporlar oluşturur
+    Creates various reports
     """
     
     @staticmethod
     def generate_doctor_summary_report(doctor, start_date, end_date):
-        """Doktor özet raporu"""
+        """Doctor summary report"""
         appointments = Appointment.objects.filter(
             doctor=doctor,
             date__range=[start_date, end_date]
@@ -258,7 +258,7 @@ class ReportGenerator:
     
     @staticmethod
     def generate_patient_health_summary(patient):
-        """Hasta sağlık özeti"""
+        """Patient health summary"""
         appointments = Appointment.objects.filter(patient=patient)
         treatments = Treatment.objects.filter(appointment__patient=patient)
         

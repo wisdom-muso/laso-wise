@@ -2,7 +2,7 @@
 {% load static %}
 {% load i18n %}
 
-{% block title %}{% translate "Gelişmiş Dashboard" %}{% endblock %}
+{% block title %}{% translate "Enhanced Dashboard" %}{% endblock %}
 
 {% block extra_css %}
 <link href="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.css" rel="stylesheet">
@@ -114,13 +114,13 @@
                 <h1 class="mb-2">{% translate "Welcome" %}, {{ user.get_full_name|default:user.username }}!</h1>
                 <p class="mb-0">
                     {% if user.is_doctor %}
-                        {% translate "Bugün" %} {{ current_date|date:"d F Y" }} - {% translate "Hasta bakım dashboard'unuz" %}
+                        {% translate "Today" %} {{ current_date|date:"d F Y" }} - {% translate "Your Patient Care Dashboard" %}
                     {% elif user.is_patient %}
-                        {% translate "Sağlık takip dashboard'unuz" %}
+                        {% translate "Your Health Tracking Dashboard" %}
                     {% elif user.is_receptionist %}
-                        {% translate "Hasta ve randevu yönetim dashboard'unuz" %}
+                        {% translate "Your Patient and Appointment Management Dashboard" %}
                     {% else %}
-                        {% translate "Sistem yönetim dashboard'unuz" %}
+                        {% translate "Your System Management Dashboard" %}
                     {% endif %}
                 </p>
             </div>
@@ -132,7 +132,7 @@
                         </div>
                         <div>
                             <div class="h4 mb-0">24°C</div>
-                            <small>{% translate "Güneşli" %}</small>
+                            <small>{% translate "Sunny" %}</small>
                         </div>
                     </div>
                 </div>
@@ -148,7 +148,7 @@
                 <div class="card-body text-center">
                     <i class="fas fa-calendar-alt fa-3x mb-3"></i>
                     <div class="metric-value">{{ appointment_stats.total }}</div>
-                    <div class="metric-label">{% translate "Toplam Randevu" %}</div>
+                    <div class="metric-label">{% translate "Total Appointments" %}</div>
                     <div class="trend-indicator trend-up">
                         <i class="fas fa-arrow-up"></i> +12% {% translate "bu ay" %}
                     </div>
@@ -165,7 +165,7 @@
                     <div class="metric-value">{{ appointment_stats.completed }}</div>
                     <div class="metric-label">{% translate "Tamamlanan" %}</div>
                     <div class="trend-indicator">
-                        %{{ appointment_stats.completion_rate|floatformat:1 }} {% translate "başarı oranı" %}
+                        %{{ appointment_stats.completion_rate|floatformat:1 }} {% translate "success rate" %}
                     </div>
                 </div>
             </div>
@@ -178,9 +178,9 @@
                 <div class="card-body text-center">
                     <i class="fas fa-user-md fa-3x mb-3"></i>
                     <div class="metric-value">{{ treatment_stats.total_treatments }}</div>
-                    <div class="metric-label">{% translate "Tedavi Sayısı" %}</div>
+                    <div class="metric-label">{% translate "Treatment Count" %}</div>
                     <div class="trend-indicator">
-                        {{ treatment_stats.avg_prescriptions }} {% translate "ort. reçete" %}
+                        {{ treatment_stats.avg_prescriptions }} {% translate "avg. prescription" %}
                     </div>
                 </div>
             </div>
@@ -221,28 +221,28 @@
                 </div>
             </div>
 
-            <!-- Doktor Performansı (sadece doktorlar için) -->
+            <!-- Doctor Performance (for doctors only) -->
             {% if doctor_performance %}
             <div class="card mb-4">
                 <div class="card-header">
                     <h5 class="card-title mb-0">
                         <i class="fas fa-trophy me-2"></i>
-                        {% translate "Performans Özeti" %}
+                        {% translate "Performance Summary" %}
                     </h5>
                 </div>
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-4 text-center">
                             <div class="h3 text-primary">{{ doctor_performance.avg_daily_patients }}</div>
-                            <small class="text-muted">{% translate "Günlük Ortalama Hasta" %}</small>
+                            <small class="text-muted">{% translate "Daily Average Patients" %}</small>
                         </div>
                         <div class="col-md-4 text-center">
                             <div class="h3 text-success">%{{ doctor_performance.completion_rate|floatformat:1 }}</div>
-                            <small class="text-muted">{% translate "Tamamlama Oranı" %}</small>
+                            <small class="text-muted">{% translate "Completion Rate" %}</small>
                         </div>
                         <div class="col-md-4 text-center">
                             <div class="h3 text-info">{{ doctor_performance.total_treatments }}</div>
-                            <small class="text-muted">{% translate "Toplam Tedavi" %}</small>
+                            <small class="text-muted">{% translate "Total Treatments" %}</small>
                         </div>
                     </div>
                 </div>
@@ -267,14 +267,14 @@
             {% endif %}
         </div>
 
-        <!-- Sağ Kolon -->
+        <!-- Right Column -->
         <div class="col-lg-4">
-            <!-- Hızlı Eylemler -->
+            <!-- Quick Actions -->
             <div class="card mb-4">
                 <div class="card-header">
                     <h5 class="card-title mb-0">
                         <i class="fas fa-bolt me-2"></i>
-                        {% translate "Hızlı Eylemler" %}
+                        {% translate "Quick Actions" %}
                     </h5>
                 </div>
                 <div class="card-body">
@@ -321,7 +321,7 @@
                         </div>
                     </div>
                     {% empty %}
-                    <p class="text-muted text-center">{% translate "Henüz aktivite bulunmuyor." %}</p>
+                    <p class="text-muted text-center">{% translate "No activity found yet." %}</p>
                     {% endfor %}
                 </div>
             </div>
@@ -337,11 +337,11 @@
                 <div class="card-body">
                     <div class="alert alert-info">
                         <i class="fas fa-info-circle me-2"></i>
-                        {% translate "Sistem bakımı 15 Ocak'ta yapılacaktır." %}
+                        {% translate "System maintenance will be performed on January 15th." %}
                     </div>
                     <div class="alert alert-success">
                         <i class="fas fa-check-circle me-2"></i>
-                        {% translate "Yeni özellikler eklendi! Keşfetmek için tıklayın." %}
+                        {% translate "New features added! Click to explore." %}
                     </div>
                 </div>
             </div>
@@ -354,7 +354,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Randevu trend grafiği
+    // Appointment trend chart
     {% if monthly_trends %}
     const trendCtx = document.getElementById('appointmentTrendChart');
     if (trendCtx) {
@@ -363,7 +363,7 @@ document.addEventListener('DOMContentLoaded', function() {
             data: {
                 labels: [{% for trend in monthly_trends %}'{{ trend.month }}'{% if not forloop.last %},{% endif %}{% endfor %}],
                 datasets: [{
-                    label: '{% translate "Randevular" %}',
+                    label: '{% translate "Appointments" %}',
                     data: [{% for trend in monthly_trends %}{{ trend.appointments }}{% if not forloop.last %},{% endif %}{% endfor %}],
                     borderColor: 'rgb(107, 115, 255)',
                     backgroundColor: 'rgba(107, 115, 255, 0.1)',
@@ -435,11 +435,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Otomatik yenileme (30 saniyede bir)
     setInterval(function() {
-        // AJAX ile dashboard verilerini güncelle
+        // Update dashboard data via AJAX
         fetch('/dashboard/api/analytics/')
             .then(response => response.json())
             .then(data => {
-                // Verileri güncelle (isteğe bağlı)
+                // Update data (optional)
                 console.log('Dashboard data updated:', data);
             })
             .catch(error => console.error('Error updating dashboard:', error));

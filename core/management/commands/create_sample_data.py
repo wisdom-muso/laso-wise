@@ -889,7 +889,7 @@ class Command(BaseCommand):
                 content = ''
                 if notification_type == 'appointment_reminder':
                     content = random.choice([
-                        "Yaklaşan randevunuz hakkında hatırlatma.",
+                        "Reminder about your upcoming appointment.",
                         "Yarınki randevunuzu unutmayın.",
                         "Önümüzdeki hafta için planlanmış randevunuz var.",
                         "Dr. ile randevunuz 3 gün sonra."
@@ -897,9 +897,9 @@ class Command(BaseCommand):
                 elif notification_type == 'prescription_refill':
                     content = random.choice([
                         "Reçeteniz yenileme zamanı geldi.",
-                        "İlaçlarınız bitmek üzere, lütfen doktorunuzla iletişime geçin.",
+                        "Your medications are running low, please contact your doctor.",
                         "Reçeteniz hazır, eczaneden alabilirsiniz.",
-                        "İlaç tedaviniz için yenileme hatırlatması."
+                        "Renewal reminder for your medication treatment."
                     ])
                 elif notification_type == 'test_result':
                     content = random.choice([
