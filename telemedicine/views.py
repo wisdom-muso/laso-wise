@@ -358,12 +358,12 @@ class TeleMedicineConsultationCreateView(LoginRequiredMixin, CreateView):
         if user.is_doctor():
             form.fields['appointment'].queryset = Appointment.objects.filter(
                 doctor=user,
-                status='scheduled'
+                status='planned'
             )
         elif user.is_patient():
             form.fields['appointment'].queryset = Appointment.objects.filter(
                 patient=user,
-                status='scheduled'
+                status='planned'
             )
         
         return form

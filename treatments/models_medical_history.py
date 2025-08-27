@@ -55,8 +55,8 @@ class MedicalHistory(models.Model):
     )
     
     class Meta:
-        verbose_name = _('Sağlık Geçmişi Kaydı')
-        verbose_name_plural = _('Sağlık Geçmişi Kayıtları')
+        verbose_name = _('Medical History Record')
+        verbose_name_plural = _('Medical History Records')
         ordering = ['-created_at']
     
     def __str__(self):

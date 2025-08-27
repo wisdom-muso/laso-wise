@@ -250,15 +250,15 @@ class AppointmentListView(LoginRequiredMixin, ListView):
 
 class AppointmentCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     """
-    Randevu oluşturma görünümü
+    Appointment creation view
     """
     model = Appointment
     form_class = AppointmentForm
     template_name = 'core/appointment_form.html'
-    success_url = reverse_lazy('appointment-list')
+    success_url = reverse_lazy('core:appointment-list')
     
     def test_func(self):
-        # Tüm kullanıcılar randevu oluşturabilir
+        # All users can create appointments
         return True
     
     def get_form_kwargs(self):
@@ -268,12 +268,12 @@ class AppointmentCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView)
     
     def get_initial(self):
         initial = super().get_initial()
-        # URL'den doktor ID'si alınırsa doktoru otomatik seç
+        # If doctor ID is taken from URL, automatically select doctor
         doctor_id = self.request.GET.get('doctor')
         if doctor_id:
             initial['doctor'] = doctor_id
         
-        # URL'den hasta ID'si alınırsa hastayı otomatik seç
+        # If patient ID is taken from URL, automatically select patient
         patient_id = self.request.GET.get('patient')
         if patient_id:
             initial['patient'] = patient_id
@@ -284,7 +284,7 @@ class AppointmentCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView)
     
     def form_valid(self, form):
         response = super().form_valid(form)
-        messages.success(self.request, _('Randevu başarıyla oluşturuldu.'))
+        messages.success(self.request, _('Appointment created successfully.'))
         return response
 
 class AppointmentUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
@@ -294,7 +294,7 @@ class AppointmentUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView)
     model = Appointment
     form_class = AppointmentForm
     template_name = 'core/appointment_form.html'
-    success_url = reverse_lazy('appointment-list')
+    success_url = reverse_lazy('core:appointment-list')
     
     def test_func(self):
         appointment = self.get_object()
@@ -338,7 +338,7 @@ class AppointmentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView)
     """
     model = Appointment
     template_name = 'core/appointment_confirm_delete.html'
-    success_url = reverse_lazy('appointment-list')
+    success_url = reverse_lazy('core:appointment-list')
     
     def test_func(self):
         # Sadece resepsiyonistler ve adminler randevu silebilir
@@ -357,7 +357,7 @@ class TreatmentCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     model = Treatment
     form_class = TreatmentForm
     template_name = 'core/treatment_form.html'
-    success_url = reverse_lazy('appointment-list')
+    success_url = reverse_lazy('core:appointment-list')
     
     def test_func(self):
         # Sadece doktorlar tedavi oluşturabilir
@@ -415,7 +415,7 @@ class TreatmentUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Treatment
     form_class = TreatmentForm
     template_name = 'core/treatment_form.html'
-    success_url = reverse_lazy('appointment-list')
+    success_url = reverse_lazy('core:appointment-list')
     
     def test_func(self):
         treatment = self.get_object()
@@ -467,27 +467,27 @@ class TreatmentDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
 # Hasta Görünümleri
 class PatientListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     """
-    Hasta listesi görünümü
+    Patient list view
     """
     model = User
     template_name = 'core/patient_list.html'
     context_object_name = 'patients'
     
     def test_func(self):
-        # Sadece doktorlar, resepsiyonistler ve adminler hasta listesini görebilir
+        # Only doctors, receptionists and admins can view patient list
         user = self.request.user
         return user.is_doctor() or user.is_receptionist() or user.is_admin_user()
     
     def get_queryset(self):
         queryset = User.objects.filter(user_type='patient')
         
-        # Doktorlar sadece kendilerine randevu alan hastaları görebilir
+        # Doctors can only see patients who have appointments with them
         if self.request.user.is_doctor():
             doctor = self.request.user
             patient_ids = Appointment.objects.filter(doctor=doctor).values_list('patient_id', flat=True)
             queryset = queryset.filter(id__in=patient_ids).distinct()
         
-        # Arama
+        # Search
         search = self.request.GET.get('search')
         if search:
             queryset = queryset.filter(

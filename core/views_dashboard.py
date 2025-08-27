@@ -59,14 +59,14 @@ class EnhancedDashboardView(LoginRequiredMixin, TemplateView):
             ]
         elif user.is_patient():
             actions = [
-                {'title': 'Randevu Al', 'url': 'appointment-create', 'icon': 'calendar-plus', 'color': 'primary'},
+                {'title': 'Book Appointment', 'url': 'appointment-create', 'icon': 'calendar-plus', 'color': 'primary'},
                 {'title': 'Tedavi Geçmişi', 'url': 'patient-treatment-history', 'icon': 'history', 'color': 'info'},
                 {'title': 'Test Sonuçları', 'url': 'patient-lab-results', 'icon': 'chart-bar', 'color': 'success'},
                 {'title': 'Reçetelerim', 'url': 'patient-prescriptions', 'icon': 'pills', 'color': 'warning'},
             ]
         elif user.is_receptionist():
             actions = [
-                {'title': 'Yeni Randevu', 'url': 'appointment-create', 'icon': 'calendar-plus', 'color': 'primary'},
+                {'title': 'New Appointment', 'url': 'appointment-create', 'icon': 'calendar-plus', 'color': 'primary'},
                 {'title': 'Hasta Kaydı', 'url': 'patient-register', 'icon': 'user-plus', 'color': 'success'},
                 {'title': 'Randevu Listesi', 'url': 'appointment-list', 'icon': 'list', 'color': 'info'},
                 {'title': 'Doktor Takvimi', 'url': 'doctor-calendar', 'icon': 'calendar', 'color': 'warning'},
