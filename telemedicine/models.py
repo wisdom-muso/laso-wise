@@ -178,7 +178,7 @@ class VideoSession(models.Model):
         return f"Oturum: {self.appointment} - {self.start_time}"
     
     def get_duration(self):
-        """Oturum süresini hesapla"""
+        """Calculate session duration"""
         if self.end_time:
             return (self.end_time - self.start_time).total_seconds()
         return None
@@ -209,7 +209,7 @@ class TelemedDocument(models.Model):
         max_length=50,
         choices=[
             ('lab_result', _('Lab Result')),
-            ('prescription', _('Reçete')),
+            ('prescription', _('Prescription')),
             ('medical_image', _('Medical Image')),
             ('referral', _('Sevk')),
             ('other', _('Other')),
@@ -296,7 +296,7 @@ class TelemedPrescription(models.Model):
         ordering = ['-created_at']
     
     def __str__(self):
-        return f"Reçete: {self.appointment}"
+        return f"Prescription: {self.appointment}"
 
 
 class TelemedNote(models.Model):
@@ -324,8 +324,8 @@ class TelemedNote(models.Model):
         choices=[
             ('diagnosis', _('Diagnosis')),
             ('treatment_plan', _('Treatment Plan')),
-            ('follow_up', _('Takip')),
-            ('general', _('Genel Not')),
+            ('follow_up', _('Follow-up')),
+            ('general', _('General Note')),
         ],
         default='general',
         verbose_name=_('Note Type')
@@ -341,7 +341,7 @@ class TelemedNote(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='created_telemedicine_notes',
-        verbose_name=_('Oluşturan')
+        verbose_name=_('Created By')
     )
     
     created_at = models.DateTimeField(
@@ -380,7 +380,7 @@ class TeleMedicineConsultation(models.Model):
         ('in_progress', _('Devam Ediyor')),
         ('completed', _('Tamamlandı')),
         ('cancelled', _('Cancelled')),
-        ('no_show', _('Katılım Sağlanmadı')),
+        ('no_show', _('No Show')),
         ('technical_issue', _('Teknik Sorun')),
     ]
     
@@ -462,7 +462,7 @@ class TeleMedicineConsultation(models.Model):
         verbose_name=_('Duration (Minutes)')
     )
     
-    # Katılımcı bilgileri
+    # Participant information
     doctor_joined_at = models.DateTimeField(
         null=True,
         blank=True,
@@ -479,10 +479,10 @@ class TeleMedicineConsultation(models.Model):
     connection_quality = models.CharField(
         max_length=20,
         choices=[
-            ('excellent', _('Mükemmel')),
-            ('good', _('İyi')),
+            ('excellent', _('Excellent')),
+            ('good', _('Good')),
             ('fair', _('Orta')),
-            ('poor', _('Kötü')),
+            ('poor', _('Poor')),
         ],
         blank=True,
         verbose_name=_('Bağlantı Kalitesi')
@@ -653,10 +653,10 @@ class TeleMedicineMessage(models.Model):
     message_type = models.CharField(
         max_length=20,
         choices=[
-            ('text', _('Metin')),
-            ('file', _('Dosya')),
-            ('image', _('Görsel')),
-            ('system', _('Sistem Mesajı')),
+            ('text', _('Text')),
+            ('file', _('File')),
+            ('image', _('Image')),
+            ('system', _('System Message')),
         ],
         default='text',
         verbose_name=_('Message Type')

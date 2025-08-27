@@ -1,17 +1,17 @@
 {% extends 'core/base.html' %}
 {% load i18n %}
 
-{% block title %}{% translate "İlaç Sil" %}: {{ medication.name }}{% endblock %}
+{% block title %}{% translate "Delete Medication" %}: {{ medication.name }}{% endblock %}
 
 {% block content %}
 <div class="container py-4">
     <div class="mb-4">
-        <h1 class="mb-0">{% translate "İlaç Sil" %}</h1>
+        <h1 class="mb-0">{% translate "Delete Medication" %}</h1>
     </div>
 
     <div class="card shadow-sm">
         <div class="card-header bg-light">
-            <h5 class="mb-0">{% translate "Silme Onayı" %}</h5>
+            <h5 class="mb-0">{% translate "Delete Confirmation" %}</h5>
         </div>
         <div class="card-body">
             <div class="alert alert-danger">
@@ -30,9 +30,9 @@
                     {% endif %}
                     <div class="mt-2">
                         {% if medication.is_prescription %}
-                        <span class="badge bg-warning">{% translate "Reçeteli" %}</span>
+                        <span class="badge bg-warning">{% translate "Prescription" %}</span>
                         {% else %}
-                        <span class="badge bg-success">{% translate "Reçetesiz" %}</span>
+                        <span class="badge bg-success">{% translate "Over-the-counter" %}</span>
                         {% endif %}
                         {% if medication.drug_code %}
                         <span class="badge bg-secondary">{{ medication.drug_code }}</span>
@@ -48,7 +48,7 @@
                         <i class="fas fa-arrow-left me-1"></i> {% translate "Vazgeç" %}
                     </a>
                     <button type="submit" class="btn btn-danger">
-                        <i class="fas fa-trash me-1"></i> {% translate "İlacı Sil" %}
+                        <i class="fas fa-trash me-1"></i> {% translate "Delete Medication" %}
                     </button>
                 </div>
             </form>

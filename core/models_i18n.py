@@ -142,12 +142,12 @@ class TranslationContext(models.Model):
     CONTEXT_TYPES = [
         ('medical', _('Medikal Terimler')),
         ('ui', _('Kullanıcı Arayüzü')),
-        ('notification', _('Bildirimler')),
-        ('report', _('Raporlar')),
-        ('appointment', _('Randevu')),
-        ('treatment', _('Tedavi')),
-        ('medication', _('İlaç')),
-        ('diagnosis', _('Teşhis')),
+        ('notification', _('Notifications')),
+        ('report', _('Reports')),
+        ('appointment', _('Appointment')),
+        ('treatment', _('Treatment')),
+        ('medication', _('Medication')),
+        ('diagnosis', _('Diagnosis')),
     ]
     
     context_type = models.CharField(
@@ -165,7 +165,7 @@ class TranslationContext(models.Model):
         max_length=100,
         unique=True,
         verbose_name=_('Bağlam Anahtarı'),
-        help_text=_('Benzersiz anahtar (örn: diagnosis.diabetes)')
+        help_text=_('Unique key (e.g.: diagnosis.diabetes)')
     )
     
     description = models.TextField(
