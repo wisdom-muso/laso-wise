@@ -156,12 +156,17 @@ STORAGES = {
         'BACKEND': 'django.core.files.storage.FileSystemStorage',
     },
     'staticfiles': {
-        'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+        'BACKEND': 'core.storage.ForgivingCompressedStaticFilesStorage',
     },
 }
 
-# Fallback for older Django versions
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# Fallback for older Django versions  
+STATICFILES_STORAGE = 'core.storage.ForgivingCompressedStaticFilesStorage'
+
+# WhiteNoise settings
+WHITENOISE_USE_FINDERS = True
+WHITENOISE_AUTOREFRESH = True
+WHITENOISE_SKIP_COMPRESS_EXTENSIONS = ['js.map', 'css.map']
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
