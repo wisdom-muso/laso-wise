@@ -7,7 +7,7 @@
     
     <!-- Favicon -->
     {% load static %}
-    <link rel="icon" type="image/png" href="{% static 'assets/media/logos/favicon.png' %}">
+    <!-- <link rel="icon" type="image/png" href="{% static 'assets/media/logos/favicon.png' %}"> -->
     
     <!-- Fonts -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
@@ -69,18 +69,21 @@
         .registration-container {
             min-height: 100vh;
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             justify-content: center;
-            padding: 20px;
+            padding: 40px 20px;
             position: relative;
             z-index: 1;
+            box-sizing: border-box;
+            overflow-y: auto;
         }
 
         .registration-wrapper {
             display: grid;
             grid-template-columns: 1fr 1.2fr;
-            max-width: 1200px;
+            max-width: 1400px;
             width: 100%;
+            margin: 0 auto;
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.3);
@@ -89,14 +92,15 @@
                 0 25px 50px rgba(0, 0, 0, 0.08),
                 0 0 0 1px rgba(255, 255, 255, 0.1);
             overflow: hidden;
+            min-height: auto;
         }
 
         .registration-info {
             background: linear-gradient(135deg, var(--primary-teal) 0%, var(--primary-dark) 100%);
-            padding: 60px 40px;
+            padding: 40px 30px;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: flex-start;
             align-items: center;
             text-align: center;
             color: white;
@@ -175,12 +179,13 @@
         }
 
         .registration-form-section {
-            padding: 40px 40px;
+            padding: 30px 25px;
             display: flex;
             flex-direction: column;
             justify-content: flex-start;
-            min-height: 100vh;
-            overflow-y: visible;
+            min-height: auto;
+            overflow-y: auto;
+            box-sizing: border-box;
         }
 
         .form-title {
@@ -375,45 +380,101 @@
         }
 
         /* Responsive Design */
-        @media (max-width: 768px) {
+        @media (max-width: 1024px) {
+            .registration-container {
+                padding: 30px 15px;
+                align-items: flex-start;
+            }
+
             .registration-wrapper {
                 grid-template-columns: 1fr;
-                max-width: 500px;
+                max-width: none;
+                width: 100%;
+                margin: 0;
+            }
+            
+            .registration-info {
+                min-height: auto;
+                padding: 30px 25px;
+            }
+
+            .registration-form-section {
+                padding: 30px 25px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .registration-container {
+                padding: 20px 10px;
+                min-height: 100vh;
+                align-items: flex-start;
+            }
+
+            .registration-wrapper {
+                grid-template-columns: 1fr;
+                max-width: none;
+                width: 100%;
+                margin: 0;
+                border-radius: 16px;
             }
 
             .registration-info {
-                padding: 30px 20px;
+                padding: 25px 20px;
                 min-height: auto;
             }
 
             .registration-form-section {
-                padding: 30px 20px;
+                padding: 25px 20px;
                 min-height: auto;
             }
 
             .form-row {
                 grid-template-columns: 1fr;
                 gap: 0;
+                margin-bottom: 15px;
+            }
+
+            .form-group {
+                margin-bottom: 15px;
             }
 
             .info-title {
-                font-size: 24px;
+                font-size: 22px;
+                margin-bottom: 12px;
             }
 
             .form-title {
                 font-size: 20px;
+                margin-bottom: 6px;
+            }
+
+            .step-title {
+                font-size: 16px;
+                margin-bottom: 15px;
+            }
+
+            .form-control {
+                padding: 14px 16px;
+                font-size: 16px; /* Prevent zoom on iOS */
+            }
+
+            .btn-register {
+                padding: 14px;
+                font-size: 16px;
             }
         }
 
-        @media (max-width: 1024px) {
-            .registration-wrapper {
-                grid-template-columns: 1fr;
-                max-width: 600px;
+        @media (max-width: 480px) {
+            .registration-container {
+                padding: 15px 8px;
             }
-            
-            .registration-info {
-                min-height: auto;
-                padding: 40px 30px;
+
+            .registration-info, .registration-form-section {
+                padding: 20px 15px;
+            }
+
+            .form-control, .btn-register {
+                font-size: 16px; /* Prevent zoom on iOS */
             }
         }
 
