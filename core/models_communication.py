@@ -71,20 +71,20 @@ class Message(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='sent_messages',
-        verbose_name=_('Gönderen')
+        verbose_name=_('Sender')
     )
     receiver = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='received_messages',
-        verbose_name=_('Alıcı')
+        verbose_name=_('Receiver')
     )
     subject = models.CharField(
         max_length=200,
-        verbose_name=_('Konu')
+        verbose_name=_('Subject')
     )
     content = models.TextField(
-        verbose_name=_('İçerik')
+        verbose_name=_('Content')
     )
     is_read = models.BooleanField(
         default=False,
@@ -96,7 +96,7 @@ class Message(models.Model):
         null=True,
         blank=True,
         related_name='replies',
-        verbose_name=_('Üst Mesaj')
+        verbose_name=_('Parent Message')
     )
     created_at = models.DateTimeField(
         auto_now_add=True,
@@ -104,8 +104,8 @@ class Message(models.Model):
     )
     
     class Meta:
-        verbose_name = _('Mesaj')
-        verbose_name_plural = _('Mesajlar')
+        verbose_name = _('Message')
+        verbose_name_plural = _('Messages')
         ordering = ['-created_at']
     
     def __str__(self):
@@ -120,36 +120,36 @@ class EmailTemplate(models.Model):
     E-posta şablonu modeli. Sistem tarafından gönderilen e-postaların şablonlarını temsil eder.
     """
     TEMPLATE_TYPE_CHOICES = [
-        ('appointment_reminder', _('Randevu Hatırlatma')),
-        ('appointment_confirmation', _('Randevu Onayı')),
-        ('appointment_cancellation', _('Randevu İptali')),
-        ('test_result', _('Test Sonucu Bildirimi')),
-        ('prescription', _('Reçete Bildirimi')),
-        ('welcome', _('Hoş Geldiniz')),
-        ('password_reset', _('Şifre Sıfırlama')),
-        ('custom', _('Özel Şablon')),
+        ('appointment_reminder', _('Appointment Reminder')),
+        ('appointment_confirmation', _('Appointment Confirmation')),
+        ('appointment_cancellation', _('Appointment Cancellation')),
+        ('test_result', _('Test Result Notification')),
+        ('prescription', _('Prescription Notification')),
+        ('welcome', _('Welcome')),
+        ('password_reset', _('Password Reset')),
+        ('custom', _('Custom Template')),
     ]
     
     name = models.CharField(
         max_length=100,
-        verbose_name=_('Şablon Adı')
+        verbose_name=_('Template Name')
     )
     template_type = models.CharField(
         max_length=30,
         choices=TEMPLATE_TYPE_CHOICES,
-        verbose_name=_('Şablon Tipi')
+        verbose_name=_('Template Type')
     )
     subject = models.CharField(
         max_length=200,
-        verbose_name=_('E-posta Konusu')
+        verbose_name=_('Email Subject')
     )
     content = models.TextField(
-        verbose_name=_('E-posta İçeriği'),
-        help_text=_('HTML kullanabilirsiniz. Değişkenler için {{değişken_adı}} formatını kullanın.')
+        verbose_name=_('Email Content'),
+        help_text=_('You can use HTML. Use {{variable_name}} format for variables.')
     )
     is_active = models.BooleanField(
         default=True,
-        verbose_name=_('Aktif mi?')
+        verbose_name=_('Is Active?')
     )
     created_at = models.DateTimeField(
         auto_now_add=True,
@@ -157,12 +157,12 @@ class EmailTemplate(models.Model):
     )
     updated_at = models.DateTimeField(
         auto_now=True,
-        verbose_name=_('Güncellenme Tarihi')
+        verbose_name=_('Updated Date')
     )
     
     class Meta:
-        verbose_name = _('E-posta Şablonu')
-        verbose_name_plural = _('E-posta Şablonları')
+        verbose_name = _('Email Template')
+        verbose_name_plural = _('Email Templates')
     
     def __str__(self):
         return f"{self.name} ({self.get_template_type_display()})"
