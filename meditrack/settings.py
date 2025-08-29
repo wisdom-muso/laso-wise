@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import os
+from decouple import config, Csv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,12 +22,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-$87@n^(g6isfhz4rt7uxv-yx1khpu&c+t(n_svs7y7u9u)49r)'
+SECRET_KEY = config('SECRET_KEY', default='django-insecure-$87@n^(g6isfhz4rt7uxv-yx1khpu&c+t(n_svs7y7u9u)49r)')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,65.108.91.110,host.docker.internal,*', cast=Csv())
 
 
 # Application definition
@@ -43,7 +44,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'corsheaders',
-    # Our own applications
+    # Our applications
     'users',
     'appointments',
     'treatments',
@@ -54,6 +55,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -88,12 +90,25 @@ WSGI_APPLICATION = 'meditrack.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+# Explicit toggle to force SQLite even if DATABASE_URL is present
+USE_SQLITE = config('USE_SQLITE', default=False, cast=bool)
+
+# Check if we have a DATABASE_URL environment variable (for Docker/production)
+DATABASE_URL = config('DATABASE_URL', default=None)
+
+if not USE_SQLITE and DATABASE_URL:
+    # Production/Docker database configuration
+    import dj_database_url
+    DATABASES = {
+        'default': dj_database_url.parse(DATABASE_URL)
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 
 # Password validation
@@ -118,9 +133,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
-LANGUAGE_CODE = 'en'
+LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'Europe/Istanbul'
+TIME_ZONE = 'UTC'
 
 USE_I18N = True
 
@@ -130,9 +145,27 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# WhiteNoise configuration for static files - Simplified for stability
+# For Django 4.2+ use STORAGES setting, fall back to STATICFILES_STORAGE for older versions
+STORAGES = {
+    'default': {
+        'BACKEND': 'django.core.files.storage.FileSystemStorage',
+    },
+    'staticfiles': {
+        'BACKEND': 'whitenoise.storage.CompressedStaticFilesStorage',
+    },
+}
+
+# Fallback for older Django versions  
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+
+# WhiteNoise settings - More conservative approach
+WHITENOISE_USE_FINDERS = True
+WHITENOISE_AUTOREFRESH = DEBUG
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -150,29 +183,142 @@ LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL = 'login'
 LOGIN_URL = 'login'
 
+# Admin login redirect fix
+ADMIN_REDIRECT_URL = '/admin/'
+
 # Email settings (console backend for development)
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
+
+# Email configuration for production
+if EMAIL_BACKEND == 'django.core.mail.backends.smtp.EmailBackend':
+    EMAIL_HOST = config('EMAIL_HOST', default='smtp.gmail.com')
+    EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
+    EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
+    EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
+    EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
 
 # Unfold Admin Theme Settings
 UNFOLD = {
-    "SITE_TITLE": "Laso Healthcare",
-    "SITE_HEADER": "Laso Healthcare",
+    "SITE_TITLE": "Laso Healthcare Admin",
+    "SITE_HEADER": "Laso Healthcare - Clinical Management System",
     "SITE_URL": "/",
-    "SITE_ICON": "static/assets/images/logo.png",  # or a path to your logo
+    "SITE_ICON": None,
     "DASHBOARD_CALLBACK": None,
-    "STYLES": [],  # Using default styles
-    "SCRIPTS": [],  # Using default scripts
+    "STYLES": [
+        "css/admin_custom.css",
+        "css/sidebar_teal.css",
+        "css/teal_theme_override.css",
+    ],
+    "SCRIPTS": [],
     "SIDEBAR": {
         "show_search": True,
         "show_all_applications": True,
-        "navigation": []
+        "navigation": [
+            {
+                "title": "Patient Management",
+                "separator": True,
+                "items": [
+                    {
+                        "title": "Patients",
+                        "icon": "people",
+                        "link": "/admin/users/user/?user_type__exact=patient",
+                    },
+                    {
+                        "title": "Medical History",
+                        "icon": "assignment",
+                        "link": "/admin/core/medicalhistory/",
+                    },
+                ]
+            },
+            {
+                "title": "Clinical Operations",
+                "separator": True,
+                "items": [
+                    {
+                        "title": "Appointments",
+                        "icon": "event",
+                        "link": "/admin/appointments/appointment/",
+                    },
+                    {
+                        "title": "Treatments",
+                        "icon": "local_hospital",
+                        "link": "/admin/treatments/treatment/",
+                    },
+                    {
+                        "title": "Medications",
+                        "icon": "medication",
+                        "link": "/admin/treatments/medication/",
+                    },
+                ]
+            },
+            {
+                "title": "Medical Records",
+                "separator": True,
+                "items": [
+                    {
+                        "title": "Lab Tests",
+                        "icon": "science",
+                        "link": "/admin/treatments/labtest/",
+                    },
+                    {
+                        "title": "Medical Images",
+                        "icon": "image",
+                        "link": "/admin/treatments/medicalimage/",
+                    },
+                    {
+                        "title": "Reports",
+                        "icon": "description",
+                        "link": "/admin/treatments/report/",
+                    },
+                ]
+            },
+        ]
     },
-    "TABS": [],
-    "EXTENSIONS": {},
+    "TABS": [
+        {
+            "models": [
+                "users.user",
+                "core.medicalhistory",
+            ],
+            "items": [
+                {
+                    "title": "Patients",
+                    "link": "/admin/users/user/?user_type__exact=patient",
+                },
+                {
+                    "title": "Doctors",
+                    "link": "/admin/users/user/?user_type__exact=doctor",
+                },
+            ]
+        },
+    ],
+    "EXTENSIONS": {
+        "modeltranslation": {
+            "flags": {
+                "en": "🇺🇸",
+                "tr": "🇹🇷",
+            },
+        },
+    },
     "COLORMODE": {
         "default": "light",
         "toggle": True,
     },
+    "COLORS": {
+        "primary": {
+            "50": "#f0fdfa",
+            "100": "#ccfbf1", 
+            "200": "#99f6e4",
+            "300": "#5eead4",
+            "400": "#2dd4bf",
+            "500": "#14b8a6",
+            "600": "#0d9488",
+            "700": "#0f766e", 
+            "800": "#115e59",
+            "900": "#134e4a",
+            "950": "#042f2e"
+        }
+    }
 }
 
 # REST Framework Settings
@@ -262,44 +408,117 @@ SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = 'DENY'
 
-# Cache Settings (for analytics and performance)
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'unique-snowflake',
+# Cache Settings (Redis optional)
+REDIS_URL = config('REDIS_URL', default=None)
+
+if REDIS_URL:
+    try:
+        # Only configure django-redis if the package is installed
+        import django_redis  # noqa: F401
+        CACHES = {
+            'default': {
+                'BACKEND': 'django_redis.cache.RedisCache',
+                'LOCATION': REDIS_URL,
+                'OPTIONS': {
+                    'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+                }
+            }
+        }
+        SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+        SESSION_CACHE_ALIAS = 'default'
+    except Exception:
+        # Fallback to local memory cache if django-redis isn't available
+        CACHES = {
+            'default': {
+                'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+                'LOCATION': 'unique-snowflake',
+            }
+        }
+else:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'LOCATION': 'unique-snowflake',
+        }
     }
-}
+
+# Celery Configuration (only if Redis is available)
+if REDIS_URL:
+    CELERY_BROKER_URL = REDIS_URL
+    CELERY_RESULT_BACKEND = REDIS_URL
+    CELERY_ACCEPT_CONTENT = ['json']
+    CELERY_TASK_SERIALIZER = 'json'
+    CELERY_RESULT_SERIALIZER = 'json'
+    CELERY_TIMEZONE = TIME_ZONE
+    CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+
+LOG_TO_FILE = config('LOG_TO_FILE', default=False, cast=bool)
 
 # Logging Settings
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'handlers': {
-        'file': {
-            'level': 'INFO',
-            'class': 'logging.FileHandler',
-            'filename': BASE_DIR / 'meditrack.log',
-        },
         'console': {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
         },
+        # 'file' handler is added below only if enabled
     },
     'loggers': {
         'django': {
-            'handlers': ['file', 'console'],
+            'handlers': ['console'],
             'level': 'INFO',
             'propagate': True,
         },
         'telemedicine': {
-            'handlers': ['file', 'console'],
+            'handlers': ['console'],
             'level': 'DEBUG',
             'propagate': True,
         },
         'core.ai_features': {
-            'handlers': ['file', 'console'],
+            'handlers': ['console'],
             'level': 'INFO',
             'propagate': True,
         },
     },
 }
+
+# Production-specific settings
+if not DEBUG:
+    # Security settings for production
+    SECURE_SSL_REDIRECT = config('SECURE_SSL_REDIRECT', default=False, cast=bool)
+    SESSION_COOKIE_SECURE = config('SESSION_COOKIE_SECURE', default=True, cast=bool)
+    CSRF_COOKIE_SECURE = config('CSRF_COOKIE_SECURE', default=True, cast=bool)
+    
+    # Performance settings
+    CONN_MAX_AGE = config('DB_CONN_MAX_AGE', default=300, cast=int)
+    
+    # Optional: log to file in production only if explicitly enabled
+    if LOG_TO_FILE:
+        LOGGING['handlers']['file'] = {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': '/app/logs/django.log',
+        }
+        LOGGING['loggers']['django']['handlers'] = ['console', 'file']
+        LOGGING['loggers']['telemedicine']['handlers'] = ['console', 'file']
+        LOGGING['loggers']['core.ai_features']['handlers'] = ['console', 'file']
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    
+    # Email settings
+    EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
+    EMAIL_HOST = config('EMAIL_HOST', default='')
+    EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
+    EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
+    EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
+    EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
+    
+    # CORS settings for production
+    CORS_ALLOW_ALL_ORIGINS = False
+    CORS_ALLOWED_ORIGINS = [
+        "http://65.108.91.110",
+        "https://65.108.91.110",  # If you add SSL later
+    ]

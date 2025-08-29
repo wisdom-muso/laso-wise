@@ -59,7 +59,7 @@ if [ ! -f .env ]; then
 # Database Configuration
 POSTGRES_DB=laso_healthcare
 POSTGRES_USER=laso_user
-POSTGRES_PASSWORD=laso_password
+POSTGRES_PASSWORD=laso_secure_password_$(date +%s)
 
 # Redis Configuration
 REDIS_PASSWORD=redis_secure_password_$(date +%s)

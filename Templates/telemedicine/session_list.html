@@ -44,7 +44,7 @@
 
             <!-- Sessions Cards -->
             <div class="row">
-                {% for session in sessions %}
+                {% for session in consultations %}
                 <div class="col-lg-4 col-md-6 mb-4">
                     <div class="card session-card h-100">
                         <div class="card-header d-flex justify-content-between align-items-center">
@@ -56,32 +56,32 @@
                         <div class="card-body">
                             <h6 class="card-title">
                                 {% if user.user_type == 'patient' %}
-                                    Dr. {{ session.doctor.get_full_name }}
+                                    Dr. {{ session.appointment.doctor.get_full_name }}
                                 {% else %}
-                                    {{ session.patient.get_full_name }}
+                                    {{ session.appointment.patient.get_full_name }}
                                 {% endif %}
                             </h6>
                             <p class="card-text">
                                 <i class="fas fa-calendar"></i> 
-                                {{ session.scheduled_time|date:"M d, Y" }}<br>
+                                {{ session.scheduled_start_time|date:"M d, Y" }}<br>
                                 <i class="fas fa-clock"></i> 
-                                {{ session.scheduled_time|time:"H:i" }} 
-                                ({{ session.duration_minutes }} min)
+                                {{ session.scheduled_start_time|time:"H:i" }} 
+                                ({{ session.appointment.duration|default:30 }} min)
                             </p>
-                            {% if session.notes %}
+                            {% if session.appointment.description %}
                             <p class="card-text text-muted small">
-                                {{ session.notes|truncatewords:10 }}
+                                {{ session.appointment.description|truncatewords:10 }}
                             </p>
                             {% endif %}
                         </div>
                         <div class="card-footer">
                             <div class="btn-group w-100" role="group">
-                                <a href="{% url 'telemedicine:detail' session.session_id %}" 
+                                <a href="{% url 'telemedicine:detail' session.meeting_id %}" 
                                    class="btn btn-outline-primary btn-sm">
                                     <i class="fas fa-eye"></i> View
                                 </a>
                                 {% if session.status == 'scheduled' %}
-                                <a href="{% url 'telemedicine:join' session.session_id %}" 
+                                <a href="{% url 'telemedicine:detail' session.meeting_id %}" 
                                    class="btn btn-success btn-sm">
                                     <i class="fas fa-video"></i> Join
                                 </a>
@@ -135,7 +135,7 @@
 <style>
 .session-card {
     transition: transform 0.2s;
-    border-left: 4px solid #007bff;
+    border-left: 4px solid #12bab8;
 }
 
 .session-card:hover {

@@ -4,7 +4,7 @@ from django.utils.translation import gettext_lazy as _
 
 class User(AbstractUser):
     """
-    Custom user model
+    Custom user model for Laso Healthcare system.
     Each user can be a patient, doctor, receptionist, or admin.
     """
     USER_TYPE_CHOICES = [
@@ -18,39 +18,39 @@ class User(AbstractUser):
         max_length=20,
         choices=USER_TYPE_CHOICES,
         default='patient',
-        verbose_name='User Type'
+        verbose_name=_('User Type')
     )
     
-    # Doktorlar için ek alanlar
+    # Additional fields for doctors
     specialization = models.CharField(
         max_length=100, 
         blank=True, 
         null=True,
-        verbose_name='Specialization'
+        verbose_name=_('Specialization')
     )
     
-    # Hastalar için ek alanlar
+    # Additional fields for patients
     date_of_birth = models.DateField(
         blank=True, 
         null=True, 
-        verbose_name='Date of Birth'
+        verbose_name=_('Date of Birth')
     )
     phone_number = models.CharField(
         max_length=20, 
         blank=True, 
         null=True,
-        verbose_name='Phone Number'
+        verbose_name=_('Phone Number')
     )
     address = models.TextField(
         blank=True, 
         null=True,
-        verbose_name='Address'
+        verbose_name=_('Address')
     )
     blood_type = models.CharField(
         max_length=10, 
         blank=True, 
         null=True,
-        verbose_name='Blood Type'
+        verbose_name=_('Blood Type')
     )
     
     def is_patient(self):
@@ -66,8 +66,8 @@ class User(AbstractUser):
         return self.user_type == 'admin'
     
     class Meta:
-        verbose_name = 'User'
-        verbose_name_plural = 'Users'
+        verbose_name = _('User')
+        verbose_name_plural = _('Users')
         
     def __str__(self):
         return f"{self.get_full_name()} ({self.get_user_type_display()})"

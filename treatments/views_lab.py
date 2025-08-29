@@ -23,12 +23,15 @@ class LabTestListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     context_object_name = 'lab_tests'
     
     def test_func(self):
-        # Sadece doktorlar, laborantlar ve adminler görebilir
-        # Hastalar sadece kendi testlerini görebilir
+        # Only doctors, lab technicians and admins can view all lab tests
+        # Patients can only view their own tests
         user = self.request.user
         patient_id = self.kwargs.get('patient_id')
         
         if user.is_patient():
+            # If no patient_id in URL, patient can access (will be filtered in get_queryset)
+            if patient_id is None:
+                return True
             return str(user.id) == str(patient_id)
         return user.is_doctor() or user.is_receptionist() or user.is_admin_user()
     
@@ -38,6 +41,9 @@ class LabTestListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
         
         if patient_id:
             return LabTest.objects.filter(patient_id=patient_id).order_by('-requested_date')
+        elif user.is_patient():
+            # If patient accesses without patient_id, show their own tests
+            return LabTest.objects.filter(patient=user).order_by('-requested_date')
         elif user.is_doctor():
             return LabTest.objects.filter(doctor=user).order_by('-requested_date')
         else:

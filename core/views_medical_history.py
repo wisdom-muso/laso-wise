@@ -15,15 +15,15 @@ User = get_user_model()
 
 class MedicalHistoryListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     """
-    View for listing patient medical history.
+    Hasta sağlık geçmişi listesi görünümü.
     """
     model = MedicalHistory
     template_name = 'core/medical_history_list.html'
     context_object_name = 'medical_histories'
     
     def test_func(self):
-        # Only doctors, receptionists, and admins can view
-        # Patients can only view their own history
+        # Sadece doktorlar, resepsiyonistler ve adminler görebilir
+        # Hastalar sadece kendi geçmişlerini görebilir
         user = self.request.user
         patient_id = self.kwargs.get('patient_id')
         
@@ -43,7 +43,7 @@ class MedicalHistoryListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
 
 class MedicalHistoryCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     """
-    View for creating patient medical history.
+    Hasta sağlık geçmişi oluşturma görünümü.
     """
     model = MedicalHistory
     form_class = MedicalHistoryForm
@@ -71,19 +71,19 @@ class MedicalHistoryCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateVi
     
     def form_valid(self, form):
         response = super().form_valid(form)
-        messages.success(self.request, _('Medical history record created successfully.'))
+        messages.success(self.request, _('Sağlık geçmişi kaydı başarıyla oluşturuldu.'))
         return response
 
 class MedicalHistoryUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     """
-    View for updating patient medical history.
+    Hasta sağlık geçmişi güncelleme görünümü.
     """
     model = MedicalHistory
     form_class = MedicalHistoryForm
     template_name = 'core/medical_history_form.html'
     
     def test_func(self):
-        # Only doctors and admins can update
+        # Sadece doktorlar ve adminler güncelleyebilir
         return self.request.user.is_doctor() or self.request.user.is_admin_user()
     
     def get_success_url(self):
@@ -91,12 +91,12 @@ class MedicalHistoryUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateVi
     
     def form_valid(self, form):
         response = super().form_valid(form)
-        messages.success(self.request, _('Medical history record updated successfully.'))
+        messages.success(self.request, _('Sağlık geçmişi kaydı başarıyla güncellendi.'))
         return response
 
 class MedicalHistoryDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     """
-    View for deleting patient medical history.
+    Hasta sağlık geçmişi silme görünümü.
     """
     model = MedicalHistory
     template_name = 'core/medical_history_confirm_delete.html'
@@ -110,5 +110,5 @@ class MedicalHistoryDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteVi
     
     def delete(self, request, *args, **kwargs):
         response = super().delete(request, *args, **kwargs)
-        messages.success(self.request, _('Medical history record deleted successfully.'))
+        messages.success(self.request, _('Sağlık geçmişi kaydı başarıyla silindi.'))
         return response

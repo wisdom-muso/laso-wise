@@ -5,61 +5,61 @@ import json
 
 class SystemStatistics(models.Model):
     """
-    Sistem istatistikleri modeli. Belirli bir zaman dilimindeki sisteme ait istatistikleri tutar.
+    System statistics model. Stores system statistics for a specific time period.
     """
     date = models.DateField(
         unique=True,
-        verbose_name=_('Tarih')
+        verbose_name=_('Date')
     )
     total_patients = models.IntegerField(
         default=0,
-        verbose_name=_('Toplam Hasta Sayısı')
+        verbose_name=_('Total Patients')
     )
     total_doctors = models.IntegerField(
         default=0,
-        verbose_name=_('Toplam Doktor Sayısı')
+        verbose_name=_('Total Doctors')
     )
     total_appointments = models.IntegerField(
         default=0,
-        verbose_name=_('Toplam Randevu Sayısı')
+        verbose_name=_('Total Appointments')
     )
     completed_appointments = models.IntegerField(
         default=0,
-        verbose_name=_('Tamamlanan Randevu Sayısı')
+        verbose_name=_('Completed Appointments')
     )
     cancelled_appointments = models.IntegerField(
         default=0,
-        verbose_name=_('İptal Edilen Randevu Sayısı')
+        verbose_name=_('Cancelled Appointments')
     )
     total_treatments = models.IntegerField(
         default=0,
-        verbose_name=_('Toplam Tedavi Sayısı')
+        verbose_name=_('Total Treatments')
     )
     daily_active_users = models.IntegerField(
         default=0,
-        verbose_name=_('Günlük Aktif Kullanıcı Sayısı')
+        verbose_name=_('Daily Active Users')
     )
     data_json = models.JSONField(
         default=dict,
-        verbose_name=_('Ek Veriler (JSON)'),
-        help_text=_('Bu alana ekstra istatistik verilerini JSON formatında kaydedebilirsiniz.')
+        verbose_name=_('Extra Data (JSON)'),
+        help_text=_('You can store extra statistical data in JSON format in this field.')
     )
     created_at = models.DateTimeField(
         auto_now_add=True,
-        verbose_name=_('Oluşturulma Tarihi')
+        verbose_name=_('Created At')
     )
     updated_at = models.DateTimeField(
         auto_now=True,
-        verbose_name=_('Güncellenme Tarihi')
+        verbose_name=_('Updated At')
     )
     
     class Meta:
-        verbose_name = _('Sistem İstatistiği')
-        verbose_name_plural = _('Sistem İstatistikleri')
+        verbose_name = _('System Statistic')
+        verbose_name_plural = _('System Statistics')
         ordering = ['-date']
     
     def __str__(self):
-        return f"İstatistik: {self.date}"
+        return f"Statistics: {self.date}"
     
     def get_data_as_dict(self):
         if isinstance(self.data_json, str):
@@ -68,50 +68,50 @@ class SystemStatistics(models.Model):
 
 class DoctorStatistics(models.Model):
     """
-    Doktor istatistikleri modeli. Belirli bir zaman dilimindeki doktorlara ait istatistikleri tutar.
+    Doctor statistics model. Stores doctor statistics for a specific time period.
     """
     doctor = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='statistics',
-        verbose_name=_('Doktor'),
+        verbose_name=_('Doctor'),
         limit_choices_to={'user_type': 'doctor'}
     )
     date = models.DateField(
-        verbose_name=_('Tarih')
+        verbose_name=_('Date')
     )
     appointment_count = models.IntegerField(
         default=0,
-        verbose_name=_('Randevu Sayısı')
+        verbose_name=_('Appointment Count')
     )
     completed_appointment_count = models.IntegerField(
         default=0,
-        verbose_name=_('Tamamlanan Randevu Sayısı')
+        verbose_name=_('Completed Appointment Count')
     )
     treatment_count = models.IntegerField(
         default=0,
-        verbose_name=_('Tedavi Sayısı')
+        verbose_name=_('Treatment Count')
     )
     prescription_count = models.IntegerField(
         default=0,
-        verbose_name=_('Reçete Sayısı')
+        verbose_name=_('Prescription Count')
     )
     lab_test_count = models.IntegerField(
         default=0,
-        verbose_name=_('Laboratuvar Testi Sayısı')
+        verbose_name=_('Lab Test Count')
     )
     average_appointment_duration = models.FloatField(
         default=0.0,
-        verbose_name=_('Ortalama Randevu Süresi (dakika)')
+        verbose_name=_('Average Appointment Duration (minutes)')
     )
     data_json = models.JSONField(
         default=dict,
-        verbose_name=_('Ek Veriler (JSON)')
+        verbose_name=_('Extra Data (JSON)')
     )
     
     class Meta:
-        verbose_name = _('Doktor İstatistiği')
-        verbose_name_plural = _('Doktor İstatistikleri')
+        verbose_name = _('Doctor Statistic')
+        verbose_name_plural = _('Doctor Statistics')
         ordering = ['-date']
         unique_together = ['doctor', 'date']
     
@@ -120,55 +120,55 @@ class DoctorStatistics(models.Model):
 
 class DoctorPerformanceMetric(models.Model):
     """
-    Doktor performans metriği modeli. Doktorların performans değerlendirmelerini tutar.
+    Doctor performance metric model. Stores doctor performance evaluations.
     """
     doctor = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='performance_metrics',
-        verbose_name=_('Doktor'),
+        verbose_name=_('Doctor'),
         limit_choices_to={'user_type': 'doctor'}
     )
     date = models.DateField(
-        verbose_name=_('Tarih')
+        verbose_name=_('Date')
     )
     appointments_count = models.IntegerField(
         default=0,
-        verbose_name=_('Randevu Sayısı')
+        verbose_name=_('Appointments Count')
     )
     treatments_count = models.IntegerField(
         default=0,
-        verbose_name=_('Tedavi Sayısı')
+        verbose_name=_('Treatments Count')
     )
     average_rating = models.FloatField(
         default=0.0,
-        verbose_name=_('Ortalama Değerlendirme (5 üzerinden)')
+        verbose_name=_('Average Rating (out of 5)')
     )
     patient_satisfaction = models.FloatField(
         default=0.0,
-        verbose_name=_('Hasta Memnuniyeti (100 üzerinden)')
+        verbose_name=_('Patient Satisfaction (out of 100)')
     )
     efficiency_score = models.FloatField(
         default=0.0,
-        verbose_name=_('Verimlilik Puanı (100 üzerinden)')
+        verbose_name=_('Efficiency Score (out of 100)')
     )
     notes = models.TextField(
         blank=True,
         null=True,
-        verbose_name=_('Notlar')
+        verbose_name=_('Notes')
     )
     created_at = models.DateTimeField(
         auto_now_add=True,
-        verbose_name=_('Oluşturulma Tarihi')
+        verbose_name=_('Created At')
     )
     updated_at = models.DateTimeField(
         auto_now=True,
-        verbose_name=_('Güncellenme Tarihi')
+        verbose_name=_('Updated At')
     )
     
     class Meta:
-        verbose_name = _('Doktor Performans Metriği')
-        verbose_name_plural = _('Doktor Performans Metrikleri')
+        verbose_name = _('Doctor Performance Metric')
+        verbose_name_plural = _('Doctor Performance Metrics')
         ordering = ['-date']
         unique_together = ['doctor', 'date']
     
@@ -200,7 +200,7 @@ class ReportTemplate(models.Model):
     description = models.TextField(
         blank=True,
         null=True,
-        verbose_name=_('Açıklama')
+        verbose_name=_('Description')
     )
     query = models.TextField(
         verbose_name=_('SQL Sorgusu'),
@@ -213,7 +213,7 @@ class ReportTemplate(models.Model):
     )
     is_active = models.BooleanField(
         default=True,
-        verbose_name=_('Aktif mi?')
+        verbose_name=_('Is Active?')
     )
     created_at = models.DateTimeField(
         auto_now_add=True,

@@ -23,7 +23,7 @@ class CalendarView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         user = self.request.user
         
-        # Tarih filtresi
+        # Date filter
         start_date = self.request.GET.get('start_date')
         end_date = self.request.GET.get('end_date')
         
@@ -55,7 +55,7 @@ class CalendarView(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
-        # Doktor listesi
+        # Doctor list
         context['doctors'] = User.objects.filter(user_type='doctor')
         
         # Takvim verisi
@@ -80,7 +80,7 @@ class CalendarView(LoginRequiredMixin, ListView):
         colors = {
             'planned': '#3699FF',  # Mavi
             'completed': '#1BC5BD',  # Yeşil
-            'cancelled': '#F64E60',  # Red
+            'cancelled': '#F64E60',  # Kırmızı
         }
         return colors.get(status, '#3699FF')
 

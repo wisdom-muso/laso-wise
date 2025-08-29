@@ -5,7 +5,7 @@ from treatments.models import Treatment
 
 class MedicalImage(models.Model):
     """
-    Tıbbi görüntü modeli. Röntgen, MR, BT gibi görüntüleri temsil eder.
+    Medical image model. Represents images like X-ray, MRI, CT scans.
     """
     IMAGE_TYPE_CHOICES = [
         ('xray', _('Röntgen')),
@@ -19,34 +19,34 @@ class MedicalImage(models.Model):
         Treatment,
         on_delete=models.CASCADE,
         related_name='medical_images',
-        verbose_name=_('Tedavi')
+        verbose_name=_('Treatment')
     )
     patient = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='medical_images',
-        verbose_name=_('Hasta'),
+        verbose_name=_('Patient'),
         limit_choices_to={'user_type': 'patient'}
     )
     doctor = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='ordered_medical_images',
-        verbose_name=_('İsteyen Doktor'),
+        verbose_name=_('Requesting Doctor'),
         limit_choices_to={'user_type': 'doctor'}
     )
     image_type = models.CharField(
         max_length=20,
         choices=IMAGE_TYPE_CHOICES,
-        verbose_name=_('Görüntü Tipi')
+        verbose_name=_('Image Type')
     )
     body_part = models.CharField(
         max_length=100,
-        verbose_name=_('Vücut Bölgesi')
+        verbose_name=_('Body Region')
     )
     image_file = models.ImageField(
         upload_to='medical_images/',
-        verbose_name=_('Görüntü Dosyası')
+        verbose_name=_('Image File')
     )
     description = models.TextField(
         blank=True,
@@ -62,8 +62,8 @@ class MedicalImage(models.Model):
     )
     
     class Meta:
-        verbose_name = _('Tıbbi Görüntü')
-        verbose_name_plural = _('Tıbbi Görüntüler')
+        verbose_name = _('Medical Image')
+        verbose_name_plural = _('Medical Images')
         ordering = ['-created_at']
     
     def __str__(self):
@@ -139,7 +139,7 @@ class Report(models.Model):
     
     class Meta:
         verbose_name = _('Rapor')
-        verbose_name_plural = _('Raporlar')
+        verbose_name_plural = _('Reports')
         ordering = ['-created_at']
     
     def __str__(self):

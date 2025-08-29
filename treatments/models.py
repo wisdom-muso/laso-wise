@@ -5,34 +5,34 @@ from appointments.models import Appointment
 
 class Treatment(models.Model):
     """
-    Tedavi modeli, bir randevu sonucunda doktor tarafından hastaya uygulanan tedavi bilgilerini içerir.
+    Treatment model, contains treatment information applied by doctor to patient as a result of an appointment.
     """
     appointment = models.OneToOneField(
         Appointment,
         on_delete=models.CASCADE,
         related_name='treatment',
-        verbose_name=_('Randevu')
+        verbose_name=_('Appointment')
     )
     diagnosis = models.TextField(
-        verbose_name=_('Teşhis')
+        verbose_name=_('Diagnosis')
     )
     notes = models.TextField(
         blank=True,
         null=True,
-        verbose_name=_('Notlar')
+        verbose_name=_('Notes')
     )
     created_at = models.DateTimeField(
         auto_now_add=True,
-        verbose_name=_('Oluşturulma Tarihi')
+        verbose_name=_('Created At')
     )
     updated_at = models.DateTimeField(
         auto_now=True,
-        verbose_name=_('Güncellenme Tarihi')
+        verbose_name=_('Updated At')
     )
     
     class Meta:
-        verbose_name = _('Tedavi')
-        verbose_name_plural = _('Tedaviler')
+        verbose_name = _('Treatment')
+        verbose_name_plural = _('Treatments')
         ordering = ['-created_at']
     
     def __str__(self):
@@ -40,17 +40,17 @@ class Treatment(models.Model):
 
 class Prescription(models.Model):
     """
-    Reçete modeli, bir tedavi için verilen ilaç bilgilerini içerir.
+    Prescription model, contains medication information given for a treatment.
     """
     treatment = models.ForeignKey(
         Treatment,
         on_delete=models.CASCADE,
         related_name='prescriptions',
-        verbose_name=_('Tedavi')
+        verbose_name=_('Treatment')
     )
     name = models.CharField(
         max_length=100,
-        verbose_name=_('İlaç Adı')
+        verbose_name=_('Medication Name')
     )
     medication = models.ForeignKey(
         'treatments.Medication',
@@ -58,23 +58,23 @@ class Prescription(models.Model):
         null=True,
         blank=True,
         related_name='prescriptions',
-        verbose_name=_('İlaç')
+        verbose_name=_('Medication')
     )
     dosage = models.CharField(
         max_length=100,
-        verbose_name=_('Doz')
+        verbose_name=_('Dosage')
     )
     instructions = models.TextField(
-        verbose_name=_('Kullanım Talimatları')
+        verbose_name=_('Usage Instructions')
     )
     created_at = models.DateTimeField(
         auto_now_add=True,
-        verbose_name=_('Oluşturulma Tarihi')
+        verbose_name=_('Created At')
     )
     
     class Meta:
-        verbose_name = _('Reçete')
-        verbose_name_plural = _('Reçeteler')
+        verbose_name = _('Prescription')
+        verbose_name_plural = _('Prescriptions')
         ordering = ['-created_at']
     
     def __str__(self):

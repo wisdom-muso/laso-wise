@@ -22,43 +22,61 @@ from django.contrib.auth import views as auth_views
 from django.views.generic import RedirectView
 from core.forms import LoginForm
 from core.views import HomeView, dashboard
+from core.views_auth import CustomLoginView, HomeRedirectView
 from core.logout_view import logout_view
 from core.views_theme import toggle_theme, get_theme_preference
+from core.health_check import health_check, readiness_check, liveness_check
+from core import views_debug
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     
-    # Ana sayfa
-    path('', HomeView.as_view(), name='home'),
+    # Home page - redirect to login if not authenticated, otherwise to dashboard
+    path('', HomeRedirectView.as_view(), name='home'),
+    path('landing/', HomeView.as_view(), name='landing'),
     
-    # Dashboard
+    # Dashboard - main dashboard endpoint
     path('dashboard/', dashboard, name='dashboard'),
     
+    # Add catch-all for login/dashboard redirect fix
+    path('login/dashboard/', RedirectView.as_view(pattern_name='dashboard', permanent=True)),
+    
     # Authentication
-    path('login/', auth_views.LoginView.as_view(
-        template_name='core/login.html',
-        authentication_form=LoginForm
-    ), name='login'),
+    path('login/', CustomLoginView.as_view(), name='login'),
     path('logout/', logout_view, name='logout'),
     
     # Theme settings
     path('theme/toggle/', toggle_theme, name='toggle-theme'),
     path('theme/preference/', get_theme_preference, name='get-theme-preference'),
     
-    # Core app URLs
+    # Health check endpoints
+    path('health/', health_check, name='health-check'),
+    path('readiness/', readiness_check, name='readiness-check'),
+    path('liveness/', liveness_check, name='liveness-check'),
+    
+    # Debug endpoints (remove in production)
+    path('debug/auth/', include([
+        path('', views_debug.debug_auth, name='debug-auth'),
+        path('user/', views_debug.debug_user, name='debug-user'),
+    ])),
+    
+    # Core application URLs
     path('core/', include('core.urls', namespace='core')),
     
-    # Appointments app URLs
+    # Appointments application URLs
     path('appointments/', include('appointments.urls')),
     
-    # Treatments app URLs
+    # Treatments application URLs
     path('treatments/', include('treatments.urls')),
     
-    # Telemedicine app URLs
+    # Telemedicine application URLs
     path('telemedicine/', include('telemedicine.urls')),
 ]
 
 # URLs for media and static files
+# Always add media files
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+# Add static files in debug mode or when not using WhiteNoise
 if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

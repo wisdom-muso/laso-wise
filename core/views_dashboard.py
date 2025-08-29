@@ -29,7 +29,7 @@ class EnhancedDashboardView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
-        # Analitik verilerini al
+        # Get analytics data
         analytics = DashboardAnalytics(user=self.request.user)
         dashboard_data = analytics.get_comprehensive_dashboard_data()
         
@@ -40,7 +40,7 @@ class EnhancedDashboardView(LoginRequiredMixin, TemplateView):
         # Quick access links
         context['quick_actions'] = self.get_quick_actions()
         
-        # Son aktiviteler
+        # Recent activities
         context['recent_activities'] = self.get_recent_activities()
         
         return context
@@ -59,7 +59,7 @@ class EnhancedDashboardView(LoginRequiredMixin, TemplateView):
             ]
         elif user.is_patient():
             actions = [
-                {'title': 'Schedule Appointment', 'url': 'appointment-create', 'icon': 'calendar-plus', 'color': 'primary'},
+                {'title': 'Book Appointment', 'url': 'appointment-create', 'icon': 'calendar-plus', 'color': 'primary'},
                 {'title': 'Treatment History', 'url': 'patient-treatment-history', 'icon': 'history', 'color': 'info'},
                 {'title': 'Test Results', 'url': 'patient-lab-results', 'icon': 'chart-bar', 'color': 'success'},
                 {'title': 'My Prescriptions', 'url': 'patient-prescriptions', 'icon': 'pills', 'color': 'warning'},
@@ -82,7 +82,7 @@ class EnhancedDashboardView(LoginRequiredMixin, TemplateView):
         return actions
     
     def get_recent_activities(self):
-        """Recent activities"""
+        """Son aktiviteler"""
         user = self.request.user
         activities = []
         
@@ -96,14 +96,14 @@ class EnhancedDashboardView(LoginRequiredMixin, TemplateView):
             for appointment in recent_appointments:
                 activities.append({
                     'type': 'appointment',
-                    'title': f'Appointment with {appointment.patient.get_full_name()}',
+                    'title': f'{appointment.patient.get_full_name()} ile randevu',
                     'date': appointment.date,
                     'time': appointment.time,
                     'status': appointment.status,
                     'url': f'/appointments/{appointment.id}/',
                 })
             
-            # Recent treatments
+            # Son tedaviler
             recent_treatments = Treatment.objects.filter(
                 appointment__doctor=user
             ).order_by('-created_at')[:3]
@@ -111,7 +111,7 @@ class EnhancedDashboardView(LoginRequiredMixin, TemplateView):
             for treatment in recent_treatments:
                 activities.append({
                     'type': 'treatment',
-                    'title': f'Treatment for {treatment.appointment.patient.get_full_name()}',
+                    'title': f'{treatment.appointment.patient.get_full_name()} tedavisi',
                     'date': treatment.created_at.date(),
                     'description': treatment.diagnosis[:50] + '...' if len(treatment.diagnosis) > 50 else treatment.diagnosis,
                     'url': f'/treatments/{treatment.id}/',
@@ -126,7 +126,7 @@ class EnhancedDashboardView(LoginRequiredMixin, TemplateView):
             for appointment in recent_appointments:
                 activities.append({
                     'type': 'appointment',
-                    'title': f'Appointment with Dr. {appointment.doctor.get_full_name()}',
+                    'title': f'Dr. {appointment.doctor.get_full_name()} ile randevu',
                     'date': appointment.date,
                     'time': appointment.time,
                     'status': appointment.status,
@@ -142,22 +142,22 @@ class EnhancedDashboardView(LoginRequiredMixin, TemplateView):
             for test in pending_tests:
                 activities.append({
                     'type': 'lab_test',
-                    'title': f'{test.test_name} - Test pending',
+                    'title': f'{test.test_name} - Test bekleniyor',
                     'date': test.requested_date.date(),
                     'status': test.status,
                     'url': f'/lab-tests/{test.id}/',
                 })
         
-        # Tarihe göre sırala
+        # Sort by date
         activities.sort(key=lambda x: x.get('date', timezone.now().date()), reverse=True)
         
-        return activities[:8]  # En son 8 aktivite
+        return activities[:8]  # Latest 8 activities
 
 
 @login_required
 def dashboard_analytics_api(request):
     """
-    AJAX API endpoint for dashboard
+    AJAX API endpoint for Dashboard
     """
     date_range = request.GET.get('range', 30)
     try:
@@ -182,13 +182,13 @@ def patient_health_summary_api(request, patient_id):
     patient = get_object_or_404(User, id=patient_id, user_type='patient')
     summary = ReportGenerator.generate_patient_health_summary(patient)
     
-    # Django modellerini JSON'a çevir
+    # Convert Django models to JSON
     def model_to_dict(instance):
         if hasattr(instance, '_meta'):
             data = {}
             for field in instance._meta.fields:
                 value = getattr(instance, field.name)
-                if hasattr(value, 'isoformat'):  # Tarih/saat alanları
+                if hasattr(value, 'isoformat'):  # Date/time fields
                     data[field.name] = value.isoformat()
                 elif hasattr(value, '__str__'):
                     data[field.name] = str(value)
@@ -197,7 +197,7 @@ def patient_health_summary_api(request, patient_id):
             return data
         return str(instance)
     
-    # Modelleri serileştir
+    # Serialize models
     serialized_summary = {}
     for key, value in summary.items():
         if key == 'patient':
@@ -219,16 +219,18 @@ class DoctorPerformanceView(LoginRequiredMixin, TemplateView):
     """
     Doctor performance dashboard
     """
+    template_name = 'dashboards/doctor_performance.html'
+    
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_doctor():
             from django.core.exceptions import PermissionDenied
-            raise PermissionDenied("This page is only accessible to doctors.")
+            raise PermissionDenied("Only doctors can access this page.")
         return super().dispatch(request, *args, **kwargs)
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
-        # Performance data for different time periods
+        # Performance data for different time ranges
         periods = [
             ('This Week', 7),
             ('This Month', 30),
@@ -244,7 +246,7 @@ class DoctorPerformanceView(LoginRequiredMixin, TemplateView):
         context['performance_data'] = performance_data
         context['doctor'] = self.request.user
         
-        # Patient satisfaction data (to be added in the future)
+        # Hasta memnuniyet verileri (gelecekte eklenebilir)
         context['satisfaction_ratings'] = self.get_satisfaction_data()
         
         return context
@@ -269,10 +271,12 @@ class SystemReportsView(LoginRequiredMixin, TemplateView):
     """
     System reports (admin only)
     """
+    template_name = 'dashboards/system_reports.html'
+    
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_admin_user():
             from django.core.exceptions import PermissionDenied
-            raise PermissionDenied("This page is only accessible to administrators.")
+            raise PermissionDenied("Only admins can access this page.")
         return super().dispatch(request, *args, **kwargs)
     
     def get_context_data(self, **kwargs):
@@ -288,7 +292,7 @@ class SystemReportsView(LoginRequiredMixin, TemplateView):
             'total_lab_tests': LabTest.objects.count(),
         }
         
-        # Most active doctors
+        # En aktif doktorlar
         context['top_doctors'] = User.objects.filter(
             user_type='doctor'
         ).annotate(
@@ -304,11 +308,11 @@ class SystemReportsView(LoginRequiredMixin, TemplateView):
         """Calculate monthly growth data"""
         months_data = []
         
-        for i in range(12):  # Son 12 ay
+        for i in range(12):  # Last 12 months
             month_date = timezone.now().date().replace(day=1) - timedelta(days=i*30)
             month_start = month_date.replace(day=1)
             
-            # Ay sonu hesapla
+            # Calculate end of month
             if month_start.month == 12:
                 month_end = month_start.replace(year=month_start.year + 1, month=1, day=1) - timedelta(days=1)
             else:

@@ -33,7 +33,7 @@ class TeleMedicineMessageForm(forms.ModelForm):
             'content': forms.Textarea(attrs={
                 'class': 'form-control',
                 'rows': 2,
-                'placeholder': 'Mesajınızı yazın...'
+                'placeholder': 'Write your message...'
             })
         }
 
@@ -69,11 +69,11 @@ class AppointmentSearchForm(forms.Form):
         required=False,
         widget=forms.TextInput(attrs={
             'class': 'form-control',
-            'placeholder': 'Randevuları ara...'
+            'placeholder': 'Search appointments...'
         })
     )
     status_filter = forms.ChoiceField(
-        choices=[('', 'Tüm Durumlar')] + list(TelemedicineAppointment.STATUS_CHOICES),
+        choices=[('', 'All Status')] + list(TelemedicineAppointment.STATUS_CHOICES),
         required=False,
         widget=forms.Select(attrs={'class': 'form-control'})
     )

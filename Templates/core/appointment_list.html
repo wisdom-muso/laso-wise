@@ -1,31 +1,31 @@
 {% extends 'core/base.html' %}
 {% load static %}
 
-{% block title %}Randevular{% endblock %}
+{% block title %}Appointments{% endblock %}
 
 {% block content %}
 <div class="container py-4">
     <div class="row mb-4">
         <div class="col">
-            <h1 class="h3 mb-0">Randevular</h1>
-            <p class="text-muted">Tüm randevuların listesi</p>
+            <h1 class="h3 mb-0">Appointments</h1>
+            <p class="text-muted">List of all appointments</p>
         </div>
         <div class="col-auto">
             <div class="d-flex">
                 <form method="get" class="d-flex me-2">
-                    <input type="text" name="search" class="form-control me-2" placeholder="Randevu ara..." value="{{ request.GET.search }}">
+                    <input type="text" name="search" class="form-control me-2" placeholder="Search appointments..." value="{{ request.GET.search }}">
                     <select name="status" class="form-select me-2">
-                        <option value="">Tüm Durumlar</option>
-                        <option value="planned" {% if request.GET.status == 'planned' %}selected{% endif %}>Planlandı</option>
-                        <option value="completed" {% if request.GET.status == 'completed' %}selected{% endif %}>Tamamlandı</option>
-                        <option value="cancelled" {% if request.GET.status == 'cancelled' %}selected{% endif %}>İptal Edildi</option>
+                        <option value="">All Status</option>
+                        <option value="planned" {% if request.GET.status == 'planned' %}selected{% endif %}>Scheduled</option>
+                        <option value="completed" {% if request.GET.status == 'completed' %}selected{% endif %}>Completed</option>
+                        <option value="cancelled" {% if request.GET.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
                     </select>
-                    <button type="submit" class="btn btn-primary">Filtrele</button>
+                    <button type="submit" class="btn btn-primary">Filter</button>
                 </form>
                 
                 {% if user.is_doctor or user.is_receptionist or user.is_admin_user %}
                 <a href="{% url 'core:appointment-create' %}" class="btn btn-success">
-                    <i class="fas fa-plus"></i> Yeni Randevu
+                    <i class="fas fa-plus"></i> New Appointment
                 </a>
                 {% endif %}
             </div>
@@ -37,7 +37,7 @@
             {% if user.is_patient %}
             <div class="mb-4">
                 <a href="{% url 'core:appointment-create' %}" class="btn btn-primary">
-                    <i class="fas fa-calendar-plus"></i> Randevu Al
+                    <i class="fas fa-calendar-plus"></i> Book Appointment
                 </a>
             </div>
             {% endif %}
@@ -45,25 +45,25 @@
                 <table class="table table-hover">
                     <thead>
                         <tr>
-                            <th>Tarih</th>
-                            <th>Saat</th>
+                            <th>Date</th>
+                            <th>Time</th>
                             {% if not user.is_patient %}
-                                <th>Hasta</th>
+                                <th>Patient</th>
                             {% endif %}
                             {% if not user.is_doctor %}
-                                <th>Doktor</th>
+                                <th>Doctor</th>
                             {% endif %}
-                            <th>Durum</th>
-                            <th>Açıklama</th>
-                            <th>İşlemler</th>
+                            <th>Status</th>
+                            <th>Description</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% if appointments %}
                             {% for appointment in appointments %}
                                 <tr>
-                                    <td>{{ appointment.date|date:"d.m.Y" }}</td>
-                                    <td>{{ appointment.time|time:"H:i" }}</td>
+                                    <td>{{ appointment.date|date:"M d, Y" }}</td>
+                                    <td>{{ appointment.time|time:"g:i A" }}</td>
                                     {% if not user.is_patient %}
                                         <td>
                                             <a href="{% url 'core:patient-detail' appointment.patient.id %}">
@@ -76,35 +76,35 @@
                                     {% endif %}
                                     <td>
                                         {% if appointment.status == 'planned' %}
-                                            <span class="badge bg-primary">Planlandı</span>
+                                            <span class="badge bg-primary">Scheduled</span>
                                         {% elif appointment.status == 'completed' %}
-                                            <span class="badge bg-success">Tamamlandı</span>
+                                            <span class="badge bg-success">Completed</span>
                                         {% elif appointment.status == 'cancelled' %}
-                                            <span class="badge bg-danger">İptal Edildi</span>
+                                            <span class="badge bg-danger">Cancelled</span>
                                         {% endif %}
                                     </td>
                                     <td>{{ appointment.description|truncatechars:30 }}</td>
                                     <td>
                                         <a href="{% url 'core:appointment-detail' appointment.id %}" class="btn btn-sm btn-info">
-                                            <i class="fas fa-eye"></i> Görüntüle
+                                            <i class="fas fa-eye"></i> View
                                         </a>
                                         
                                         {% if appointment.status == 'planned' %}
                                             {% if user.is_doctor and appointment.doctor == user %}
                                                 <a href="{% url 'core:treatment-create' appointment.id %}" class="btn btn-sm btn-success">
-                                                    <i class="fas fa-notes-medical"></i> Tedavi Ekle
+                                                    <i class="fas fa-notes-medical"></i> Add Treatment
                                                 </a>
                                             {% endif %}
                                             
                                             {% if user.is_doctor or user.is_receptionist or user.is_admin_user %}
                                                 <a href="{% url 'core:appointment-update' appointment.id %}" class="btn btn-sm btn-warning">
-                                                    <i class="fas fa-edit"></i> Düzenle
+                                                    <i class="fas fa-edit"></i> Edit
                                                 </a>
                                             {% endif %}
                                             
                                             {% if user.is_receptionist or user.is_admin_user %}
                                                 <a href="{% url 'core:appointment-delete' appointment.id %}" class="btn btn-sm btn-danger">
-                                                    <i class="fas fa-trash"></i> Sil
+                                                    <i class="fas fa-trash"></i> Delete
                                                 </a>
                                             {% endif %}
                                         {% endif %}
@@ -122,4 +122,4 @@
         </div>
     </div>
 </div>
-{% endblock %} 
+{% endblock %}

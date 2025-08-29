@@ -12,7 +12,7 @@ from .models_communication import CommunicationNotification
 
 class NotificationListView(LoginRequiredMixin, ListView):
     """
-    View to list all notifications for the user.
+    Kullanıcının tüm bildirimlerini listeleyen görünüm.
     """
     model = CommunicationNotification
     template_name = 'core/notification_list.html'
@@ -20,12 +20,12 @@ class NotificationListView(LoginRequiredMixin, ListView):
     paginate_by = 15
     
     def get_queryset(self):
-        # Only show notifications for the logged-in user
+        # Sadece giriş yapmış kullanıcının bildirimlerini göster
         return CommunicationNotification.objects.filter(user=self.request.user).order_by('-created_at')
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Add any additional required data
+        # İhtiyaç duyulan ek verileri ekleyebiliriz
         context['unread_count'] = CommunicationNotification.objects.filter(
             user=self.request.user,
             is_read=False
@@ -35,17 +35,17 @@ class NotificationListView(LoginRequiredMixin, ListView):
 @login_required
 def mark_notification_as_read(request, notification_id):
     """
-    View to mark a specific notification as read.
+    Belirli bir bildirimi okundu olarak işaretleyen görünüm.
     """
     notification = get_object_or_404(CommunicationNotification, id=notification_id, user=request.user)
     notification.mark_as_read()
     
-    # JSON response for AJAX request
+    # AJAX isteği için JSON yanıtı
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return JsonResponse({'status': 'success'})
     
-    # Redirect for normal request
-    messages.success(request, _('Notification marked as read.'))
+    # Normal istek için yönlendirme
+    messages.success(request, _('Bildirim okundu olarak işaretlendi.'))
     if notification.related_url:
         return redirect(notification.related_url)
     return redirect('core:notification-list')
@@ -53,7 +53,7 @@ def mark_notification_as_read(request, notification_id):
 @login_required
 def mark_all_notifications_as_read(request):
     """
-    View to mark all notifications as read for the user.
+    Kullanıcının tüm bildirimlerini okundu olarak işaretleyen görünüm.
     """
     CommunicationNotification.objects.filter(user=request.user, is_read=False).update(is_read=True)
     
@@ -62,5 +62,5 @@ def mark_all_notifications_as_read(request):
         return JsonResponse({'status': 'success'})
     
     # Normal istek için yönlendirme
-    messages.success(request, _('All notifications marked as read.'))
+    messages.success(request, _('Tüm bildirimler okundu olarak işaretlendi.'))
     return redirect('core:notification-list')

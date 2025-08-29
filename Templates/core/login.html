@@ -1,16 +1,17 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Laso Healthcare - Giriş</title>
+    <title>LASO Healthcare - Login</title>
     
     <!-- Favicon -->
     {% load static %}
-    <link rel="icon" type="image/png" href="{% static 'assets/media/logos/favicon.png' %}">
+    <!-- <link rel="icon" type="image/png" href="{% static 'assets/media/logos/favicon.png' %}"> -->
     
     <!-- Fonts -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
     
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -20,184 +21,191 @@
     <link href="{% static 'assets/css/style.bundle.css' %}" rel="stylesheet" type="text/css" />
     
     <style>
-        .login-bg {
-            background: linear-gradient(135deg, #0095e8 0%, #0055a5 100%);
+        /* Healthcare Color Palette */
+        :root {
+            --primary-teal: #14b8a6;
+            --primary-dark: #0d9488;
+            --primary-light: #5eead4;
+            --secondary-blue: #0ea5e9;
+            --accent-green: #10b981;
+            --neutral-50: #f8fafc;
+            --neutral-100: #f1f5f9;
+            --neutral-200: #e2e8f0;
+            --neutral-600: #475569;
+            --neutral-800: #1e293b;
+            --neutral-900: #0f172a;
         }
-        
-        .form-control:focus {
-            box-shadow: 0 0 0 0.25rem rgba(0, 85, 165, 0.25);
-            border-color: #0055a5;
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        
-        .btn-primary {
-            background-color: #0055a5;
-            border-color: #0055a5;
+
+        body {
+            font-family: 'Inter', 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--neutral-50) 0%, #e0f7fa 50%, var(--neutral-100) 100%);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
         }
-        
-        .btn-primary:hover {
-            background-color: #004080;
-            border-color: #004080;
+
+        /* Animated Background Elements */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 25% 25%, rgba(20, 184, 166, 0.05) 0%, transparent 60%),
+                radial-gradient(circle at 75% 75%, rgba(14, 165, 233, 0.05) 0%, transparent 60%),
+                radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.03) 0%, transparent 60%);
+            pointer-events: none;
+            z-index: 0;
         }
-        
-        .feature-item {
-            transition: transform 0.3s ease;
+
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            position: relative;
+            z-index: 1;
+            box-sizing: border-box;
         }
-        
-        .feature-item:hover {
-            transform: translateY(-5px);
+
+        .login-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 24px;
+            box-shadow: 
+                0 25px 50px rgba(0, 0, 0, 0.08),
+                0 0 0 1px rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+            max-height: 90vh;
         }
-        
+
+        .login-info {
+            background: linear-gradient(135deg, var(--primary-teal) 0%, var(--primary-dark) 100%);
+            padding: 40px 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: white;
+            position: relative;
+            overflow-y: auto;
+        }
+
+        .login-info::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="healthPattern" x="0" y="0" width="30" height="30" patternUnits="userSpaceOnUse"><circle cx="15" cy="15" r="1" fill="white" opacity="0.1"/><path d="M15 10v10M10 15h10" stroke="white" stroke-width="0.5" opacity="0.05"/></pattern></defs><rect width="100" height="100" fill="url(%23healthPattern)"/></svg>');
+            pointer-events: none;
+        }
+
         .login-logo {
-            max-height: 70px;
-            margin-bottom: 20px;
+            width: 100px;
+            height: 100px;
+            margin-bottom: 30px;
+            z-index: 1;
+            position: relative;
         }
-    </style>
-</head>
-<body id="kt_body" class="app-blank app-blank">
-    <div class="d-flex flex-column flex-root" id="kt_app_root">
-        <div class="d-flex flex-column flex-lg-row flex-column-fluid">
-            
-            <!-- Solda Giriş Formu -->
-            <div class="d-flex flex-column flex-lg-row-fluid w-lg-50 p-10 order-2 order-lg-1">
-                <div class="d-flex flex-center flex-column flex-lg-row-fluid">
-                    <div class="w-lg-500px p-10">
-                        
-                        <!-- Form Başlığı -->
-                        <div class="text-center mb-11">
-                            <img src="https://cdn-icons-png.flaticon.com/512/4497/4497909.png" alt="Laso Healthcare Logo" class="login-logo">
-                            <h1 class="text-gray-900 fw-bolder mb-3">Laso Healthcare</h1>
-                            <div class="text-gray-500 fw-semibold fs-6">Klinik Hasta Takip ve Randevu Sistemi</div>
-                        </div>
-                        
-                        <!-- Flash Messages -->
-                        {% if messages %}
-                        <div class="messages">
-                            {% for message in messages %}
-                            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">
-                                {{ message }}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                            </div>
-                            {% endfor %}
-                        </div>
-                        {% endif %}
-                        
-                        <!-- Hata Mesajları -->
-                        {% if form.errors %}
-                        <div class="alert alert-danger">
-                            <div class="d-flex flex-column">
-                                <h4 class="mb-1 text-danger">Giriş Başarısız</h4>
-                                <span>Lütfen kullanıcı adı ve şifrenizi kontrol ediniz.</span>
-                            </div>
-                        </div>
-                        {% endif %}
-                        
-                        <!-- Giriş Formu -->
-                        <form class="form w-100" method="post">
-                            {% csrf_token %}
-                            
-                            <!-- Kullanıcı Adı -->
-                            <div class="fv-row mb-8">
-                                <label class="form-label fs-6 fw-bolder text-gray-900">{{ form.username.label }}</label>
-                                {{ form.username }}
-                            </div>
-                            
-                            <!-- Şifre -->
-                            <div class="fv-row mb-8">
-                                <label class="form-label fw-bolder text-gray-900 fs-6">{{ form.password.label }}</label>
-                                {{ form.password }}
-                            </div>
-                            
-                            <!-- Giriş Butonu -->
-                            <div class="d-grid mb-10">
-                                <button type="submit" id="kt_sign_in_submit" class="btn btn-primary btn-lg">
-                                    <span class="indicator-label">Giriş Yap</span>
-                                    <span class="indicator-progress">Lütfen bekleyin...
-                                    <span class="spinner-border spinner-border-sm align-middle ms-2"></span></span>
-                                </button>
-                            </div>
-                            
-                            <input type="hidden" name="next" value="{{ next }}">
-                        </form>
-                        
-                        <!-- Ana Sayfaya Dön -->
-                        <div class="text-center">
-                            <a href="{% url 'home' %}" class="text-gray-500 text-hover-primary">Ana Sayfaya Dön</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Sağda Görsel ve Bilgi Alanı -->
-            <div class="d-flex flex-lg-row-fluid w-lg-50 login-bg order-1 order-lg-2">
-                <div class="d-flex flex-column flex-center py-7 py-lg-15 px-5 px-md-15 w-100">
-                    <div class="mb-10 mb-lg-15 text-center">
-                        <img src="https://cdn-icons-png.flaticon.com/512/3588/3588455.png" class="img-fluid" style="max-height: 320px;" alt="Laso Healthcare Sağlık Sistemi">
-                    </div>
-                    
-                    <div class="text-center text-white">
-                        <h1 class="fs-2qx fw-bold mb-5">Laso Healthcare Sağlık Sistemi</h1>
-                        
-                        <div class="fs-6 mb-7">
-                            Sağlık merkezinizi dijital dünyaya taşıyan modern ve kapsamlı çözüm
-                        </div>
-                        
-                        <div class="d-flex flex-center flex-wrap">
-                            <div class="d-flex align-items-center mb-6 me-7 feature-item">
-                                <div class="symbol symbol-45px me-4">
-                                    <span class="symbol-label bg-white bg-opacity-20">
-                                        <i class="ki-outline ki-calendar-tick fs-2 text-white"></i>
-                                    </span>
-                                </div>
-                                <div class="d-flex flex-column align-items-start">
-                                    <span class="text-white fw-bold fs-6">Randevu Yönetimi</span>
-                                </div>
-                            </div>
-                            
-                            <div class="d-flex align-items-center mb-6 feature-item">
-                                <div class="symbol symbol-45px me-4">
-                                    <span class="symbol-label bg-white bg-opacity-20">
-                                        <i class="ki-outline ki-profile-user fs-2 text-white"></i>
-                                    </span>
-                                </div>
-                                <div class="d-flex flex-column align-items-start">
-                                    <span class="text-white fw-bold fs-6">Hasta Takip</span>
-                                </div>
-                            </div>
-                            
-                            <div class="d-flex align-items-center mb-6 me-7 feature-item">
-                                <div class="symbol symbol-45px me-4">
-                                    <span class="symbol-label bg-white bg-opacity-20">
-                                        <i class="ki-outline ki-tablet-ok fs-2 text-white"></i>
-                                    </span>
-                                </div>
-                                <div class="d-flex flex-column align-items-start">
-                                    <span class="text-white fw-bold fs-6">Reçete Yönetimi</span>
-                                </div>
-                            </div>
-                            
-                            <div class="d-flex align-items-center mb-6 feature-item">
-                                <div class="symbol symbol-45px me-4">
-                                    <span class="symbol-label bg-white bg-opacity-20">
-                                        <i class="ki-outline ki-chart-line fs-2 text-white"></i>
-                                    </span>
-                                </div>
-                                <div class="d-flex flex-column align-items-start">
-                                    <span class="text-white fw-bold fs-6">Analiz ve Raporlar</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- JavaScript Libraries -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="{% static 'assets/plugins/global/plugins.bundle.js' %}"></script>
-    <script src="{% static 'assets/js/scripts.bundle.js' %}"></script>
-</body>
-</html>             position: relative;
+
+        .login-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+        }
+
+        .info-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            z-index: 1;
+            position: relative;
+        }
+
+        .info-subtitle {
+            font-size: 16px;
+            opacity: 0.9;
+            margin-bottom: 30px;
+            z-index: 1;
+            position: relative;
+        }
+
+        .info-features {
+            list-style: none;
+            text-align: left;
+            z-index: 1;
+            position: relative;
+        }
+
+        .info-features li {
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .info-features li::before {
+            content: '✓';
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .login-form-section {
+            padding: 40px 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            overflow-y: auto;
+            max-height: 90vh;
+            box-sizing: border-box;
+        }
+
+        .form-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--neutral-900);
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        .form-subtitle {
+            font-size: 14px;
+            color: var(--neutral-600);
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+            position: relative;
         }
 
         .form-label {
@@ -369,25 +377,77 @@
 
         /* Responsive Design */
         @media (max-width: 768px) {
+            .login-container {
+                padding: 20px 15px;
+                min-height: 100vh;
+                align-items: flex-start;
+                overflow-y: auto;
+            }
+
             .login-wrapper {
                 grid-template-columns: 1fr;
-                max-width: 400px;
+                max-width: none;
+                width: 100%;
+                max-height: none;
+                margin: 0;
             }
 
             .login-info {
-                padding: 40px 30px;
+                padding: 30px 20px;
+                min-height: auto;
             }
 
             .login-form-section {
-                padding: 40px 30px;
+                padding: 30px 20px;
+                max-height: none;
+                min-height: auto;
             }
 
             .info-title {
                 font-size: 24px;
+                margin-bottom: 12px;
             }
 
             .form-title {
                 font-size: 20px;
+                margin-bottom: 6px;
+            }
+
+            .form-subtitle {
+                margin-bottom: 30px;
+            }
+
+            .form-group {
+                margin-bottom: 20px;
+            }
+
+            .login-logo {
+                width: 80px;
+                height: 80px;
+                margin-bottom: 20px;
+            }
+
+            .info-features {
+                font-size: 13px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 15px 10px;
+            }
+
+            .login-info, .login-form-section {
+                padding: 25px 15px;
+            }
+
+            .form-control {
+                padding: 14px 16px;
+                font-size: 16px; /* Prevent zoom on iOS */
+            }
+
+            .btn-signin {
+                padding: 14px;
             }
         }
 
@@ -461,7 +521,7 @@
             <!-- Left Panel - Information -->
             <div class="login-info">
                 <div class="login-logo">
-                    <img src="{% static 'assets/media/logos/laso-logo.svg' %}" alt="LASO Healthcare">
+                    <img src="{% static 'images/logo.png' %}" alt="LASO Logo" style="width: 100%; height: 100%; object-fit: contain;">
                 </div>
                 <h1 class="info-title">Welcome to LASO</h1>
                 <p class="info-subtitle">Your Health, In Your Hands</p>

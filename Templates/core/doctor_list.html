@@ -1,25 +1,25 @@
 {% extends 'core/base.html' %}
 {% load static %}
 
-{% block title %}Doktorlar{% endblock %}
+{% block title %}Doctors{% endblock %}
 
 {% block content %}
 <div class="container py-4">
     <div class="row mb-4">
         <div class="col">
-            <h1 class="h3 mb-0">Doktorlar</h1>
-            <p class="text-muted">Tüm doktorların listesi</p>
+            <h1 class="h3 mb-0">Doctors</h1>
+            <p class="text-muted">List of all doctors</p>
         </div>
         <div class="col-auto">
             <div class="d-flex">
                 <form method="get" class="d-flex me-2">
-                    <input type="text" name="search" class="form-control me-2" placeholder="Doktor ara..." value="{{ request.GET.search }}">
-                    <button type="submit" class="btn btn-primary">Ara</button>
+                    <input type="text" name="search" class="form-control me-2" placeholder="Search doctors..." value="{{ request.GET.search }}">
+                    <button type="submit" class="btn btn-primary">Search</button>
                 </form>
                 
                 {% if user.is_admin_user or user.is_superuser %}
                 <a href="{% url 'doctor-create' %}" class="btn btn-success">
-                    <i class="fas fa-plus"></i> Doktor Ekle
+                    <i class="fas fa-plus"></i> Add Doctor
                 </a>
                 {% endif %}
             </div>
@@ -29,7 +29,7 @@
     {% if available_doctors and user.is_patient %}
     <div class="card shadow mb-4 border-success">
         <div class="card-header bg-success text-white">
-            <h5 class="mb-0">📊 Şu Anda Müsait Doktorlar ({{ current_time|date:"H:i" }})</h5>
+            <h5 class="mb-0">📊 Currently Available Doctors ({{ current_time|date:"H:i" }})</h5>
         </div>
         <div class="card-body">
             <div class="row">
@@ -38,13 +38,13 @@
                     <div class="card h-100 border-success">
                         <div class="card-body">
                             <h5 class="card-title">{{ doctor.get_full_name }}</h5>
-                            <h6 class="card-subtitle mb-2 text-muted">{{ doctor.specialization|default:"Genel Doktor" }}</h6>
+                            <h6 class="card-subtitle mb-2 text-muted">{{ doctor.specialization|default:"General Practitioner" }}</h6>
                             <div class="mt-3">
-                                <a href="{% url 'appointment-create' %}?doctor={{ doctor.id }}" class="btn btn-sm btn-success">
-                                    <i class="fas fa-calendar-plus"></i> Hemen Randevu Al
+                                <a href="{% url 'core:appointment-create' %}?doctor={{ doctor.id }}" class="btn btn-sm btn-success">
+                                    <i class="fas fa-calendar-plus"></i> Book Appointment
                                 </a>
                                 <a href="{% url 'doctor-calendar' doctor.id %}" class="btn btn-sm btn-outline-success ms-1">
-                                    <i class="fas fa-calendar"></i> Takvim
+                                    <i class="fas fa-calendar"></i> Calendar
                                 </a>
                             </div>
                         </div>
@@ -53,7 +53,7 @@
                 {% empty %}
                 <div class="col-12">
                     <div class="alert alert-info mb-0">
-                        Şu anda müsait doktor bulunmamaktadır. Lütfen diğer doktorların takvimlerini kontrol ediniz.
+                        No doctors are currently available. Please check other doctors' calendars.
                     </div>
                 </div>
                 {% endfor %}
@@ -68,11 +68,11 @@
                 <table class="table table-hover">
                     <thead>
                         <tr>
-                            <th>Ad Soyad</th>
-                            <th>Uzmanlık</th>
-                            <th>E-posta</th>
-                            <th>Telefon</th>
-                            <th>İşlemler</th>
+                            <th>Full Name</th>
+                            <th>Specialization</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -85,26 +85,26 @@
                                     <td>{{ doctor.phone|default:"-" }}</td>
                                     <td>
                                         {% if user.is_patient or user.is_receptionist %}
-                                            <a href="{% url 'appointment-create' %}?doctor={{ doctor.id }}" class="btn btn-sm btn-primary">
-                                                <i class="fas fa-calendar-plus"></i> Randevu Al
+                                            <a href="{% url 'core:appointment-create' %}?doctor={{ doctor.id }}" class="btn btn-sm btn-primary">
+                                                <i class="fas fa-calendar-plus"></i> Book Appointment
                                             </a>
                                         {% endif %}
                                         
-                                        <a href="{% url 'doctor-calendar' doctor.id %}" class="btn btn-sm btn-info">
-                                            <i class="ki-outline ki-calendar fs-2"></i> Takvim
-                                        </a>
+                                                                <a href="{% url 'doctor-calendar' doctor.id %}" class="btn btn-sm btn-info">
+                            <i class="ki-outline ki-calendar fs-2"></i> Calendar
+                        </a>
                                         
                                         {% if user.is_admin_user or user.is_superuser %}
-                                            <a href="{% url 'doctor-update' doctor.id %}" class="btn btn-sm btn-warning">
-                                                <i class="fas fa-edit"></i> Düzenle
-                                            </a>
+                                                                        <a href="{% url 'doctor-update' doctor.id %}" class="btn btn-sm btn-warning">
+                                <i class="fas fa-edit"></i> Edit
+                            </a>
                                         {% endif %}
                                     </td>
                                 </tr>
                             {% endfor %}
                         {% else %}
                             <tr>
-                                <td colspan="5" class="text-center">Doktor bulunamadı.</td>
+                                <td colspan="5" class="text-center">No doctors found.</td>
                             </tr>
                         {% endif %}
                     </tbody>

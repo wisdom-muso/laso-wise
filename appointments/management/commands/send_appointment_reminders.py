@@ -4,52 +4,52 @@ from core.utils import get_upcoming_appointments, send_appointment_reminder_emai
 from core.models_communication import CommunicationNotification
 
 class Command(BaseCommand):
-    help = 'Yaklaşan randevular için hatırlatma e-postaları ve bildirimleri gönderir'
+    help = 'Sends reminder emails and notifications for upcoming appointments'
 
     def add_arguments(self, parser):
         parser.add_argument(
             '--days',
             type=int,
             default=1,
-            help='Kaç gün sonraki randevular için hatırlatma gönderilecek (varsayılan: 1)'
+            help='How many days ahead to send reminders for appointments (default: 1)'
         )
 
     def handle(self, *args, **options):
         days = options['days']
         
-        # Yaklaşan randevuları al
+        # Get upcoming appointments
         appointments = get_upcoming_appointments(days=days)
         
-        self.stdout.write(f"{len(appointments)} adet yaklaşan randevu bulundu.")
+        self.stdout.write(f"{len(appointments)} upcoming appointments found.")
         
-        # Her randevu için hatırlatma gönder
+        # Send reminder for each appointment
         for appointment in appointments:
-            # E-posta gönder
+            # Send email
             try:
                 send_appointment_reminder_email(appointment)
                 self.stdout.write(self.style.SUCCESS(
-                    f"E-posta gönderildi: {appointment.patient.email} - {appointment.date}"
+                    f"Email sent: {appointment.patient.email} - {appointment.date}"
                 ))
             except Exception as e:
                 self.stdout.write(self.style.ERROR(
-                    f"E-posta gönderilemedi: {appointment.patient.email} - Hata: {str(e)}"
+                    f"Email could not be sent: {appointment.patient.email} - Error: {str(e)}"
                 ))
             
-            # Bildirim oluştur
+            # Create notification
             try:
                 CommunicationNotification.objects.create(
                     user=appointment.patient,
-                    title=f"Randevu Hatırlatması: {appointment.date.strftime('%d.%m.%Y')}",
-                    message=f"You have an appointment with Dr. {appointment.doctor.get_full_name()} tomorrow at {appointment.time.strftime('%H:%M')}.",
+                    title=f"Appointment Reminder: {appointment.date.strftime('%d.%m.%Y')}",
+                    message=f"You have an appointment tomorrow at {appointment.time.strftime('%H:%M')} with Dr. {appointment.doctor.get_full_name()}.",
                     related_url=f"/appointments/{appointment.id}/",
                     notification_type="appointment"
                 )
                 self.stdout.write(self.style.SUCCESS(
-                    f"Bildirim oluşturuldu: {appointment.patient.get_full_name()}"
+                    f"Notification created: {appointment.patient.get_full_name()}"
                 ))
             except Exception as e:
                 self.stdout.write(self.style.ERROR(
-                    f"Bildirim oluşturulamadı: {appointment.patient.get_full_name()} - Hata: {str(e)}"
+                    f"Notification could not be created: {appointment.patient.get_full_name()} - Error: {str(e)}"
                 ))
         
-        self.stdout.write(self.style.SUCCESS(f"Toplam {len(appointments)} adet hatırlatma gönderildi.")) 
+        self.stdout.write(self.style.SUCCESS(f"Total {len(appointments)} reminders sent.")) 

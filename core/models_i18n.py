@@ -1,6 +1,6 @@
 """
-Internationalization Management for MediTracked
-Çoklu dil desteği yönetimi
+Internationalization Management for Laso Healthcare
+Multi-language support management
 """
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -10,51 +10,51 @@ import json
 
 class Language(models.Model):
     """
-    Desteklenen diller
+    Supported languages
     """
     code = models.CharField(
         max_length=10,
         unique=True,
-        verbose_name=_('Dil Kodu'),
-        help_text=_('ISO 639-1 dil kodu (örn: tr, en, de)')
+        verbose_name=_('Language Code'),
+        help_text=_('ISO 639-1 language code (e.g: tr, en, de)')
     )
     
     name = models.CharField(
         max_length=100,
-        verbose_name=_('Dil Adı')
+        verbose_name=_('Language Name')
     )
     
     native_name = models.CharField(
         max_length=100,
-        verbose_name=_('Yerel Adı'),
-        help_text=_('Dilin kendi dilindeki adı')
+        verbose_name=_('Native Name'),
+        help_text=_('Name of the language in its own language')
     )
     
     flag_emoji = models.CharField(
         max_length=10,
         blank=True,
-        verbose_name=_('Bayrak Emoji')
+        verbose_name=_('Flag Emoji')
     )
     
     is_active = models.BooleanField(
         default=True,
-        verbose_name=_('Aktif mi?')
+        verbose_name=_('Is Active?')
     )
     
     is_rtl = models.BooleanField(
         default=False,
-        verbose_name=_('Sağdan Sola mı?'),
-        help_text=_('Arapça, İbranice gibi diller için')
+        verbose_name=_('Right to Left?'),
+        help_text=_('For languages like Arabic, Hebrew')
     )
     
     order = models.PositiveIntegerField(
         default=0,
-        verbose_name=_('Sıralama')
+        verbose_name=_('Order')
     )
     
     class Meta:
-        verbose_name = _('Dil')
-        verbose_name_plural = _('Diller')
+        verbose_name = _('Language')
+        verbose_name_plural = _('Languages')
         ordering = ['order', 'name']
     
     def __str__(self):
@@ -69,7 +69,7 @@ class UserLanguagePreference(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='language_preference',
-        verbose_name=_('Kullanıcı')
+        verbose_name=_('User')
     )
     
     language = models.ForeignKey(
@@ -142,12 +142,12 @@ class TranslationContext(models.Model):
     CONTEXT_TYPES = [
         ('medical', _('Medikal Terimler')),
         ('ui', _('Kullanıcı Arayüzü')),
-        ('notification', _('Bildirimler')),
-        ('report', _('Raporlar')),
-        ('appointment', _('Randevu')),
-        ('treatment', _('Tedavi')),
-        ('medication', _('İlaç')),
-        ('diagnosis', _('Teşhis')),
+        ('notification', _('Notifications')),
+        ('report', _('Reports')),
+        ('appointment', _('Appointment')),
+        ('treatment', _('Treatment')),
+        ('medication', _('Medication')),
+        ('diagnosis', _('Diagnosis')),
     ]
     
     context_type = models.CharField(
@@ -165,18 +165,18 @@ class TranslationContext(models.Model):
         max_length=100,
         unique=True,
         verbose_name=_('Bağlam Anahtarı'),
-        help_text=_('Benzersiz anahtar (örn: diagnosis.diabetes)')
+        help_text=_('Unique key (e.g.: diagnosis.diabetes)')
     )
     
     description = models.TextField(
         blank=True,
-        verbose_name=_('Açıklama'),
+        verbose_name=_('Description'),
         help_text=_('Çevirmenler için açıklama')
     )
     
     is_active = models.BooleanField(
         default=True,
-        verbose_name=_('Aktif mi?')
+        verbose_name=_('Is Active?')
     )
     
     created_at = models.DateTimeField(
@@ -207,7 +207,7 @@ class Translation(models.Model):
     language = models.ForeignKey(
         Language,
         on_delete=models.CASCADE,
-        verbose_name=_('Dil')
+        verbose_name=_('Language')
     )
     
     translated_text = models.TextField(
@@ -224,7 +224,7 @@ class Translation(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        verbose_name=_('Çevirmen')
+        verbose_name=_('Translator')
     )
     
     reviewer = models.ForeignKey(
@@ -260,8 +260,8 @@ class Translation(models.Model):
     )
     
     class Meta:
-        verbose_name = _('Çeviri')
-        verbose_name_plural = _('Çeviriler')
+        verbose_name = _('Translation')
+        verbose_name_plural = _('Translations')
         unique_together = ['context', 'language']
         ordering = ['-updated_at']
     
@@ -286,7 +286,7 @@ class MedicalTerminology(models.Model):
     category = models.CharField(
         max_length=20,
         choices=CATEGORY_CHOICES,
-        verbose_name=_('Kategori')
+        verbose_name=_('Category')
     )
     
     term_en = models.CharField(
@@ -370,7 +370,7 @@ class LocalizationSetting(models.Model):
         Language,
         on_delete=models.CASCADE,
         related_name='localization_settings',
-        verbose_name=_('Dil')
+        verbose_name=_('Language')
     )
     
     # Medikal birimler

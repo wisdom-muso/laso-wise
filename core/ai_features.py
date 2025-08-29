@@ -20,7 +20,7 @@ User = get_user_model()
 
 class SymptomAnalyzer:
     """
-    Semptom analizi ve öneriler
+    Symptom analysis and recommendations
     """
     
     # Semptom-hastalık eşleştirme veritabanı (basit örnek)
@@ -44,7 +44,7 @@ class SymptomAnalyzer:
     
     def analyze_symptoms(self, symptoms_text):
         """
-        Semptom metnini analiz ederek olası hastalıkları önerir
+        Analyzes symptom text to suggest possible diseases
         """
         if not symptoms_text:
             return []
@@ -97,7 +97,7 @@ class SymptomAnalyzer:
 
 class DrugInteractionChecker:
     """
-    İlaç etkileşimi kontrolü
+    Medication interaction check
     """
     
     def check_prescription_interactions(self, prescription_list):
@@ -141,7 +141,7 @@ class DrugInteractionChecker:
     
     def check_patient_drug_history(self, patient, new_medication):
         """
-        Hastanın mevcut ilaçları ile yeni ilaç etkileşimi
+        Interaction between patient's current medications and new medication
         """
         # Hastanın aktif ilaçlarını al
         current_medications = MedicalHistory.objects.filter(
@@ -168,7 +168,7 @@ class TreatmentRecommendationEngine:
         """
         Benzer vakalar bulma
         """
-        # Semptom analizi
+        # Symptom analysis
         analyzer = SymptomAnalyzer()
         analysis = analyzer.analyze_symptoms(patient_symptoms)
         
@@ -367,7 +367,7 @@ class AIHealthInsights:
     
     def generate_patient_insights(self, patient):
         """
-        Hasta için kapsamlı AI analizi
+        Comprehensive AI analysis for patient
         """
         insights = {
             'patient': patient,
@@ -381,7 +381,7 @@ class AIHealthInsights:
     
     def analyze_recent_treatments(self, patient):
         """
-        Son tedavileri analiz et
+        Analyze recent treatments
         """
         recent_treatments = Treatment.objects.filter(
             appointment__patient=patient

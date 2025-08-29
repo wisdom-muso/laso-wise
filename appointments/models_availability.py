@@ -5,44 +5,44 @@ import datetime
 
 class DoctorAvailability(models.Model):
     """
-    Doktor uygunluk takvimi. Doktorların hangi günlerde ve saatlerde 
-    müsait olduğunu belirler.
+    Doctor availability calendar. Determines which days and times 
+    doctors are available.
     """
     WEEKDAY_CHOICES = [
-        (0, _('Pazartesi')),
-        (1, _('Salı')),
-        (2, _('Çarşamba')),
-        (3, _('Perşembe')),
-        (4, _('Cuma')),
-        (5, _('Cumartesi')),
-        (6, _('Pazar')),
+        (0, _('Monday')),
+        (1, _('Tuesday')),
+        (2, _('Wednesday')),
+        (3, _('Thursday')),
+        (4, _('Friday')),
+        (5, _('Saturday')),
+        (6, _('Sunday')),
     ]
     
     doctor = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='availabilities',
-        verbose_name=_('Doktor'),
+        verbose_name=_('Doctor'),
         limit_choices_to={'user_type': 'doctor'}
     )
     weekday = models.IntegerField(
         choices=WEEKDAY_CHOICES,
-        verbose_name=_('Haftanın Günü')
+        verbose_name=_('Day of Week')
     )
     start_time = models.TimeField(
-        verbose_name=_('Başlangıç Saati')
+        verbose_name=_('Start Time')
     )
     end_time = models.TimeField(
-        verbose_name=_('Bitiş Saati')
+        verbose_name=_('End Time')
     )
     is_active = models.BooleanField(
         default=True,
-        verbose_name=_('Aktif mi?')
+        verbose_name=_('Is Active?')
     )
     
     class Meta:
-        verbose_name = _('Doktor Uygunluğu')
-        verbose_name_plural = _('Doktor Uygunlukları')
+        verbose_name = _('Doctor Availability')
+        verbose_name_plural = _('Doctor Availabilities')
         ordering = ['weekday', 'start_time']
         unique_together = ['doctor', 'weekday', 'start_time', 'end_time']
     
@@ -53,53 +53,53 @@ class DoctorAvailability(models.Model):
         return self.get_weekday_display()
     
     def is_available_on_date(self, date):
-        """Belirli bir tarihte doktorun uygun olup olmadığını kontrol eder"""
-        # Tarih, bu uygunluğun gününe denk geliyor mu?
+        """Checks if the doctor is available on a specific date"""
+        # Does the date match this availability's day?
         return date.weekday() == self.weekday and self.is_active
 
 class DoctorTimeOff(models.Model):
     """
-    Doktorların izin günleri/saatleri. Normalde müsait oldukları zamanlarda
-    özel sebeplerle izinli oldukları zamanları belirtir.
+    Doctor time off days/hours. Specifies times when they are on leave
+    for special reasons during their normally available times.
     """
     doctor = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='time_offs',
-        verbose_name=_('Doktor'),
+        verbose_name=_('Doctor'),
         limit_choices_to={'user_type': 'doctor'}
     )
     start_date = models.DateField(
-        verbose_name=_('Başlangıç Tarihi')
+        verbose_name=_('Start Date')
     )
     end_date = models.DateField(
-        verbose_name=_('Bitiş Tarihi')
+        verbose_name=_('End Date')
     )
     start_time = models.TimeField(
         blank=True,
         null=True,
-        verbose_name=_('Başlangıç Saati'),
-        help_text=_('Eğer tam gün izin değilse')
+        verbose_name=_('Start Time'),
+        help_text=_('If not full day leave')
     )
     end_time = models.TimeField(
         blank=True,
         null=True,
-        verbose_name=_('Bitiş Saati'),
-        help_text=_('Eğer tam gün izin değilse')
+        verbose_name=_('End Time'),
+        help_text=_('If not full day leave')
     )
     reason = models.CharField(
         max_length=200,
         blank=True,
-        verbose_name=_('İzin Sebebi')
+        verbose_name=_('Reason for Leave')
     )
     is_full_day = models.BooleanField(
         default=True,
-        verbose_name=_('Tam Gün mü?')
+        verbose_name=_('Full Day?')
     )
     
     class Meta:
-        verbose_name = _('Doktor İzni')
-        verbose_name_plural = _('Doktor İzinleri')
+        verbose_name = _('Doctor Time Off')
+        verbose_name_plural = _('Doctor Time Offs')
         ordering = ['-start_date', '-start_time']
     
     def __str__(self):

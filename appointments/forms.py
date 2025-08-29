@@ -8,7 +8,7 @@ User = get_user_model()
 
 class DoctorAvailabilityForm(forms.ModelForm):
     """
-    Doktor çalışma saatleri formu.
+    Doctor working hours form.
     """
     class Meta:
         model = DoctorAvailability
@@ -38,7 +38,7 @@ class DoctorAvailabilityForm(forms.ModelForm):
 
 class DoctorTimeOffForm(forms.ModelForm):
     """
-    Doktor izin günleri formu.
+    Doctor leave days form.
     """
     class Meta:
         model = DoctorTimeOff

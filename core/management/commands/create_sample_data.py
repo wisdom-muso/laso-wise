@@ -211,7 +211,7 @@ class Command(BaseCommand):
         admin, created = User.objects.get_or_create(
             username='admin',
             defaults={
-                'email': 'admin@lasohealthcare.com',
+                'email': 'admin@meditrack.com',
                 'first_name': 'Admin',
                 'last_name': 'Kullanıcı',
                 'user_type': 'admin',
@@ -232,14 +232,14 @@ class Command(BaseCommand):
         receptionist_data = [
             {
                 'username': 'ayse',
-                'email': 'ayse@lasohealthcare.com',
+                'email': 'ayse@meditrack.com',
                 'first_name': 'Ayşe',
                 'last_name': 'Yılmaz',
                 'password': 'password123'
             },
             {
                 'username': 'mehmet',
-                'email': 'mehmet@lasohealthcare.com',
+                'email': 'mehmet@meditrack.com',
                 'first_name': 'Mehmet',
                 'last_name': 'Demir',
                 'password': 'password123'
@@ -277,7 +277,7 @@ class Command(BaseCommand):
             user, created = User.objects.get_or_create(
                 username=username,
                 defaults={
-                    'email': f'{username}@lasohealthcare.com',
+                    'email': f'{username}@meditrack.com',
                     'first_name': first_name,
                     'last_name': last_name,
                     'user_type': 'doctor',
@@ -889,7 +889,7 @@ class Command(BaseCommand):
                 content = ''
                 if notification_type == 'appointment_reminder':
                     content = random.choice([
-                        "Yaklaşan randevunuz hakkında hatırlatma.",
+                        "Reminder about your upcoming appointment.",
                         "Yarınki randevunuzu unutmayın.",
                         "Önümüzdeki hafta için planlanmış randevunuz var.",
                         "Dr. ile randevunuz 3 gün sonra."
@@ -897,9 +897,9 @@ class Command(BaseCommand):
                 elif notification_type == 'prescription_refill':
                     content = random.choice([
                         "Reçeteniz yenileme zamanı geldi.",
-                        "İlaçlarınız bitmek üzere, lütfen doktorunuzla iletişime geçin.",
+                        "Your medications are running low, please contact your doctor.",
                         "Reçeteniz hazır, eczaneden alabilirsiniz.",
-                        "İlaç tedaviniz için yenileme hatırlatması."
+                        "Renewal reminder for your medication treatment."
                     ])
                 elif notification_type == 'test_result':
                     content = random.choice([

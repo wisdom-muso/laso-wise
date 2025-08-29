@@ -5,9 +5,9 @@
     --text-color: #333;
     --card-bg: #fff;
     --border-color: #e0e0e0;
-    --primary-color: #12bab8;
-    --secondary-color: #0e8a88;
-    --accent-color: #2196f3;
+    --primary-color: #20b2aa;
+    --secondary-color: #008b8b;
+    --accent-color: #48d1cc;
     --success-color: #4caf50;
     --warning-color: #ff9800;
     --danger-color: #f44336;
@@ -23,9 +23,9 @@ body.dark-mode {
     --text-color: #e0e0e0;
     --card-bg: #1e1e1e;
     --border-color: #333;
-    --primary-color: #12bab8;
-    --secondary-color: #0e8a88;
-    --accent-color: #42a5f5;
+    --primary-color: #40e0d0;
+    --secondary-color: #20b2aa;
+    --accent-color: #7fffd4;
     --success-color: #81c784;
     --warning-color: #ffb74d;
     --danger-color: #e57373;

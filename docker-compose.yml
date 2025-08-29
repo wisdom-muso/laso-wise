@@ -52,7 +52,7 @@ services:
     environment:
       - DEBUG=${DEBUG:-False}
       - SECRET_KEY=${SECRET_KEY}
-      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-localhost,127.0.0.1}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-localhost,127.0.0.1,65.108.91.110,host.docker.internal,*}
       - USE_SQLITE=${USE_SQLITE:-True}
       - LOG_TO_FILE=${LOG_TO_FILE:-False}
       - EMAIL_BACKEND=${EMAIL_BACKEND}
@@ -61,6 +61,7 @@ services:
       - EMAIL_HOST_USER=${EMAIL_HOST_USER}
       - EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD}
       - EMAIL_USE_TLS=${EMAIL_USE_TLS:-True}
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-redis_password}@redis:6379/0
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - HUGGINGFACE_API_KEY=${HUGGINGFACE_API_KEY}
     volumes:
@@ -77,11 +78,11 @@ services:
     networks:
       - laso_network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health/"]
+      test: ["CMD", "curl", "-f", "http://localhost:8000/liveness/"]
       interval: 30s
       timeout: 10s
-      retries: 3
-      start_period: 40s
+      retries: 5
+      start_period: 60s
 
   # Celery Worker for Background Tasks
   celery:
@@ -91,7 +92,7 @@ services:
       target: production
     container_name: laso_celery
     restart: unless-stopped
-    command: celery -A laso worker -l info
+    command: celery -A meditrack worker -l info
     environment:
       - DEBUG=${DEBUG:-False}
       - SECRET_KEY=${SECRET_KEY}
@@ -117,7 +118,7 @@ services:
       target: production
     container_name: laso_celery_beat
     restart: unless-stopped
-    command: celery -A laso beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    command: celery -A meditrack beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
     environment:
       - DEBUG=${DEBUG:-False}
       - SECRET_KEY=${SECRET_KEY}

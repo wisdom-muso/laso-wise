@@ -8,6 +8,10 @@ from django.views.generic import CreateView, UpdateView, ListView, DetailView, D
 from django.utils.translation import gettext_lazy as _
 from django.db.models import Q
 from django.utils import timezone
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
+import json
 
 from .forms import (
     LoginForm, PatientRegistrationForm, AppointmentForm, 
@@ -21,10 +25,10 @@ User = get_user_model()
 
 # Create your views here.
 
-# Ana Sayfa
+# Home Page
 class HomeView(TemplateView):
     """
-    Ana sayfa görünümü
+    Home page view
     """
     template_name = 'core/index.html'
 
@@ -32,13 +36,13 @@ class HomeView(TemplateView):
 @login_required
 def dashboard(request):
     """
-    Kullanıcı rolüne göre dashboard görünümü sağlar
+    Provides dashboard view based on user role
     """
     user = request.user
     context = {'user': user}
     
     if user.is_patient():
-        # Hasta dashboard'u
+        # Patient dashboard
         upcoming_appointments = Appointment.objects.filter(
             patient=user,
             date__gte=timezone.now().date(),
@@ -56,7 +60,7 @@ def dashboard(request):
         return render(request, 'core/patient_dashboard.html', context)
     
     elif user.is_doctor():
-        # Doktor dashboard'u
+        # Doctor dashboard
         today_appointments = Appointment.objects.filter(
             doctor=user,
             date=timezone.now().date(),
@@ -73,7 +77,7 @@ def dashboard(request):
             appointment__in=Appointment.objects.filter(doctor=user)
         ).order_by('-created_at')[:5]
         
-        # Toplam hasta sayısı
+        # Total patient count
         # Get all appointments for this doctor
         doctor_appointments = Appointment.objects.filter(doctor=user)
         # Then get all patients from those appointments
@@ -82,12 +86,12 @@ def dashboard(request):
             patient_appointments__in=doctor_appointments
         ).distinct().count()
         
-        # Toplam tedavi sayısı
+        # Total treatment count
         total_treatments = Treatment.objects.filter(
             appointment__in=doctor_appointments
         ).count()
         
-        # Haftalık randevu istatistikleri
+        # Weekly appointment statistics
         from datetime import timedelta
         week_start = timezone.now().date() - timedelta(days=timezone.now().weekday())
         weekly_appointments = []
@@ -97,7 +101,7 @@ def dashboard(request):
             count = Appointment.objects.filter(doctor=user, date=day).count()
             weekly_appointments.append(count)
         
-        # Hasta yaş demografikleri
+        # Patient age demographics
         from django.db.models import Count, Case, When, IntegerField
         from datetime import date
         
@@ -124,7 +128,7 @@ def dashboard(request):
             else:
                 age_demographics[4] += 1
         
-        # En sık görülen teşhisler
+        # Most common diagnoses
         from django.db.models import Count
         doctor_appointments = Appointment.objects.filter(doctor=user)
         common_diagnoses_data = Treatment.objects.filter(
@@ -156,7 +160,7 @@ def dashboard(request):
         return render(request, 'core/doctor_dashboard.html', context)
     
     elif user.is_receptionist():
-        # Resepsiyonist dashboard'u
+        # Receptionist dashboard
         today_appointments = Appointment.objects.filter(
             date=timezone.now().date()
         ).order_by('time')
@@ -172,7 +176,7 @@ def dashboard(request):
         return render(request, 'core/receptionist_dashboard.html', context)
     
     elif user.is_admin_user() or user.is_superuser:
-        # Admin dashboard'u
+        # Admin dashboard
         total_patients = User.objects.filter(user_type='patient').count()
         total_doctors = User.objects.filter(user_type='doctor').count()
         total_appointments = Appointment.objects.count()
@@ -186,13 +190,13 @@ def dashboard(request):
         })
         return render(request, 'core/admin_dashboard.html', context)
     
-    # Varsayılan olarak genel dashboard'a yönlendir
+    # Redirect to general dashboard by default
     return render(request, 'core/dashboard.html', context)
 
-# Hasta Kayıt
+# Patient Registration
 class PatientRegistrationView(CreateView):
     """
-    Yeni hasta kaydı oluşturma görünümü
+    Patient registration view for creating new patient accounts
     """
     template_name = 'core/patient_registration.html'
     form_class = PatientRegistrationForm
@@ -200,13 +204,13 @@ class PatientRegistrationView(CreateView):
     
     def form_valid(self, form):
         response = super().form_valid(form)
-        messages.success(self.request, _('Hasta kaydı başarıyla oluşturuldu.'))
+        messages.success(self.request, _('Patient registration completed successfully.'))
         return response
 
-# Randevu Görünümleri
+# Appointment Views
 class AppointmentListView(LoginRequiredMixin, ListView):
     """
-    Randevu listesi görünümü
+    Appointment list view
     """
     model = Appointment
     template_name = 'core/appointment_list.html'
@@ -216,7 +220,7 @@ class AppointmentListView(LoginRequiredMixin, ListView):
         queryset = super().get_queryset()
         user = self.request.user
         
-        # Filtreleme
+        # Filtering
         status = self.request.GET.get('status')
         search = self.request.GET.get('search')
         
@@ -246,15 +250,15 @@ class AppointmentListView(LoginRequiredMixin, ListView):
 
 class AppointmentCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     """
-    Randevu oluşturma görünümü
+    Appointment creation view
     """
     model = Appointment
     form_class = AppointmentForm
     template_name = 'core/appointment_form.html'
-    success_url = reverse_lazy('appointment-list')
+    success_url = reverse_lazy('core:appointment-list')
     
     def test_func(self):
-        # Tüm kullanıcılar randevu oluşturabilir
+        # All users can create appointments
         return True
     
     def get_form_kwargs(self):
@@ -264,12 +268,12 @@ class AppointmentCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView)
     
     def get_initial(self):
         initial = super().get_initial()
-        # URL'den doktor ID'si alınırsa doktoru otomatik seç
+        # If doctor ID is taken from URL, automatically select doctor
         doctor_id = self.request.GET.get('doctor')
         if doctor_id:
             initial['doctor'] = doctor_id
         
-        # URL'den hasta ID'si alınırsa hastayı otomatik seç
+        # If patient ID is taken from URL, automatically select patient
         patient_id = self.request.GET.get('patient')
         if patient_id:
             initial['patient'] = patient_id
@@ -280,22 +284,22 @@ class AppointmentCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView)
     
     def form_valid(self, form):
         response = super().form_valid(form)
-        messages.success(self.request, _('Randevu başarıyla oluşturuldu.'))
+        messages.success(self.request, _('Appointment created successfully.'))
         return response
 
 class AppointmentUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     """
-    Randevu güncelleme görünümü
+    Appointment update view
     """
     model = Appointment
     form_class = AppointmentForm
     template_name = 'core/appointment_form.html'
-    success_url = reverse_lazy('appointment-list')
+    success_url = reverse_lazy('core:appointment-list')
     
     def test_func(self):
         appointment = self.get_object()
         user = self.request.user
-        # Doktorlar ve resepsiyonistler kendi randevularını güncelleyebilir
+        # Doctors and receptionists can update their own appointments
         if user.is_doctor():
             return appointment.doctor == user
         return user.is_receptionist() or user.is_admin_user()
@@ -307,12 +311,12 @@ class AppointmentUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView)
     
     def form_valid(self, form):
         response = super().form_valid(form)
-        messages.success(self.request, _('Randevu başarıyla güncellendi.'))
+        messages.success(self.request, _('Appointment updated successfully.'))
         return response
 
 class AppointmentDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     """
-    Randevu detay görünümü
+    Appointment detail view
     """
     model = Appointment
     template_name = 'core/appointment_detail.html'
@@ -321,7 +325,7 @@ class AppointmentDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView)
     def test_func(self):
         appointment = self.get_object()
         user = self.request.user
-        # Doktor ve hasta sadece kendi randevularını görebilir
+        # Doctor and patient can only view their own appointments
         if user.is_patient():
             return appointment.patient == user
         elif user.is_doctor():
@@ -330,11 +334,11 @@ class AppointmentDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView)
 
 class AppointmentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     """
-    Randevu silme görünümü
+    Appointment deletion view
     """
     model = Appointment
     template_name = 'core/appointment_confirm_delete.html'
-    success_url = reverse_lazy('appointment-list')
+    success_url = reverse_lazy('core:appointment-list')
     
     def test_func(self):
         # Sadece resepsiyonistler ve adminler randevu silebilir
@@ -342,21 +346,21 @@ class AppointmentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView)
     
     def delete(self, request, *args, **kwargs):
         response = super().delete(request, *args, **kwargs)
-        messages.success(self.request, _('Randevu başarıyla silindi.'))
+        messages.success(self.request, _('Appointment deleted successfully.'))
         return response
 
-# Tedavi Görünümleri
+# Treatment Views
 class TreatmentCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     """
-    Tedavi oluşturma görünümü
+    Treatment creation view
     """
     model = Treatment
     form_class = TreatmentForm
     template_name = 'core/treatment_form.html'
-    success_url = reverse_lazy('appointment-list')
+    success_url = reverse_lazy('core:appointment-list')
     
     def test_func(self):
-        # Sadece doktorlar tedavi oluşturabilir
+        # Only doctors can create treatments
         return self.request.user.is_doctor()
     
     def get_context_data(self, **kwargs):
@@ -366,7 +370,7 @@ class TreatmentCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         else:
             context['prescription_formset'] = PrescriptionFormSet()
         
-        # Randevu bilgilerini ekle
+        # Add appointment information
         appointment_id = self.kwargs.get('appointment_id')
         if appointment_id:
             context['appointment'] = get_object_or_404(Appointment, id=appointment_id)
@@ -377,20 +381,20 @@ class TreatmentCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         context = self.get_context_data()
         prescription_formset = context['prescription_formset']
         
-        # Randevu ile ilişkilendir
+        # Associate with appointment
         appointment_id = self.kwargs.get('appointment_id')
         appointment = get_object_or_404(Appointment, id=appointment_id)
         
-        # Doktor sadece kendi randevularına tedavi ekleyebilir
+        # Doctor can only add treatment to their own appointments
         if appointment.doctor != self.request.user:
-            messages.error(self.request, _('Bu randevu için tedavi ekleyemezsiniz.'))
+            messages.error(self.request, _('You cannot add treatment for this appointment.'))
             return redirect('appointment-list')
         
-        # Randevu durumunu tamamlandı olarak işaretle
+        # Mark appointment status as completed
         appointment.status = 'completed'
         appointment.save()
         
-        # Tedavi ve reçeteleri kaydet
+        # Save treatment and prescriptions
         if prescription_formset.is_valid():
             self.object = form.save(commit=False)
             self.object.appointment = appointment
@@ -399,23 +403,23 @@ class TreatmentCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
             prescription_formset.instance = self.object
             prescription_formset.save()
             
-            messages.success(self.request, _('Tedavi ve reçeteler başarıyla kaydedildi.'))
+            messages.success(self.request, _('Treatment and prescriptions saved successfully.'))
             return super().form_valid(form)
         else:
             return self.render_to_response(self.get_context_data(form=form))
 
 class TreatmentUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     """
-    Tedavi güncelleme görünümü
+    Treatment update view
     """
     model = Treatment
     form_class = TreatmentForm
     template_name = 'core/treatment_form.html'
-    success_url = reverse_lazy('appointment-list')
+    success_url = reverse_lazy('core:appointment-list')
     
     def test_func(self):
         treatment = self.get_object()
-        # Sadece tedaviyi oluşturan doktor güncelleyebilir
+        # Only the doctor who created the treatment can update it
         return self.request.user.is_doctor() and treatment.appointment.doctor == self.request.user
     
     def get_context_data(self, **kwargs):
@@ -437,14 +441,14 @@ class TreatmentUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
             prescription_formset.instance = self.object
             prescription_formset.save()
             
-            messages.success(self.request, _('Tedavi ve reçeteler başarıyla güncellendi.'))
+            messages.success(self.request, _('Treatment and prescriptions updated successfully.'))
             return super().form_valid(form)
         else:
             return self.render_to_response(self.get_context_data(form=form))
 
 class TreatmentDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     """
-    Tedavi detay görünümü
+    Treatment detail view
     """
     model = Treatment
     template_name = 'core/treatment_detail.html'
@@ -453,37 +457,37 @@ class TreatmentDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     def test_func(self):
         treatment = self.get_object()
         user = self.request.user
-        # Hasta ve doktor sadece kendi tedavilerini görebilir
+        # Patient and doctor can only view their own treatments
         if user.is_patient():
             return treatment.appointment.patient == user
         elif user.is_doctor():
             return treatment.appointment.doctor == user
         return user.is_receptionist() or user.is_admin_user()
 
-# Hasta Görünümleri
+# Patient Views
 class PatientListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     """
-    Hasta listesi görünümü
+    Patient list view
     """
     model = User
     template_name = 'core/patient_list.html'
     context_object_name = 'patients'
     
     def test_func(self):
-        # Sadece doktorlar, resepsiyonistler ve adminler hasta listesini görebilir
+        # Only doctors, receptionists and admins can view patient list
         user = self.request.user
         return user.is_doctor() or user.is_receptionist() or user.is_admin_user()
     
     def get_queryset(self):
         queryset = User.objects.filter(user_type='patient')
         
-        # Doktorlar sadece kendilerine randevu alan hastaları görebilir
+        # Doctors can only see patients who have appointments with them
         if self.request.user.is_doctor():
             doctor = self.request.user
             patient_ids = Appointment.objects.filter(doctor=doctor).values_list('patient_id', flat=True)
             queryset = queryset.filter(id__in=patient_ids).distinct()
         
-        # Arama
+        # Search
         search = self.request.GET.get('search')
         if search:
             queryset = queryset.filter(
@@ -497,7 +501,7 @@ class PatientListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
 
 class PatientDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     """
-    Hasta detay görünümü
+    Patient detail view
     """
     model = User
     template_name = 'core/patient_detail.html'
@@ -507,25 +511,25 @@ class PatientDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
         patient = self.get_object()
         user = self.request.user
         
-        # Hastalar sadece kendi profillerini görebilir
+        # Patients can only view their own profiles
         if user.is_patient():
             return patient == user
         
-        # Doktorlar sadece kendilerine randevu alan hastaları görebilir
+        # Doctors can only view patients who have appointments with them
         if user.is_doctor():
             return Appointment.objects.filter(doctor=user, patient=patient).exists()
             
-        # Resepsiyonistler ve adminler tüm hastaları görebilir
+        # Receptionists and admins can view all patients
         return user.is_receptionist() or user.is_admin_user()
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         patient = self.get_object()
         
-        # Hasta randevuları
+        # Patient appointments
         appointments = Appointment.objects.filter(patient=patient).order_by('-date', '-time')
         
-        # Hasta tedavileri
+        # Patient treatments
         patient_appointments = Appointment.objects.filter(patient=patient)
         treatments = Treatment.objects.filter(appointment__in=patient_appointments).order_by('-created_at')
         
@@ -536,10 +540,10 @@ class PatientDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
         
         return context
 
-# Doktor Görünümleri
+# Doctor Views
 class DoctorListView(LoginRequiredMixin, ListView):
     """
-    Doktor listesi görünümü
+    Doctor list view
     """
     model = User
     template_name = 'core/doctor_list.html'
@@ -548,7 +552,7 @@ class DoctorListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         queryset = User.objects.filter(user_type='doctor')
         
-        # Arama
+        # Search
         search = self.request.GET.get('search')
         if search:
             queryset = queryset.filter(
@@ -562,7 +566,7 @@ class DoctorListView(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
-        # Şu anda müsait olan doktorları bul
+        # Find currently available doctors
         from appointments.models_availability import DoctorAvailability, DoctorTimeOff
         from datetime import datetime
         
@@ -570,7 +574,7 @@ class DoctorListView(LoginRequiredMixin, ListView):
         current_weekday = now.weekday()  # 0 = Pazartesi, 6 = Pazar
         current_time = now.time()
         
-        # Bugün çalışan doktorlar
+        # Doctors working today
         working_doctors = User.objects.filter(
             user_type='doctor',
             availabilities__weekday=current_weekday,
@@ -579,7 +583,7 @@ class DoctorListView(LoginRequiredMixin, ListView):
             availabilities__is_active=True
         ).distinct()
         
-        # Bugün izinli olan doktorları çıkar
+        # Exclude doctors on leave today
         today = now.date()
         on_leave_doctor_ids = DoctorTimeOff.objects.filter(
             start_date__lte=today,
@@ -595,7 +599,7 @@ class DoctorListView(LoginRequiredMixin, ListView):
 
 class DoctorCreationView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     """
-    Doktor oluşturma görünümü
+    Doctor creation view
     """
     model = User
     form_class = DoctorCreationForm
@@ -603,17 +607,17 @@ class DoctorCreationView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     success_url = reverse_lazy('doctor-list')
     
     def test_func(self):
-        # Sadece admin kullanıcılar doktor ekleyebilir
+        # Only admin users can add doctors
         return self.request.user.is_admin_user() or self.request.user.is_superuser
     
     def form_valid(self, form):
         response = super().form_valid(form)
-        messages.success(self.request, _('Doktor hesabı başarıyla oluşturuldu.'))
+        messages.success(self.request, _('Doctor account created successfully.'))
         return response
 
 class DoctorDetailView(LoginRequiredMixin, DetailView):
     """
-    Doktor detay görünümü
+    Doctor detail view
     """
     model = User
     template_name = 'core/doctor_detail.html'
@@ -625,12 +629,12 @@ class DoctorDetailView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         doctor = self.get_object()
-        # İhtiyaç duyulan ek verileri ekleyebiliriz
+        # Additional data can be added as needed
         return context
 
 class DoctorUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     """
-    Doktor güncelleme görünümü
+    Doctor update view
     """
     model = User
     form_class = DoctorUpdateForm
@@ -638,7 +642,7 @@ class DoctorUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     success_url = reverse_lazy('doctor-list')
     
     def test_func(self):
-        # Sadece admin kullanıcılar doktor bilgilerini güncelleyebilir
+        # Only admin users can update doctor information
         return self.request.user.is_admin_user() or self.request.user.is_superuser
     
     def get_context_data(self, **kwargs):
@@ -648,21 +652,21 @@ class DoctorUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     
     def form_valid(self, form):
         response = super().form_valid(form)
-        messages.success(self.request, _('Doktor bilgileri başarıyla güncellendi.'))
+        messages.success(self.request, _('Doctor information updated successfully.'))
         return response
 
 # Analytics Dashboard View
 @login_required
 def analytics_dashboard(request):
     """
-    Gelişmiş analitik dashboard görünümü
+    Advanced analytics dashboard view
     """
-    # Kullanıcı rolüne göre erişim kontrolü
+    # Access control based on user role
     if not (request.user.is_doctor() or request.user.is_admin_user()):
-        messages.error(request, _('Bu sayfaya erişim izniniz bulunmamaktadır.'))
+        messages.error(request, _('You do not have permission to access this page.'))
         return redirect('home')
     
-    # Analitik verilerini hazırla
+    # Prepare analytics data
     analytics = DashboardAnalytics(user=request.user)
     dashboard_data = analytics.get_comprehensive_dashboard_data()
     
@@ -676,10 +680,41 @@ def analytics_dashboard(request):
 @login_required
 def ai_assistant(request):
     """
-    AI Sağlık Asistanı görünümü
+    AI Health Assistant view
     """
     context = {
-        'title': _('AI Sağlık Asistanı')
+        'title': _('AI Health Assistant'),
+        'current_time': timezone.now()
     }
     
     return render(request, 'core/ai_assistant.html', context)
+
+@login_required
+@require_http_methods(["POST"])
+def ai_chat(request):
+    """
+    AI Chat endpoint for processing user messages
+    """
+    try:
+        message = request.POST.get('message', '').strip()
+        
+        if not message:
+            return JsonResponse({
+                'success': False,
+                'error': 'No message provided'
+            })
+        
+        # Simple AI response for now - this can be enhanced with actual AI integration
+        ai_response = f"Thank you for your message: '{message}'. I'm currently a prototype AI assistant. For real medical advice, please consult with your healthcare provider."
+        
+        return JsonResponse({
+            'success': True,
+            'response': ai_response,
+            'timestamp': timezone.now().isoformat()
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': 'An error occurred processing your request'
+        })
