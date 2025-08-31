@@ -34,3 +34,4 @@ def theme_processor(request):
         context['dark_mode'] = theme_preference.dark_mode
     
     return context
+
