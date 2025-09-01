@@ -16,9 +16,9 @@ def check_potential_issues():
     
     # Check if required files exist
     required_files = [
-        'meditrack/settings.py',
-        'meditrack/urls.py', 
-        'meditrack/wsgi.py',
+        'laso/settings.py',
+        'laso/urls.py', 
+        'laso/wsgi.py',
         'core/views_auth.py',
         'core/forms.py',
         'Templates/core/login.html',
@@ -36,7 +36,7 @@ def check_potential_issues():
     # Check for common syntax errors in key files
     print("\n🐍 Checking Python syntax...")
     key_python_files = [
-        'meditrack/settings.py',
+        'laso/settings.py',
         'core/views_auth.py',
         'core/forms.py',
         'manage.py'
@@ -58,7 +58,7 @@ def check_potential_issues():
     print("\n📦 Checking critical imports...")
     try:
         sys.path.insert(0, '.')
-        os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'meditrack.settings')
+        os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'laso.settings')
         
         import django
         django.setup()

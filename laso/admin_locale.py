@@ -10,7 +10,7 @@ from django.contrib.admin.apps import AdminConfig
 
 class EnglishAdminConfig(AdminConfig):
     """Custom Admin Configuration to force English interface"""
-    default_site = 'meditrack.admin_locale.EnglishAdminSite'
+    default_site = 'laso.admin_locale.EnglishAdminSite'
 
 
 class EnglishAdminSite(admin.AdminSite):

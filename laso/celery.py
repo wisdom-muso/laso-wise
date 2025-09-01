@@ -1,13 +1,13 @@
 """
-Celery configuration for meditrack project.
+Celery configuration for laso project.
 """
 import os
 from celery import Celery
 
 # Set the default Django settings module for the 'celery' program.
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'meditrack.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'laso.settings')
 
-app = Celery('meditrack')
+app = Celery('laso')
 
 # Using a string here means the worker doesn't have to serialize
 # the configuration object to child processes.

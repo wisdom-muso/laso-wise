@@ -1,5 +1,5 @@
 /**
- * Theme management for the MediTracked application
+ * Theme management for the laso application
  */
 
 document.addEventListener('DOMContentLoaded', function() {

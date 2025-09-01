@@ -9,7 +9,7 @@ from django.conf import settings
 from django.core.management import execute_from_command_line
 
 # Set the Django settings module
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'meditrack.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'laso.settings')
 
 def test_django_setup():
     """Test if Django can be set up properly"""

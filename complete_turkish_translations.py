@@ -76,7 +76,7 @@ def translate_turkish_text():
         'core/models_i18n.py',
         'core/models_statistics.py', 
         'core/utils.py',
-        'meditrack/settings.py'
+        'laso/settings.py'
     ]
     
     translations_made = 0

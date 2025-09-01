@@ -211,7 +211,7 @@ class Command(BaseCommand):
         admin, created = User.objects.get_or_create(
             username='admin',
             defaults={
-                'email': 'admin@meditrack.com',
+                'email': 'admin@laso.com',
                 'first_name': 'Admin',
                 'last_name': 'Kullanıcı',
                 'user_type': 'admin',
@@ -232,14 +232,14 @@ class Command(BaseCommand):
         receptionist_data = [
             {
                 'username': 'ayse',
-                'email': 'ayse@meditrack.com',
+                'email': 'ayse@laso.com',
                 'first_name': 'Ayşe',
                 'last_name': 'Yılmaz',
                 'password': 'password123'
             },
             {
                 'username': 'mehmet',
-                'email': 'mehmet@meditrack.com',
+                'email': 'mehmet@laso.com',
                 'first_name': 'Mehmet',
                 'last_name': 'Demir',
                 'password': 'password123'
@@ -277,7 +277,7 @@ class Command(BaseCommand):
             user, created = User.objects.get_or_create(
                 username=username,
                 defaults={
-                    'email': f'{username}@meditrack.com',
+                    'email': f'{username}@laso.com',
                     'first_name': first_name,
                     'last_name': last_name,
                     'user_type': 'doctor',

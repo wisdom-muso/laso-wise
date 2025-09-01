@@ -635,7 +635,7 @@ class TeleMedicineConsultation(models.Model):
 
 class TeleMedicineMessage(models.Model):
     """
-    Telemedicine chat mesajları
+    Telemedicine chat messages
     """
     consultation = models.ForeignKey(
         TeleMedicineConsultation,

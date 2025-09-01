@@ -106,7 +106,7 @@ HUGGINGFACE_API_KEY=your_hf_key_here
 
 ### Update Django settings for production
 ```bash
-nano meditrack/settings.py
+nano laso/settings.py
 ```
 
 Add at the end:
@@ -164,7 +164,7 @@ ExecStart=/home/laso/laso-healthcare/venv/bin/gunicorn \
           --access-logfile - \
           --workers 3 \
           --bind unix:/run/gunicorn/laso-healthcare.sock \
-          meditrack.wsgi:application
+          laso.wsgi:application
 ExecReload=/bin/kill -s HUP $MAINPID
 KillMode=mixed
 TimeoutStopSec=5

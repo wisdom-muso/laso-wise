@@ -36,7 +36,7 @@ services:
       - ENABLE_AI_FEATURES=False
     volumes:
       - .:/app
-    command: celery -A meditrack worker -l debug --autoreload
+    command: celery -A laso worker -l debug --autoreload
 
   # Celery Beat - Development Configuration
   celery-beat:
@@ -48,7 +48,7 @@ services:
       - DEBUG=True
     volumes:
       - .:/app
-    command: celery -A meditrack beat -l debug
+    command: celery -A laso beat -l debug
 
   # Development Database with exposed port
   db:
