@@ -24,14 +24,14 @@ class LabTestForm(forms.ModelForm):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Sadece doktor tipi kullanıcıları göster
+        # Show only users of type doctor
         self.fields['doctor'].queryset = User.objects.filter(user_type='doctor')
-        # Sadece hasta tipi kullanıcıları göster
+        # Show only users of type patient
         self.fields['patient'].queryset = User.objects.filter(user_type='patient')
 
 class TestResultForm(forms.ModelForm):
     """
-    Test sonucu oluşturma ve düzenleme formu.
+    Test result creation and editing form.
     """
     class Meta:
         model = TestResult
@@ -48,5 +48,5 @@ class TestResultForm(forms.ModelForm):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Tamamlanmamış testleri göster
+        # Show incomplete tests
         self.fields['lab_test'].queryset = LabTest.objects.filter(status='in_progress')

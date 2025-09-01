@@ -1,18 +1,18 @@
 {% extends 'core/base.html' %}
 {% load static %}
 
-{% block title %}{% if is_update %}Doktor Düzenle{% else %}Doktor Ekle{% endif %}{% endblock %}
+{% block title %}{% if is_update %}Edit Doctor{% else %}Add Doctor{% endif %}{% endblock %}
 
 {% block content %}
 <div class="container py-4">
     <div class="row mb-4">
         <div class="col">
-            <h1 class="h3 mb-0">{% if is_update %}Doktor Düzenle{% else %}Doktor Ekle{% endif %}</h1>
-            <p class="text-muted">{% if is_update %}Doktor bilgilerini güncelleyin{% else %}Yeni bir doktor hesabı oluşturun{% endif %}</p>
+            <h1 class="h3 mb-0">{% if is_update %}Edit Doctor{% else %}Add Doctor{% endif %}</h1>
+            <p class="text-muted">{% if is_update %}Update doctor information{% else %}Create a new doctor account{% endif %}</p>
         </div>
         <div class="col-auto">
             <a href="{% url 'core:doctor-list' %}" class="btn btn-secondary">
-                <i class="fas fa-arrow-left"></i> Doktor Listesine Dön
+                <i class="fas fa-arrow-left"></i> Back to Doctor List
             </a>
         </div>
     </div>
@@ -23,7 +23,7 @@
                 {% csrf_token %}
                 <div class="row mb-4">
                     <div class="col-md-6">
-                        <h4 class="mb-3">Hesap Bilgileri</h4>
+                        <h4 class="mb-3">Account Information</h4>
                         {% if not is_update %}
                         <div class="mb-3">
                             <label for="{{ form.username.id_for_label }}" class="form-label">{{ form.username.label }}</label>
@@ -105,7 +105,7 @@
                 
                 <div class="text-end">
                     <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save"></i> {% if is_update %}Değişiklikleri Kaydet{% else %}Doktor Ekle{% endif %}
+                        <i class="fas fa-save"></i> {% if is_update %}Save Changes{% else %}Add Doctor{% endif %}
                     </button>
                 </div>
             </form>

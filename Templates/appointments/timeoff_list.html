@@ -1,16 +1,16 @@
 {% extends 'core/base.html' %}
 {% load static %}
 
-{% block title %}{{ doctor.get_full_name }} - İzin Günleri{% endblock %}
+{% block title %}{{ doctor.get_full_name }} - Time Off Days{% endblock %}
 
 {% block content %}
 <div class="container py-4">
     <div class="card shadow">
         <div class="card-header bg-warning text-white d-flex justify-content-between align-items-center">
-            <h4 class="mb-0">{{ doctor.get_full_name }} - İzin Günleri</h4>
+            <h4 class="mb-0">{{ doctor.get_full_name }} - Time Off Days</h4>
             {% if user.is_doctor and user.id == doctor.id or user.is_admin_user or user.is_receptionist %}
             <a href="{% url 'doctor-timeoff-create' doctor.id %}" class="btn btn-light">
-                <i class="ki-outline ki-plus fs-2"></i> Yeni İzin Günü Ekle
+                <i class="ki-outline ki-plus fs-2"></i> Add New Time Off
             </a>
             {% endif %}
         </div>
@@ -18,13 +18,13 @@
             <div class="d-flex justify-content-between mb-4">
                 <div>
                     <a href="{% url 'doctor-detail' doctor.id %}" class="btn btn-sm btn-secondary me-2">
-                        <i class="ki-outline ki-arrow-left fs-2"></i> Doktor Detayına Dön
+                        <i class="ki-outline ki-arrow-left fs-2"></i> Back to Doctor Detail
                     </a>
                     <a href="{% url 'doctor-calendar' doctor.id %}" class="btn btn-sm btn-info me-2">
-                        <i class="ki-outline ki-calendar fs-2"></i> Takvim Görünümü
+                        <i class="ki-outline ki-calendar fs-2"></i> Calendar View
                     </a>
                     <a href="{% url 'doctor-availability-list' doctor.id %}" class="btn btn-sm btn-primary">
-                        <i class="ki-outline ki-time fs-2"></i> Çalışma Saatleri
+                        <i class="ki-outline ki-time fs-2"></i> Working Hours
                     </a>
                 </div>
             </div>
@@ -34,12 +34,12 @@
                 <table class="table table-row-bordered table-hover">
                     <thead>
                         <tr class="fw-bold fs-6 text-gray-800">
-                            <th>Başlangıç Tarihi</th>
-                            <th>Bitiş Tarihi</th>
-                            <th>Saat Aralığı</th>
-                            <th>Tam Gün</th>
-                            <th>Sebep</th>
-                            <th>İşlemler</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Time Range</th>
+                            <th>Full Day</th>
+                            <th>Reason</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -49,16 +49,16 @@
                             <td>{{ timeoff.end_date }}</td>
                             <td>
                                 {% if timeoff.is_full_day %}
-                                <span class="badge badge-light-info">Tam Gün</span>
+                                <span class="badge badge-light-info">Full Day</span>
                                 {% else %}
                                 {{ timeoff.start_time }} - {{ timeoff.end_time }}
                                 {% endif %}
                             </td>
                             <td>
                                 {% if timeoff.is_full_day %}
-                                <span class="badge badge-light-success">Evet</span>
+                                <span class="badge badge-light-success">Yes</span>
                                 {% else %}
-                                <span class="badge badge-light-danger">Hayır</span>
+                                <span class="badge badge-light-danger">No</span>
                                 {% endif %}
                             </td>
                             <td>{{ timeoff.reason|default:"-" }}</td>
@@ -79,8 +79,8 @@
             </div>
             {% else %}
             <div class="alert alert-info">
-                <h5 class="alert-heading">Kayıt Bulunamadı</h5>
-                <p>Bu doktor için henüz izin günü kaydı oluşturulmamış.</p>
+                <h5 class="alert-heading">No Records Found</h5>
+                <p>No time off days have been created for this doctor yet.</p>
             </div>
             {% endif %}
         </div>

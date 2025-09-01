@@ -61,7 +61,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='telemeddocument',
             name='document_type',
-            field=models.CharField(choices=[('lab_result', 'Laboratuvar Sonucu'), ('prescription', 'Reçete'), ('medical_image', 'Tıbbi Görüntü'), ('referral', 'Sevk'), ('other', 'Diğer')], max_length=50, verbose_name='Document Type'),
+            field=models.CharField(choices=[('lab_result', 'Lab Result'), ('prescription', 'Prescription'), ('medical_image', 'Medical Image'), ('referral', 'Referral'), ('other', 'Other')], max_length=50, verbose_name='Document Type'),
         ),
         migrations.AlterField(
             model_name='telemeddocument',
@@ -151,7 +151,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='telemedicineconsultation',
             name='consultation_type',
-            field=models.CharField(choices=[('video', 'Video Görüşme'), ('audio', 'Ses Görüşmesi'), ('chat', 'Metin Sohbeti'), ('hybrid', 'Karma (Video + Chat)')], default='video', max_length=20, verbose_name='Consultation Type'),
+            field=models.CharField(choices=[('video', 'Video Call'), ('audio', 'Audio Call'), ('chat', 'Text Chat'), ('hybrid', 'Hybrid (Video + Chat)')], default='video', max_length=20, verbose_name='Consultation Type'),
         ),
         migrations.AlterField(
             model_name='telemedicineconsultation',
@@ -206,7 +206,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='telemedicineconsultation',
             name='meeting_url',
-            field=models.URLField(blank=True, help_text='Video konferans bağlantısı', verbose_name='Meeting URL'),
+            field=models.URLField(blank=True, help_text='Video conference link', verbose_name='Meeting URL'),
         ),
         migrations.AlterField(
             model_name='telemedicineconsultation',
@@ -236,7 +236,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='telemedicineconsultation',
             name='shared_files',
-            field=models.JSONField(blank=True, default=list, help_text='Konsültasyon sırasında paylaşılan dosya listesi', verbose_name='Shared Files'),
+            field=models.JSONField(blank=True, default=list, help_text='List of files shared during the consultation', verbose_name='Shared Files'),
         ),
         migrations.AlterField(
             model_name='telemedicineconsultation',
@@ -276,7 +276,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='telemedicinemessage',
             name='message_type',
-            field=models.CharField(choices=[('text', 'Metin'), ('file', 'Dosya'), ('image', 'Görsel'), ('system', 'Sistem Mesajı')], default='text', max_length=20, verbose_name='Message Type'),
+            field=models.CharField(choices=[('text', 'Text'), ('file', 'File'), ('image', 'Image'), ('system', 'System Message')], default='text', max_length=20, verbose_name='Message Type'),
         ),
         migrations.AlterField(
             model_name='telemedicinemessage',
@@ -336,7 +336,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='telemedicinesettings',
             name='video_quality',
-            field=models.CharField(choices=[('low', 'Düşük (360p)'), ('medium', 'Orta (720p)'), ('high', 'Yüksek (1080p)')], default='medium', max_length=20, verbose_name='Video Quality'),
+            field=models.CharField(choices=[('low', 'Low (360p)'), ('medium', 'Medium (720p)'), ('high', 'High (1080p)')], default='medium', max_length=20, verbose_name='Video Quality'),
         ),
         migrations.AlterField(
             model_name='telemednote',
@@ -356,12 +356,12 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='telemednote',
             name='is_private',
-            field=models.BooleanField(default=False, help_text='Özel notlar sadece doktor tarafından görülebilir', verbose_name='Private Note?'),
+            field=models.BooleanField(default=False, help_text='Private notes can only be seen by the doctor', verbose_name='Private Note?'),
         ),
         migrations.AlterField(
             model_name='telemednote',
             name='note_type',
-            field=models.CharField(choices=[('diagnosis', 'Teşhis'), ('treatment_plan', 'Tedavi Planı'), ('follow_up', 'Takip'), ('general', 'Genel Not')], default='general', max_length=50, verbose_name='Note Type'),
+            field=models.CharField(choices=[('diagnosis', 'Diagnosis'), ('treatment_plan', 'Treatment Plan'), ('follow_up', 'Follow-up'), ('general', 'General Note')], default='general', max_length=50, verbose_name='Note Type'),
         ),
         migrations.AlterField(
             model_name='telemednote',
@@ -406,7 +406,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='telemedprescription',
             name='medications',
-            field=models.JSONField(help_text='İlaç listesi ve dozaj bilgileri', verbose_name='Medications'),
+            field=models.JSONField(help_text='List of medications and dosage information', verbose_name='Medications'),
         ),
         migrations.AlterField(
             model_name='videosession',

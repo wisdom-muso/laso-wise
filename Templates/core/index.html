@@ -56,12 +56,12 @@
     <div class="container">
         <div class="row align-items-center">
             <div class="col-lg-6 mb-5 mb-lg-0">
-                <h1 class="display-4 fw-bold mb-3">Sağlık Hizmetlerinizi Dijitalleştirin</h1>
-                <p class="fs-4 mb-5">Laso Healthcare ile hasta takibi, randevu yönetimi ve tedavi süreçlerinizi kolayca yönetin.</p>
+                <h1 class="display-4 fw-bold mb-3">Digitize Your Healthcare Services</h1>
+                <p class="fs-4 mb-5">Easily manage patient tracking, appointment management, and treatment processes with Laso Healthcare.</p>
                 {% if user.is_authenticated %}
-                <a href="{% url 'dashboard' %}" class="btn btn-light btn-lg px-6">Dashboard'a Git</a>
+                <a href="{% url 'dashboard' %}" class="btn btn-light btn-lg px-6">Go to Dashboard</a>
                 {% else %}
-                <a href="{% url 'login' %}" class="btn btn-light btn-lg px-6">Hemen Başlayın</a>
+                <a href="{% url 'login' %}" class="btn btn-light btn-lg px-6">Get Started</a>
                 {% endif %}
             </div>
             <div class="col-lg-6 text-center">
@@ -74,8 +74,8 @@
 <!-- Features Section -->
 <div class="container mb-10">
     <div class="text-center mb-10">
-        <h2 class="fs-2x fw-bold mb-3">Neden Laso Healthcare?</h2>
-        <p class="fs-4 text-muted">Sağlık profesyonelleri için tasarlanmış kapsamlı çözümler</p>
+        <h2 class="fs-2x fw-bold mb-3">Why Laso Healthcare?</h2>
+        <p class="fs-4 text-muted">Comprehensive solutions designed for healthcare professionals</p>
     </div>
     
     <div class="row g-5">
@@ -84,19 +84,19 @@
                 <div class="feature-icon bg-light-primary">
                     <i class="ki-outline ki-profile-user fs-1 text-primary"></i>
                 </div>
-                <h3 class="fs-2 fw-bold mb-3">Hasta Yönetimi</h3>
-                <p class="fs-5 text-gray-600 mb-5">Hastaların demografik bilgilerini, sağlık geçmişini ve tedavi planlarını kolayca yönetin.</p>
+                <h3 class="fs-2 fw-bold mb-3">Patient Management</h3>
+                <p class="fs-5 text-gray-600 mb-5">Easily manage patient demographics, health history, and treatment plans.</p>
                 <div class="mt-auto">
                     {% if user.is_authenticated %}
                         {% if user.is_receptionist or user.is_admin_user %}
-                        <a href="{% url 'core:patient-register' %}" class="btn btn-primary">Hasta Kaydı</a>
+                        <a href="{% url 'core:patient-register' %}" class="btn btn-primary">Patient Registration</a>
                         {% elif user.is_doctor %}
-                        <a href="{% url 'core:patient-list' %}" class="btn btn-primary">Hastalarım</a>
+                        <a href="{% url 'core:patient-list' %}" class="btn btn-primary">My Patients</a>
                         {% else %}
-                        <a href="{% url 'core:appointment-list' %}" class="btn btn-primary">Randevularım</a>
+                        <a href="{% url 'core:appointment-list' %}" class="btn btn-primary">My Appointments</a>
                         {% endif %}
                     {% else %}
-                    <a href="{% url 'login' %}" class="btn btn-primary">Giriş Yap</a>
+                    <a href="{% url 'login' %}" class="btn btn-primary">Login</a>
                     {% endif %}
                 </div>
             </div>
@@ -107,11 +107,11 @@
                 <div class="feature-icon bg-light-success">
                     <i class="ki-outline ki-calendar-tick fs-1 text-success"></i>
                 </div>
-                <h3 class="fs-2 fw-bold mb-3">Randevu Sistemi</h3>
-                <p class="fs-5 text-gray-600 mb-5">Randevuları kolayca oluşturun, takip edin ve yönetin. Doktor ve hasta programlarını optimize edin.</p>
+                <h3 class="fs-2 fw-bold mb-3">Appointment System</h3>
+                <p class="fs-5 text-gray-600 mb-5">Easily create, track, and manage appointments. Optimize doctor and patient schedules.</p>
                 <div class="mt-auto">
                     {% if user.is_authenticated %}
-                    <a href="{% url 'core:appointment-list' %}" class="btn btn-success">Randevular</a>
+                    <a href="{% url 'core:appointment-list' %}" class="btn btn-success">Appointments</a>
                     {% else %}
                     <a href="{% url 'login' %}" class="btn btn-success">Login</a>
                     {% endif %}
@@ -124,17 +124,17 @@
                 <div class="feature-icon bg-light-info">
                     <i class="ki-outline ki-document fs-1 text-info"></i>
                 </div>
-                <h3 class="fs-2 fw-bold mb-3">Tedavi ve Reçete</h3>
-                <p class="fs-5 text-gray-600 mb-5">Tedavi planlarını oluşturun, reçeteleri yazın ve hasta ilerlemesini takip edin.</p>
+                <h3 class="fs-2 fw-bold mb-3">Treatment and Prescription</h3>
+                <p class="fs-5 text-gray-600 mb-5">Create treatment plans, write prescriptions, and track patient progress.</p>
                 <div class="mt-auto">
                     {% if user.is_authenticated %}
                         {% if user.is_doctor %}
-                        <a href="{% url 'core:appointment-list' %}" class="btn btn-info">Tedavi Yönetimi</a>
+                        <a href="{% url 'core:appointment-list' %}" class="btn btn-info">Treatment Management</a>
                         {% else %}
                         <a href="{% url 'dashboard' %}" class="btn btn-info">Dashboard</a>
                         {% endif %}
                     {% else %}
-                    <a href="{% url 'login' %}" class="btn btn-info">Giriş Yap</a>
+                    <a href="{% url 'login' %}" class="btn btn-info">Login</a>
                     {% endif %}
                 </div>
             </div>
@@ -145,8 +145,8 @@
 <!-- Testimonials -->
 <div class="container mb-10">
     <div class="text-center mb-10">
-        <h2 class="fs-2x fw-bold mb-3">Kullanıcı Deneyimleri</h2>
-        <p class="fs-4 text-muted">Laso Healthcare kullanan sağlık profesyonellerinin görüşleri</p>
+        <h2 class="fs-2x fw-bold mb-3">User Experiences</h2>
+        <p class="fs-4 text-muted">Opinions of healthcare professionals using Laso Healthcare</p>
     </div>
     
     <div class="row g-5">
@@ -158,10 +158,10 @@
                     </div>
                     <div>
                         <h5 class="mb-0">Dr. Ayşe Yılmaz</h5>
-                        <p class="text-muted mb-0">Kardiyoloji Uzmanı</p>
+                        <p class="text-muted mb-0">Cardiologist</p>
                     </div>
                 </div>
-                <p class="fs-5 text-gray-700">"Laso Healthcare sayesinde hasta takibi çok daha kolay hale geldi. Artık tüm bilgilere anında erişebiliyorum."</p>
+                <p class="fs-5 text-gray-700">"Thanks to Laso Healthcare, patient tracking has become much easier. I can now access all information instantly."</p>
                 <div class="d-flex">
                     <i class="ki-outline ki-star fs-6 text-warning"></i>
                     <i class="ki-outline ki-star fs-6 text-warning"></i>
@@ -180,10 +180,10 @@
                     </div>
                     <div>
                         <h5 class="mb-0">Mehmet Kaya</h5>
-                        <p class="text-muted mb-0">Klinik Yöneticisi</p>
+                        <p class="text-muted mb-0">Clinic Manager</p>
                     </div>
                 </div>
-                <p class="fs-5 text-gray-700">"Randevu sistemi çok pratik. Artık çakışan randevular ve karışıklık yaşamıyoruz. Verimlilik arttı."</p>
+                <p class="fs-5 text-gray-700">"The appointment system is very practical. We no longer have conflicting appointments and confusion. Efficiency has increased."</p>
                 <div class="d-flex">
                     <i class="ki-outline ki-star fs-6 text-warning"></i>
                     <i class="ki-outline ki-star fs-6 text-warning"></i>
@@ -202,10 +202,10 @@
                     </div>
                     <div>
                         <h5 class="mb-0">Zeynep Taş</h5>
-                        <p class="text-muted mb-0">Resepsiyonist</p>
+                        <p class="text-muted mb-0">Receptionist</p>
                     </div>
                 </div>
-                <p class="fs-5 text-gray-700">"Kullanımı çok kolay ve sezgisel. Eğitim almadan bile hemen adapte oldum ve işlerimi hızlandırdım."</p>
+                <p class="fs-5 text-gray-700">"It is very easy to use and intuitive. I adapted immediately without any training and sped up my work."</p>
                 <div class="d-flex">
                     <i class="ki-outline ki-star fs-6 text-warning"></i>
                     <i class="ki-outline ki-star fs-6 text-warning"></i>
@@ -223,14 +223,14 @@
     <div class="container">
         <div class="row align-items-center">
             <div class="col-lg-8 mb-4 mb-lg-0">
-                <h2 class="fs-1 fw-bold mb-3">Kliniğinizi Dijitalleştirmeye Hazır mısınız?</h2>
-                <p class="fs-4 mb-0">Laso Healthcare ile sağlık hizmetlerinizi daha verimli hale getirin.</p>
+                <h2 class="fs-1 fw-bold mb-3">Ready to Digitize Your Clinic?</h2>
+                <p class="fs-4 mb-0">Make your healthcare services more efficient with Laso Healthcare.</p>
             </div>
             <div class="col-lg-4 text-lg-end">
                 {% if user.is_authenticated %}
-                <a href="{% url 'dashboard' %}" class="btn btn-light btn-lg px-6">Dashboard'a Git</a>
+                <a href="{% url 'dashboard' %}" class="btn btn-light btn-lg px-6">Go to Dashboard</a>
                 {% else %}
-                <a href="{% url 'login' %}" class="btn btn-light btn-lg px-6">Hemen Başlayın</a>
+                <a href="{% url 'login' %}" class="btn btn-light btn-lg px-6">Get Started</a>
                 {% endif %}
             </div>
         </div>

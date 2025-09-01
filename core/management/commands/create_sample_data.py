@@ -15,205 +15,205 @@ from treatments.models_imaging import MedicalImage, Report
 
 User = get_user_model()
 
-# Doktor uzmanlık alanları
+# Doctor specializations
 SPECIALIZATIONS = [
-    'Dahiliye', 'Kardiyoloji', 'Göz Hastalıkları', 'Ortopedi', 'Nöroloji',
-    'Dermatoloji', 'Üroloji', 'Kulak Burun Boğaz', 'Genel Cerrahi', 'Kadın Hastalıkları ve Doğum',
-    'Çocuk Sağlığı ve Hastalıkları', 'Psikiyatri', 'Fizik Tedavi ve Rehabilitasyon'
+    'Internal Medicine', 'Cardiology', 'Ophthalmology', 'Orthopedics', 'Neurology',
+    'Dermatology', 'Urology', 'Otorhinolaryngology', 'General Surgery', 'Obstetrics and Gynecology',
+    'Pediatrics', 'Psychiatry', 'Physical Therapy and Rehabilitation'
 ]
 
-# Hasta kan grupları
+# Patient blood types
 BLOOD_TYPES = ['A Rh+', 'A Rh-', 'B Rh+', 'B Rh-', 'AB Rh+', 'AB Rh-', '0 Rh+', '0 Rh-']
 
-# İl ve ilçeler (örnek olarak birkaç tane eklenmiştir)
+# Cities and districts (a few examples have been added)
 CITIES_AND_DISTRICTS = [
-    {'city': 'İstanbul', 'districts': ['Kadıköy', 'Beşiktaş', 'Şişli', 'Üsküdar', 'Beyoğlu']},
-    {'city': 'Ankara', 'districts': ['Çankaya', 'Keçiören', 'Mamak', 'Yenimahalle', 'Etimesgut']},
-    {'city': 'İzmir', 'districts': ['Konak', 'Karşıyaka', 'Bornova', 'Bayraklı', 'Buca']},
-    {'city': 'Bursa', 'districts': ['Osmangazi', 'Nilüfer', 'Yıldırım', 'Gemlik', 'İnegöl']},
-    {'city': 'Antalya', 'districts': ['Muratpaşa', 'Konyaaltı', 'Kepez', 'Alanya', 'Manavgat']}
+    {'city': 'Istanbul', 'districts': ['Kadikoy', 'Besiktas', 'Sisli', 'Uskudar', 'Beyoglu']},
+    {'city': 'Ankara', 'districts': ['Cankaya', 'Kecioren', 'Mamak', 'Yenimahalle', 'Etimesgut']},
+    {'city': 'Izmir', 'districts': ['Konak', 'Karsiyaka', 'Bornova', 'Bayrakli', 'Buca']},
+    {'city': 'Bursa', 'districts': ['Osmangazi', 'Nilufer', 'Yildirim', 'Gemlik', 'Inegol']},
+    {'city': 'Antalya', 'districts': ['Muratpasa', 'Konyaalti', 'Kepez', 'Alanya', 'Manavgat']}
 ]
 
-# Tedavi teşhisleri
+# Treatment diagnoses
 DIAGNOSES = [
-    'Grip', 'Soğuk Algınlığı', 'Migren', 'Hipertansiyon', 'Diyabet', 
-    'Anemi', 'Bel Fıtığı', 'Boyun Fıtığı', 'Gastrit', 'Reflü',
-    'Astım', 'Bronşit', 'Sinüzit', 'Kulak İltihabı', 'Farenjit',
-    'Egzama', 'Sedef Hastalığı', 'Alerji', 'Vertigo', 'Anksiyete'
+    'Flu', 'Common Cold', 'Migraine', 'Hypertension', 'Diabetes', 
+    'Anemia', 'Herniated Disc', 'Cervical Hernia', 'Gastritis', 'Reflux',
+    'Asthma', 'Bronchitis', 'Sinusitis', 'Ear Infection', 'Pharyngitis',
+    'Eczema', 'Psoriasis', 'Allergy', 'Vertigo', 'Anxiety'
 ]
 
-# İlaçlar ve kullanım talimatları
+# Medications and instructions for use
 MEDICATIONS = [
     {
         'name': 'Parol',
         'dosage': '500 mg',
-        'instructions': 'Günde 3 defa, aç karnına alınmamalıdır.'
+        'instructions': '3 times a day, should not be taken on an empty stomach.'
     },
     {
         'name': 'Aspirin',
         'dosage': '100 mg',
-        'instructions': 'Günde 1 defa, yemeklerden sonra alınmalıdır.'
+        'instructions': 'Once a day, should be taken after meals.'
     },
     {
         'name': 'Nurofen',
         'dosage': '400 mg',
-        'instructions': 'Günde 2 defa, 12 saat arayla alınmalıdır.'
+        'instructions': 'Twice a day, should be taken 12 hours apart.'
     },
     {
         'name': 'Augmentin',
         'dosage': '1000 mg',
-        'instructions': 'Günde 2 defa, 12 saat arayla, yemeklerden önce alınmalıdır.'
+        'instructions': 'Twice a day, 12 hours apart, should be taken before meals.'
     },
     {
         'name': 'Ventolin',
         'dosage': '100 mcg',
-        'instructions': 'Günde 2 defa, 2 inhalasyon olarak uygulanmalıdır.'
+        'instructions': 'Twice a day, should be administered as 2 inhalations.'
     },
     {
         'name': 'Nexium',
         'dosage': '40 mg',
-        'instructions': 'Günde 1 defa, sabah aç karnına alınmalıdır.'
+        'instructions': 'Once a day, should be taken in the morning on an empty stomach.'
     },
     {
         'name': 'Cipralex',
         'dosage': '10 mg',
-        'instructions': 'Günde 1 defa, akşam yemeğinden sonra alınmalıdır.'
+        'instructions': 'Once a day, should be taken after dinner.'
     },
     {
         'name': 'Euthyrox',
         'dosage': '50 mcg',
-        'instructions': 'Günde 1 defa, sabah aç karnına, kahvaltıdan 30 dakika önce alınmalıdır.'
+        'instructions': 'Once a day, in the morning on an empty stomach, 30 minutes before breakfast.'
     },
     {
         'name': 'Concor',
         'dosage': '5 mg',
-        'instructions': 'Günde 1 defa, sabah kahvaltıdan sonra alınmalıdır.'
+        'instructions': 'Once a day, should be taken after breakfast in the morning.'
     },
     {
         'name': 'Xyzal',
         'dosage': '5 mg',
-        'instructions': 'Günde 1 defa, akşam yemeklerinden sonra alınmalıdır.'
+        'instructions': 'Once a day, should be taken after dinner.'
     }
 ]
 
 class Command(BaseCommand):
-    help = 'Laso Healthcare sistemi için örnek veriler oluşturur'
+    help = 'Creates sample data for the Laso Healthcare system'
 
     def add_arguments(self, parser):
         parser.add_argument(
             '--patients',
             type=int,
             default=20,
-            help='Oluşturulacak hasta sayısı'
+            help='Number of patients to create'
         )
         parser.add_argument(
             '--doctors',
             type=int,
             default=10,
-            help='Oluşturulacak doktor sayısı'
+            help='Number of doctors to create'
         )
         parser.add_argument(
             '--appointments',
             type=int,
             default=50,
-            help='Oluşturulacak randevu sayısı'
+            help='Number of appointments to create'
         )
         parser.add_argument(
             '--treatments',
             type=int,
             default=30,
-            help='Oluşturulacak tedavi sayısı'
+            help='Number of treatments to create'
         )
         parser.add_argument(
             '--availabilities',
             type=int,
             default=20,
-            help='Oluşturulacak doktor uygunluğu sayısı'
+            help='Number of doctor availabilities to create'
         )
         parser.add_argument(
             '--timeoffs',
             type=int,
             default=15,
-            help='Oluşturulacak doktor izin sayısı'
+            help='Number of doctor timeoffs to create'
         )
         parser.add_argument(
             '--medicalhistories',
             type=int,
             default=25,
-            help='Oluşturulacak tıbbi geçmiş sayısı'
+            help='Number of medical histories to create'
         )
         parser.add_argument(
             '--notifications',
             type=int,
             default=40,
-            help='Oluşturulacak bildirim sayısı'
+            help='Number of notifications to create'
         )
 
     def handle(self, *args, **options):
-        self.stdout.write(self.style.SUCCESS('Laso Healthcare örnek veri oluşturma başlatılıyor...'))
+        self.stdout.write(self.style.SUCCESS('Starting Laso Healthcare sample data creation...'))
         
-        # Admin kullanıcısı oluştur
+        # Create admin user
         self.create_admin_user()
         
-        # Resepsiyonist oluştur
+        # Create receptionists
         self.create_receptionists()
         
-        # Doktorlar oluştur
+        # Create doctors
         num_doctors = options['doctors']
         doctors = self.create_doctors(num_doctors)
         
-        # Hastalar oluştur
+        # Create patients
         num_patients = options['patients']
         patients = self.create_patients(num_patients)
         
-        # Doktor uygunlukları oluştur
+        # Create doctor availabilities
         num_availabilities = options['availabilities']
         self.create_doctor_availabilities(num_availabilities, doctors)
         
-        # Doktor izinleri oluştur
+        # Create doctor timeoffs
         num_timeoffs = options['timeoffs']
         self.create_doctor_timeoffs(num_timeoffs, doctors)
         
-        # Randevular oluştur
+        # Create appointments
         num_appointments = options['appointments']
         appointments = self.create_appointments(num_appointments, doctors, patients)
         
-        # Tedaviler ve reçeteler oluştur
+        # Create treatments and prescriptions
         num_treatments = options['treatments']
         treatments = self.create_treatments_and_prescriptions(num_treatments, appointments)
         
-        # Tıbbi geçmişler oluştur
+        # Create medical histories
         num_medicalhistories = options['medicalhistories']
         self.create_medical_histories(num_medicalhistories, patients)
         
-        # Laboratuvar testleri ve sonuçları oluştur
+        # Create lab tests and results
         self.create_lab_tests_and_results(doctors, patients)
         
-        # Görüntüleme ve sonuçları oluştur
+        # Create imaging and results
         self.create_imaging_and_results(doctors, patients)
         
-        # Bildirimler oluştur
+        # Create notifications
         num_notifications = options['notifications']
         self.create_notifications(num_notifications)
         
-        self.stdout.write(self.style.SUCCESS('Örnek veriler başarıyla oluşturuldu!'))
-        self.stdout.write(f'- {num_doctors} doktor')
-        self.stdout.write(f'- {num_patients} hasta')
-        self.stdout.write(f'- {num_availabilities} doktor uygunluğu')
-        self.stdout.write(f'- {num_timeoffs} doktor izni')
-        self.stdout.write(f'- {num_appointments} randevu')
-        self.stdout.write(f'- {num_treatments} tedavi ve reçete')
-        self.stdout.write(f'- {num_medicalhistories} tıbbi geçmiş kaydı')
-        self.stdout.write(f'- {num_notifications} bildirim')
+        self.stdout.write(self.style.SUCCESS('Sample data created successfully!'))
+        self.stdout.write(f'- {num_doctors} doctors')
+        self.stdout.write(f'- {num_patients} patients')
+        self.stdout.write(f'- {num_availabilities} doctor availabilities')
+        self.stdout.write(f'- {num_timeoffs} doctor timeoffs')
+        self.stdout.write(f'- {num_appointments} appointments')
+        self.stdout.write(f'- {num_treatments} treatments and prescriptions')
+        self.stdout.write(f'- {num_medicalhistories} medical history records')
+        self.stdout.write(f'- {num_notifications} notifications')
 
     def create_admin_user(self):
-        """Admin kullanıcısı oluşturur."""
+        """Creates an admin user."""
         admin, created = User.objects.get_or_create(
             username='admin',
             defaults={
                 'email': 'admin@laso.com',
                 'first_name': 'Admin',
-                'last_name': 'Kullanıcı',
+                'last_name': 'User',
                 'user_type': 'admin',
                 'is_staff': True,
                 'is_superuser': True,
@@ -223,18 +223,18 @@ class Command(BaseCommand):
         if created:
             admin.set_password('admin123')
             admin.save()
-            self.stdout.write(self.style.SUCCESS('Admin kullanıcısı oluşturuldu'))
+            self.stdout.write(self.style.SUCCESS('Admin user created'))
         else:
-            self.stdout.write(self.style.WARNING('Admin kullanıcısı zaten mevcut'))
+            self.stdout.write(self.style.WARNING('Admin user already exists'))
 
     def create_receptionists(self):
-        """Resepsiyonist kullanıcıları oluşturur."""
+        """Creates receptionist users."""
         receptionist_data = [
             {
                 'username': 'ayse',
                 'email': 'ayse@laso.com',
-                'first_name': 'Ayşe',
-                'last_name': 'Yılmaz',
+                'first_name': 'Ayse',
+                'last_name': 'Yilmaz',
                 'password': 'password123'
             },
             {
@@ -263,10 +263,10 @@ class Command(BaseCommand):
                 user.save()
                 created_count += 1
         
-        self.stdout.write(self.style.SUCCESS(f'{created_count} resepsiyonist kullanıcı oluşturuldu'))
+        self.stdout.write(self.style.SUCCESS(f'{created_count} receptionist users created'))
 
     def create_doctors(self, num_doctors):
-        """Belirtilen sayıda doktor oluşturur."""
+        """Creates the specified number of doctors."""
         created_count = 0
         for i in range(1, num_doctors + 1):
             first_name = self.get_random_first_name(gender='male' if i % 2 == 0 else 'female')
@@ -291,23 +291,23 @@ class Command(BaseCommand):
                 created_count += 1
         
         doctors = User.objects.filter(user_type='doctor')
-        self.stdout.write(self.style.SUCCESS(f'{created_count} doktor kullanıcı oluşturuldu'))
+        self.stdout.write(self.style.SUCCESS(f'{created_count} doctor users created'))
         return doctors
 
     def create_patients(self, num_patients):
-        """Belirtilen sayıda hasta oluşturur."""
+        """Creates the specified number of patients."""
         created_count = 0
         for i in range(1, num_patients + 1):
             first_name = self.get_random_first_name(gender='male' if i % 2 == 0 else 'female')
             last_name = self.get_random_last_name()
-            username = f"hasta.{first_name.lower()}"
+            username = f"patient.{first_name.lower()}"
             
-            # Rastgele adres oluştur
+            # Create random address
             location = random.choice(CITIES_AND_DISTRICTS)
             district = random.choice(location['districts'])
-            address = f"{random.randint(1, 100)}. Sokak, No: {random.randint(1, 100)}, {district} / {location['city']}"
+            address = f"{random.randint(1, 100)}. Street, No: {random.randint(1, 100)}, {district} / {location['city']}"
             
-            # Rastgele doğum tarihi (18-80 yaş arası)
+            # Random date of birth (between 18-80 years old)
             age = random.randint(18, 80)
             birth_date = datetime.now().date() - timedelta(days=age*365)
             
@@ -331,24 +331,24 @@ class Command(BaseCommand):
                 created_count += 1
         
         patients = User.objects.filter(user_type='patient')
-        self.stdout.write(self.style.SUCCESS(f'{created_count} hasta kullanıcı oluşturuldu'))
+        self.stdout.write(self.style.SUCCESS(f'{created_count} patient users created'))
         return patients
 
     def create_appointments(self, num_appointments, doctors, patients):
-        """Belirtilen sayıda randevu oluşturur."""
+        """Creates the specified number of appointments."""
         if not doctors.exists() or not patients.exists():
-            self.stdout.write(self.style.ERROR('Doktor veya hasta bulunamadı! Randevular oluşturulamıyor.'))
+            self.stdout.write(self.style.ERROR('Doctor or patient not found! Appointments cannot be created.'))
             return []
         
-        # Randevu saatleri (09:00 - 17:00, 30 dakika aralıklarla)
+        # Appointment times (09:00 - 17:00, 30-minute intervals)
         appointment_times = []
         start_time = time(9, 0)
-        for i in range(16):  # 8 saat x 2 (30 dakikalık dilimler)
+        for i in range(16):  # 8 hours x 2 (30-minute slots)
             hour = 9 + i // 2
             minute = 0 if i % 2 == 0 else 30
             appointment_times.append(time(hour, minute))
         
-        # Son 60 gün ve gelecek 30 gün arasında randevular oluştur
+        # Create appointments between the last 60 days and the next 30 days
         start_date = timezone.now().date() - timedelta(days=60)
         end_date = timezone.now().date() + timedelta(days=30)
         date_range = (end_date - start_date).days
@@ -360,31 +360,31 @@ class Command(BaseCommand):
             patient = random.choice(patients)
             doctor = random.choice(doctors)
             
-            # Rastgele tarih ve saat
+            # Random date and time
             random_day = random.randint(0, date_range)
             appointment_date = start_date + timedelta(days=random_day)
             appointment_time = random.choice(appointment_times)
             
-            # Randevu durumu
+            # Appointment status
             if appointment_date < timezone.now().date():
-                # Geçmiş randevular ya tamamlandı ya da iptal edildi
-                status = random.choice(['completed', 'cancelled', 'completed', 'completed'])  # Daha fazla tamamlanmış
+                # Past appointments are either completed or canceled
+                status = random.choice(['completed', 'cancelled', 'completed', 'completed'])  # More completed
             else:
-                # Gelecek randevular planlandı
+                # Future appointments are planned
                 status = 'planned'
             
-            # Rastgele açıklama
+            # Random description
             descriptions = [
-                'Genel kontrol',
-                'Düzenli kontrol',
-                'Ağrı şikayeti',
-                'Takip randevusu',
-                'İlaç yazımı',
-                'Test sonuçlarının değerlendirilmesi',
-                'Başağrısı şikayeti',
-                'Sırt ağrısı',
-                'Tansiyon kontrolü',
-                'Mide şikayetleri'
+                'General check-up',
+                'Regular check-up',
+                'Pain complaint',
+                'Follow-up appointment',
+                'Prescription writing',
+                'Evaluation of test results',
+                'Headache complaint',
+                'Back pain',
+                'Blood pressure check',
+                'Stomach complaints'
             ]
             
             description = random.choice(descriptions)
@@ -401,40 +401,40 @@ class Command(BaseCommand):
             appointments.append(appointment)
             created_count += 1
         
-        self.stdout.write(self.style.SUCCESS(f'{created_count} randevu oluşturuldu'))
+        self.stdout.write(self.style.SUCCESS(f'{created_count} appointments created'))
         return appointments
 
     def create_treatments_and_prescriptions(self, num_treatments, appointments):
-        """Belirtilen sayıda tedavi ve reçete oluşturur."""
-        # Sadece tamamlanmış randevulara tedavi eklenebilir
+        """Creates the specified number of treatments and prescriptions."""
+        # Treatments can only be added to completed appointments
         completed_appointments = [appt for appt in appointments if appt.status == 'completed']
         
         if not completed_appointments:
-            self.stdout.write(self.style.ERROR('Tamamlanmış randevu bulunamadı! Tedaviler oluşturulamıyor.'))
+            self.stdout.write(self.style.ERROR('No completed appointments found! Treatments cannot be created.'))
             return []
         
-        # Rastgele tedavi sayısı oluştur (num_treatments'dan fazla tamamlanmış randevu yoksa)
+        # Create a random number of treatments (if there are not more completed appointments than num_treatments)
         treatment_count = min(len(completed_appointments), num_treatments)
         created_count = 0
         created_treatments = []
         
         for i in range(treatment_count):
-            # Henüz tedavisi olmayan rastgele bir tamamlanmış randevu seç
+            # Select a random completed appointment that does not yet have a treatment
             available_appointments = [appt for appt in completed_appointments if not hasattr(appt, 'treatment')]
             if not available_appointments:
                 break
                 
             appointment = random.choice(available_appointments)
             
-            # Tedavi oluştur
+            # Create treatment
             diagnosis = random.choice(DIAGNOSES)
             notes = random.choice([
-                'Hasta bir hafta içinde iyileşme gösterdi.',
-                'Tedaviye iyi yanıt verdi.',
-                'Düzenli ilaç kullanımı önemli.',
-                'Kontrol randevusu 2 hafta sonraya planlandı.',
-                'Hasta bilgilendirildi.',
-                None,  # Bazen not olmayabilir
+                'Patient showed improvement within a week.',
+                'Responded well to treatment.',
+                'Regular medication use is important.',
+                'Follow-up appointment scheduled for 2 weeks later.',
+                'Patient was informed.',
+                None,  # Sometimes there may be no notes
             ])
             
             treatment = Treatment.objects.create(
@@ -446,20 +446,20 @@ class Command(BaseCommand):
             created_count += 1
             created_treatments.append(treatment)
             
-            # 1-3 arası rastgele reçete ekle
+            # Add 1-3 random prescriptions
             num_prescriptions = random.randint(1, 3)
             medication_options = random.sample(MEDICATIONS, num_prescriptions)
             
             for medication in medication_options:
-                # Yeni ilaç nesnesi oluştur
+                # Create new medication object
                 med_obj = Medication.objects.create(
                     name=medication['name'],
-                    active_ingredient=f"Etken madde {random.randint(1, 100)}",
-                    description=f"{medication['name']} - {medication['dosage']} dozunda",
-                    side_effects="Uyku hali, baş dönmesi, mide bulantısı görülebilir."
+                    active_ingredient=f"Active ingredient {random.randint(1, 100)}",
+                    description=f"{medication['name']} - {medication['dosage']} dose",
+                    side_effects="Drowsiness, dizziness, nausea may occur."
                 )
                 
-                # Reçete oluştur
+                # Create prescription
                 Prescription.objects.create(
                     treatment=treatment,
                     medication=med_obj,
@@ -468,44 +468,44 @@ class Command(BaseCommand):
                     instructions=medication['instructions']
                 )
         
-        self.stdout.write(self.style.SUCCESS(f'{created_count} tedavi ve {created_count * 2} ortalama reçete oluşturuldu'))
+        self.stdout.write(self.style.SUCCESS(f'{created_count} treatments and {created_count * 2} average prescriptions created'))
         return created_treatments
 
     def create_doctor_availabilities(self, num_availabilities, doctors):
-        """Doktorlar için uygunluk saatleri oluşturur."""
+        """Creates availability hours for doctors."""
         if not doctors.exists():
-            self.stdout.write(self.style.ERROR('Doktor bulunamadı! Uygunluklar oluşturulamıyor.'))
+            self.stdout.write(self.style.ERROR('Doctor not found! Availabilities cannot be created.'))
             return
         
-        # Gün isimleri (0: Pazartesi, 6: Pazar)
-        days = [0, 1, 2, 3, 4]  # Hafta içi günleri
+        # Day names (0: Monday, 6: Sunday)
+        days = [0, 1, 2, 3, 4]  # Weekdays
         
         created_count = 0
         for doctor in doctors:
             if doctor.user_type != 'doctor':
                 continue
                 
-            # Her doktor için 3-5 gün uygunluk ekle
+            # Add 3-5 days of availability for each doctor
             available_days = random.sample(days, random.randint(3, 5))
             
             for day in available_days:
-                # Çalışma saatleri varyasyonları
+                # Working hour variations
                 start_options = ['08:00', '09:00', '10:00']
                 end_options = ['16:00', '17:00', '18:00']
                 
-                # Rastgele başlangıç ve bitiş saati seç
+                # Select random start and end times
                 start_time = random.choice(start_options)
                 end_time = random.choice(end_options)
                 
-                # Tutarlılığı sağlamak için başlangıç ve bitiş saatlerini kontrol et
+                # Check start and end times for consistency
                 start_hour = int(start_time.split(':')[0])
                 end_hour = int(end_time.split(':')[0])
                 
                 if end_hour <= start_hour:
-                    end_time = '18:00'  # Varsayılan bitiş saati
+                    end_time = '18:00'  # Default end time
                 
                 try:
-                    # Uygunluk oluştur
+                    # Create availability
                     DoctorAvailability.objects.create(
                         doctor=doctor,
                         weekday=day,
@@ -514,47 +514,47 @@ class Command(BaseCommand):
                     )
                     created_count += 1
                 except Exception as e:
-                    self.stdout.write(self.style.ERROR(f'Uygunluk oluşturulurken hata: {e}'))
+                    self.stdout.write(self.style.ERROR(f'Error while creating availability: {e}'))
         
-        self.stdout.write(self.style.SUCCESS(f'{created_count} doktor uygunluğu oluşturuldu'))
+        self.stdout.write(self.style.SUCCESS(f'{created_count} doctor availabilities created'))
 
     def create_doctor_timeoffs(self, num_timeoffs, doctors):
-        """Doktorlar için izin günleri oluşturur."""
+        """Creates time off days for doctors."""
         if not doctors.exists():
-            self.stdout.write(self.style.ERROR('Doktor bulunamadı! İzinler oluşturulamıyor.'))
+            self.stdout.write(self.style.ERROR('Doctor not found! Time offs cannot be created.'))
             return
         
-        # İzin nedenleri
-        reasons = ['Yıllık İzin', 'Hastalık İzni', 'Konferans', 'Eğitim', 'Kişisel İşler']
+        # Reasons for leave
+        reasons = ['Annual Leave', 'Sick Leave', 'Conference', 'Training', 'Personal Matters']
         
         created_count = 0
         today = timezone.now().date()
         
         for _ in range(num_timeoffs):
             try:
-                # Doktor tipine sahip kullanıcılardan birini seç
+                # Select one of the users with doctor type
                 doctor_users = [d for d in doctors if d.user_type == 'doctor']
                 if not doctor_users:
                     break
                     
                 doctor = random.choice(doctor_users)
                 
-                # İzin türü
+                # Reason for leave
                 reason = random.choice(reasons)
                 
-                # Rastgele tarih aralığı (geçmiş veya gelecek)
+                # Random date range (past or future)
                 if random.random() < 0.5:
-                    # Geçmiş izin
+                    # Past leave
                     start_date = today - timedelta(days=random.randint(60, 90))
                 else:
-                    # Gelecek izin
+                    # Future leave
                     start_date = today + timedelta(days=random.randint(10, 60))
                 
-                # İzin süresi (1-7 gün)
+                # Duration of leave (1-7 days)
                 duration = random.randint(1, 7)
                 end_date = start_date + timedelta(days=duration)
                 
-                # İzin oluştur
+                # Create time off
                 DoctorTimeOff.objects.create(
                     doctor=doctor,
                     start_date=start_date,
@@ -563,25 +563,25 @@ class Command(BaseCommand):
                 )
                 created_count += 1
             except Exception as e:
-                self.stdout.write(self.style.ERROR(f'İzin oluşturulurken hata: {e}'))
+                self.stdout.write(self.style.ERROR(f'Error while creating time off: {e}'))
         
-        self.stdout.write(self.style.SUCCESS(f'{created_count} doktor izni oluşturuldu'))
+        self.stdout.write(self.style.SUCCESS(f'{created_count} doctor time offs created'))
 
     def create_medical_histories(self, num_medicalhistories, patients):
-        """Hastalar için tıbbi geçmiş kayıtları oluşturur."""
+        """Creates medical history records for patients."""
         if not patients.exists():
-            self.stdout.write(self.style.ERROR('Hasta bulunamadı! Tıbbi geçmiş oluşturulamıyor.'))
+            self.stdout.write(self.style.ERROR('Patient not found! Medical history cannot be created.'))
             return
         
-        # Tıbbi durumlar
+        # Medical conditions
         conditions = [
-            'Hipertansiyon', 'Diyabet', 'Astım', 'Kalp Hastalığı', 'Migren', 
-            'Romatizma', 'Tiroid Hastalığı', 'Depresyon', 'Anksiyete Bozukluğu',
-            'Kolesterol', 'Reflü', 'Ülser', 'Kronik Bronşit', 'Sedef Hastalığı',
-            'Alerji', 'Artrit', 'Osteoporoz', 'Epilepsi', 'Anemi'
+            'Hypertension', 'Diabetes', 'Asthma', 'Heart Disease', 'Migraine', 
+            'Rheumatism', 'Thyroid Disease', 'Depression', 'Anxiety Disorder',
+            'Cholesterol', 'Reflux', 'Ulcer', 'Chronic Bronchitis', 'Psoriasis',
+            'Allergy', 'Arthritis', 'Osteoporosis', 'Epilepsy', 'Anemia'
         ]
         
-        # Durum türleri
+        # Condition types
         condition_types = ['chronic', 'surgery', 'allergy', 'medication', 'other']
         
         created_count = 0
@@ -589,31 +589,31 @@ class Command(BaseCommand):
         
         for _ in range(num_medicalhistories):
             try:
-                # Hasta tipine sahip kullanıcılardan birini seç
+                # Select one of the users with patient type
                 patient_users = [p for p in patients if p.user_type == 'patient']
                 if not patient_users:
                     break
                     
                 patient = random.choice(patient_users)
                 
-                # Rastgele bir durum seç
+                # Select a random condition
                 condition = random.choice(conditions)
                 condition_type = random.choice(condition_types)
                 
-                # Teşhis tarihi (1-15 yıl öncesi)
+                # Diagnosis date (1-15 years ago)
                 years_ago = random.randint(1, 15)
                 diagnosed_date = today - timedelta(days=years_ago * 365)
                 
-                # Notlar
+                # Notes
                 notes_options = [
-                    f'{condition} teşhisi konuldu. Düzenli takip gerekli.',
-                    f'{condition} için düzenli ilaç kullanımı önerildi.',
-                    f'{condition} kontrol altında, 6 ayda bir kontrol önerisi.',
-                    f'Aile geçmişinde de bulunan {condition} için yaşam tarzı değişiklikleri önerildi.',
-                    f'{condition} durumu için hasta bilgilendirildi, düzenli kontroller planlandı.'
+                    f'{condition} diagnosed. Regular follow-up required.',
+                    f'Regular medication use recommended for {condition}.',
+                    f'{condition} under control, check-up recommended every 6 months.',
+                    f'Lifestyle changes recommended for {condition}, which is also in the family history.',
+                    f'Patient informed about {condition}, regular check-ups planned.'
                 ]
                 
-                # Tıbbi geçmiş oluştur
+                # Create medical history
                 MedicalHistory.objects.create(
                     patient=patient,
                     condition=condition,
@@ -623,58 +623,58 @@ class Command(BaseCommand):
                 )
                 created_count += 1
             except Exception as e:
-                self.stdout.write(self.style.ERROR(f'Tıbbi geçmiş oluşturulurken hata: {e}'))
+                self.stdout.write(self.style.ERROR(f'Error while creating medical history: {e}'))
         
-        self.stdout.write(self.style.SUCCESS(f'{created_count} tıbbi geçmiş kaydı oluşturuldu'))
+        self.stdout.write(self.style.SUCCESS(f'{created_count} medical history records created'))
 
     def create_lab_tests_and_results(self, doctors, patients):
-        """Laboratuvar testleri ve sonuçları oluşturur."""
+        """Creates lab tests and results."""
         if not doctors.exists() or not patients.exists():
-            self.stdout.write(self.style.ERROR('Doktor veya hasta bulunamadı! Lab testleri oluşturulamıyor.'))
+            self.stdout.write(self.style.ERROR('Doctor or patient not found! Lab tests cannot be created.'))
             return
         
-        # Test türleri
+        # Test types
         test_types = [
-            'Tam Kan Sayımı', 'Kan Şekeri', 'Kolesterol Paneli', 'Karaciğer Fonksiyon Testi',
-            'Böbrek Fonksiyon Testi', 'Tiroid Paneli', 'İdrar Tahlili', 'HbA1c',
-            'Vitamin D', 'Vitamin B12', 'Demir', 'Elektrolit Paneli'
+            'Complete Blood Count', 'Blood Sugar', 'Cholesterol Panel', 'Liver Function Test',
+            'Kidney Function Test', 'Thyroid Panel', 'Urinalysis', 'HbA1c',
+            'Vitamin D', 'Vitamin B12', 'Iron', 'Electrolyte Panel'
         ]
         
         created_tests_count = 0
         created_results_count = 0
         today = timezone.now().date()
         
-        # Doktor ve hasta listelerini filtrele
+        # Filter doctor and patient lists
         doctor_users = [d for d in doctors if d.user_type == 'doctor']
         patient_users = [p for p in patients if p.user_type == 'patient']
         
         if not doctor_users or not patient_users:
-            self.stdout.write(self.style.ERROR('Doktor veya hasta bulunamadı! Lab testleri oluşturulamıyor.'))
+            self.stdout.write(self.style.ERROR('Doctor or patient not found! Lab tests cannot be created.'))
             return
         
-        # 20-30 arası test oluştur
+        # Create 20-30 tests
         num_tests = random.randint(20, 30)
         
         for _ in range(num_tests):
             try:
-                # Rastgele hasta ve doktor seç
+                # Select random patient and doctor
                 patient = random.choice(patient_users)
                 doctor = random.choice(doctor_users)
                 
-                # Test türü
+                # Test type
                 test_type = random.choice(test_types)
                 
-                # Test tarihi (son 180 gün içinde)
+                # Test date (within the last 180 days)
                 days_ago = random.randint(1, 180)
                 test_date = today - timedelta(days=days_ago)
                 
-                # Test durumu
+                # Test status
                 if days_ago > 7:
-                    status = 'completed'  # 1 haftadan eski testler tamamlandı
+                    status = 'completed'  # Tests older than 1 week are completed
                 else:
-                    status = random.choice(['pending', 'completed', 'completed'])  # Yeni testler çoğunlukla tamamlandı
+                    status = random.choice(['pending', 'completed', 'completed'])  # New tests are mostly completed
                 
-                # Lab testi oluştur
+                # Create lab test
                 lab_test = LabTest.objects.create(
                     patient=patient,
                     doctor=doctor,
@@ -684,35 +684,35 @@ class Command(BaseCommand):
                 )
                 created_tests_count += 1
                 
-                # Tamamlanan testler için sonuç oluştur
+                # Create result for completed tests
                 if status == 'completed':
-                    # Sonuç tarihi (test tarihinden 1-3 gün sonra)
+                    # Result date (1-3 days after test date)
                     result_date = test_date + timedelta(days=random.randint(1, 3))
                     
-                    # Sonuçlar ve yorumlar
+                    # Results and comments
                     results_options = [
-                        f'{test_type} sonuçları normal aralıkta.',
-                        f'{test_type} sonuçlarında hafif anormallikler görüldü.',
-                        f'{test_type} değerleri referans aralığında.',
-                        f'{test_type} sonuçları detaylı olarak incelendi.'
+                        f'{test_type} results are within the normal range.',
+                        f'Slight abnormalities were observed in the {test_type} results.',
+                        f'{test_type} values are within the reference range.',
+                        f'{test_type} results were examined in detail.'
                     ]
                     
                     interpretation_options = [
-                        'Normal sonuçlar, klinik bulgular ile uyumlu.',
-                        'Hafif anormallikler mevcut, klinik açıdan anlamlı değil.',
-                        'Sonuçlar değerlendirildi, tedavi değişikliği gerektirmiyor.',
-                        'Sonuçlar normal aralıkta, sağlık durumu iyi.'
+                        'Normal results, consistent with clinical findings.',
+                        'Slight abnormalities present, not clinically significant.',
+                        'Results evaluated, no change in treatment required.',
+                        'Results are within the normal range, health status is good.'
                     ]
                     
                     recommendations_options = [
-                        'Kontrol gerektirmiyor.',
-                        '6 ay sonra kontrol önerilir.',
-                        'Mevcut tedaviye devam edilmesi uygun.',
-                        'Yaşam tarzı değişiklikleri önerilir.',
-                        'Yıllık rutin kontroller yeterli.'
+                        'No follow-up required.',
+                        'Follow-up recommended after 6 months.',
+                        'Continuation of current treatment is appropriate.',
+                        'Lifestyle changes are recommended.',
+                        'Annual routine check-ups are sufficient.'
                     ]
                     
-                    # Sonuç oluştur
+                    # Create result
                     TestResult.objects.create(
                         lab_test=lab_test,
                         result_date=result_date,
@@ -722,95 +722,95 @@ class Command(BaseCommand):
                     )
                     created_results_count += 1
             except Exception as e:
-                self.stdout.write(self.style.ERROR(f'Lab testi/sonucu oluşturulurken hata: {e}'))
+                self.stdout.write(self.style.ERROR(f'Error while creating lab test/result: {e}'))
         
-        self.stdout.write(self.style.SUCCESS(f'{created_tests_count} lab testi ve {created_results_count} lab sonucu oluşturuldu'))
+        self.stdout.write(self.style.SUCCESS(f'{created_tests_count} lab tests and {created_results_count} lab results created'))
 
     def create_imaging_and_results(self, doctors, patients):
-        """Tıbbi görüntüler ve raporlar oluşturur."""
+        """Creates medical images and reports."""
         if not doctors.exists() or not patients.exists():
-            self.stdout.write(self.style.ERROR('Doktor veya hasta bulunamadı! Tıbbi görüntüler oluşturulamıyor.'))
+            self.stdout.write(self.style.ERROR('Doctor or patient not found! Medical images cannot be created.'))
             return
         
-        # Görüntüleme türleri
+        # Imaging types
         image_types = ['xray', 'mri', 'ct', 'ultrasound', 'other']
         
-        # Vücut bölgeleri
+        # Body parts
         body_parts = [
-            'Göğüs', 'Abdomen', 'Kafa', 'Omurga', 'Pelvis', 
-            'Diz', 'Omuz', 'El Bileği', 'Ayak Bileği', 'Kalça'
+            'Chest', 'Abdomen', 'Head', 'Spine', 'Pelvis', 
+            'Knee', 'Shoulder', 'Wrist', 'Ankle', 'Hip'
         ]
         
         created_images_count = 0
         created_reports_count = 0
         today = timezone.now().date()
         
-        # Doktor ve hasta listelerini filtrele
+        # Filter doctor and patient lists
         doctor_users = [d for d in doctors if d.user_type == 'doctor']
         patient_users = [p for p in patients if p.user_type == 'patient']
         
         if not doctor_users or not patient_users:
-            self.stdout.write(self.style.ERROR('Doktor veya hasta bulunamadı! Tıbbi görüntüler oluşturulamıyor.'))
+            self.stdout.write(self.style.ERROR('Doctor or patient not found! Medical images cannot be created.'))
             return
         
-        # Rastgele tedaviler oluştur (sonradan kullanılacak)
+        # Create random treatments (to be used later)
         treatments = []
         for _ in range(20):
-            # Rastgele bir randevu oluştur
+            # Create a random appointment
             patient = random.choice(patient_users)
             doctor = random.choice(doctor_users)
             
-            # Randevu tarihi
+            # Appointment date
             appointment_date = today - timedelta(days=random.randint(10, 60))
             appointment_time = time(random.randint(9, 16), random.choice([0, 15, 30, 45]))
             
-            # Randevu oluştur
+            # Create appointment
             appointment = Appointment.objects.create(
                 patient=patient,
                 doctor=doctor,
                 date=appointment_date,
                 time=appointment_time,
-                description="Görüntüleme için randevu",
+                description="Appointment for imaging",
                 status="completed"
             )
             
-            # Tedavi oluştur
+            # Create treatment
             treatment = Treatment.objects.create(
                 appointment=appointment,
-                diagnosis="Görüntüleme gerekli durum",
-                notes="Görüntüleme sonucuna göre tedavi planlanacak"
+                diagnosis="Condition requiring imaging",
+                notes="Treatment to be planned according to imaging result"
             )
             treatments.append(treatment)
         
-        # 15-25 arası görüntüleme oluştur
+        # Create 15-25 imaging
         num_imaging = random.randint(15, 25)
         
         for _ in range(num_imaging):
             try:
-                # Rastgele tedavi, hasta ve doktor seç
+                # Select random treatment, patient and doctor
                 treatment = random.choice(treatments)
                 patient = treatment.patient
                 doctor = treatment.doctor
                 
-                # Görüntüleme türü ve vücut bölgesi
+                # Imaging type and body part
                 image_type = random.choice(image_types)
                 body_part = random.choice(body_parts)
                 
-                # Görüntüleme tarihi (son 60 gün içinde)
+                # Imaging date (within the last 60 days)
                 days_ago = random.randint(1, 60)
                 taken_date = today - timedelta(days=days_ago)
                 
-                # Açıklama
+                # Description
                 description_options = [
-                    f'{body_part} ağrısı nedeniyle {image_type} görüntüleme',
-                    f'{body_part} bölgesinde şişlik nedeniyle görüntüleme',
-                    f'{body_part} bölgesinde travma sonrası kontrol',
-                    f'{body_part} bölgesinde anormallik şüphesi',
-                    'Rutin kontrol',
-                    'Takip görüntülemesi'
+                    f'{image_type} imaging due to {body_part} pain',
+                    f'Imaging due to swelling in the {body_part} area',
+                    f'Post-traumatic check-up of the {body_part} area',
+                    f'Suspicion of abnormality in the {body_part} area',
+                    'Routine check-up',
+                    'Follow-up imaging'
                 ]
                 
-                # Tıbbi görüntü oluştur
+                # Create medical image
                 image = MedicalImage.objects.create(
                     treatment=treatment,
                     patient=patient,
@@ -819,31 +819,31 @@ class Command(BaseCommand):
                     body_part=body_part,
                     taken_date=taken_date,
                     description=random.choice(description_options),
-                    image_file="medical_images/sample.jpg"  # Örnek dosya adı
+                    image_file="medical_images/sample.jpg"  # Sample file name
                 )
                 created_images_count += 1
                 
-                # Rastgele görüntüler için rapor oluştur (%70 olasılıkla)
+                # Create report for random images (with 70% probability)
                 if random.random() < 0.7:
-                    # Rapor tarihi (görüntüleme tarihinden 1-3 gün sonra)
+                    # Report date (1-3 days after imaging date)
                     report_date = taken_date + timedelta(days=random.randint(1, 3))
                     
-                    # Rapor içerikleri
+                    # Report contents
                     title_options = [
-                        f'{body_part} {image_type} Değerlendirmesi',
-                        f'{body_part} Görüntüleme Raporu',
-                        f'{image_type.upper()} Raporu - {body_part}',
-                        f'Tıbbi Değerlendirme - {body_part}'
+                        f'{body_part} {image_type} Evaluation',
+                        f'{body_part} Imaging Report',
+                        f'{image_type.upper()} Report - {body_part}',
+                        f'Medical Evaluation - {body_part}'
                     ]
                     
                     content_options = [
-                        f'{body_part} bölgesinde herhangi bir anormallik saptanmadı. Normal anatomik yapı ve görünüm mevcuttur.',
-                        f'{body_part} bölgesinde minimal dejeneratif değişiklikler gözlenmiştir. Klinik açıdan anlamlı patoloji izlenmemiştir.',
-                        f'{body_part} görüntülemesi normal sınırlarda olup, hasta şikayetlerini açıklayacak bir bulgu saptanmamıştır.',
-                        f'{body_part} bölgesinde hafif değişiklikler mevcut olup, klinik korelasyon önerilir. Kontrol görüntüleme gerekli değildir.'
+                        f'No abnormality was detected in the {body_part} area. Normal anatomical structure and appearance are present.',
+                        f'Minimal degenerative changes were observed in the {body_part} area. No clinically significant pathology was observed.',
+                        f'{body_part} imaging is within normal limits, and no findings were found to explain the patient\'s complaints.',
+                        f'Slight changes are present in the {body_part} area, and clinical correlation is recommended. Control imaging is not required.'
                     ]
                     
-                    # Rapor oluştur
+                    # Create report
                     Report.objects.create(
                         treatment=treatment,
                         patient=patient,
@@ -852,23 +852,23 @@ class Command(BaseCommand):
                         title=random.choice(title_options),
                         content=random.choice(content_options),
                         valid_from=report_date,
-                        valid_until=report_date + timedelta(days=365)  # 1 yıl geçerli
+                        valid_until=report_date + timedelta(days=365)  # Valid for 1 year
                     )
                     created_reports_count += 1
             except Exception as e:
-                self.stdout.write(self.style.ERROR(f'Tıbbi görüntü/rapor oluşturulurken hata: {e}'))
+                self.stdout.write(self.style.ERROR(f'Error while creating medical image/report: {e}'))
         
-        self.stdout.write(self.style.SUCCESS(f'{created_images_count} tıbbi görüntü ve {created_reports_count} rapor oluşturuldu'))
+        self.stdout.write(self.style.SUCCESS(f'{created_images_count} medical images and {created_reports_count} reports created'))
 
     def create_notifications(self, num_notifications):
-        """Kullanıcılar için bildirimler oluşturur."""
+        """Creates notifications for users."""
         all_users = User.objects.all()
         
         if not all_users.exists():
-            self.stdout.write(self.style.ERROR('Kullanıcı bulunamadı! Bildirimler oluşturulamıyor.'))
+            self.stdout.write(self.style.ERROR('User not found! Notifications cannot be created.'))
             return
         
-        # Bildirim türleri
+        # Notification types
         notification_types = [
             'appointment_reminder', 'prescription_refill', 'test_result',
             'message', 'system'
@@ -879,58 +879,58 @@ class Command(BaseCommand):
         
         for _ in range(num_notifications):
             try:
-                # Rastgele bir kullanıcı seç
+                # Select a random user
                 user = random.choice(all_users)
                 
-                # Bildirim türü
+                # Notification type
                 notification_type = random.choice(notification_types)
                 
-                # Bildirim içeriği
+                # Notification content
                 content = ''
                 if notification_type == 'appointment_reminder':
                     content = random.choice([
                         "Reminder about your upcoming appointment.",
-                        "Yarınki randevunuzu unutmayın.",
-                        "Önümüzdeki hafta için planlanmış randevunuz var.",
-                        "Dr. ile randevunuz 3 gün sonra."
+                        "Don't forget your appointment tomorrow.",
+                        "You have an appointment scheduled for next week.",
+                        "Your appointment with Dr. is in 3 days."
                     ])
                 elif notification_type == 'prescription_refill':
                     content = random.choice([
-                        "Reçeteniz yenileme zamanı geldi.",
+                        "It's time to renew your prescription.",
                         "Your medications are running low, please contact your doctor.",
-                        "Reçeteniz hazır, eczaneden alabilirsiniz.",
+                        "Your prescription is ready, you can pick it up from the pharmacy.",
                         "Renewal reminder for your medication treatment."
                     ])
                 elif notification_type == 'test_result':
                     content = random.choice([
-                        "Test sonuçlarınız hazır.",
-                        "Laboratuvar sonuçlarınız sisteme yüklendi.",
-                        "Görüntüleme sonuçlarınız doktorunuz tarafından değerlendirildi.",
-                        "Yeni test sonuçlarınız mevcut."
+                        "Your test results are ready.",
+                        "Your lab results have been uploaded to the system.",
+                        "Your imaging results have been evaluated by your doctor.",
+                        "Your new test results are available."
                     ])
                 elif notification_type == 'message':
                     content = random.choice([
-                        "Doktorunuzdan yeni bir mesaj aldınız.",
-                        "Sağlık ekibinizden mesaj var.",
-                        "Tedaviniz hakkında yeni bir mesaj.",
-                        "Randevunuz hakkında mesaj aldınız."
+                        "You have a new message from your doctor.",
+                        "You have a message from your healthcare team.",
+                        "A new message about your treatment.",
+                        "You have received a message about your appointment."
                     ])
                 else:  # system
                     content = random.choice([
-                        "Sistem bakımı nedeniyle kısa süreli kesinti olacaktır.",
-                        "Uygulama güncellemesi yapıldı.",
-                        "Hesap bilgilerinizi güncelleyin.",
-                        "Yeni özellikler eklendi, keşfedin!"
+                        "There will be a short interruption due to system maintenance.",
+                        "The application has been updated.",
+                        "Update your account information.",
+                        "New features have been added, discover them!"
                     ])
                 
-                # Oluşturulma tarihi (son 30 gün içinde)
+                # Creation date (within the last 30 days)
                 days_ago = random.randint(0, 30)
                 created_at = today - timedelta(days=days_ago)
                 
-                # Okunma durumu
+                # Read status
                 is_read = random.choice([True, False]) if days_ago > 2 else False
                 
-                # Bildirim oluştur
+                # Create notification
                 CommunicationNotification.objects.create(
                     user=user,
                     notification_type=notification_type,
@@ -940,16 +940,16 @@ class Command(BaseCommand):
                 )
                 created_count += 1
             except Exception as e:
-                self.stdout.write(self.style.ERROR(f'Bildirim oluşturulurken hata: {e}'))
+                self.stdout.write(self.style.ERROR(f'Error while creating notification: {e}'))
         
-        self.stdout.write(self.style.SUCCESS(f'{created_count} bildirim oluşturuldu'))
+        self.stdout.write(self.style.SUCCESS(f'{created_count} notifications created'))
 
     def get_random_first_name(self, gender='male'):
-        """Rastgele Türkçe isim döndürür."""
-        male_names = ['Ahmet', 'Mehmet', 'Mustafa', 'Ali', 'Hasan', 'Hüseyin', 'İbrahim', 'Osman', 'Yusuf', 'Murat',
-                     'Ömer', 'Enes', 'Emre', 'Baran', 'Can', 'Deniz', 'Eren', 'Furkan', 'Gökhan', 'Kemal']
-        female_names = ['Ayşe', 'Fatma', 'Emine', 'Hatice', 'Zeynep', 'Elif', 'Meryem', 'Esra', 'Nur', 'Zehra',
-                       'Melek', 'Ebru', 'Derya', 'Canan', 'Büşra', 'Aslı', 'Gül', 'Seda', 'Pınar', 'Özge']
+        """Returns a random Turkish name."""
+        male_names = ['Ahmet', 'Mehmet', 'Mustafa', 'Ali', 'Hasan', 'Huseyin', 'Ibrahim', 'Osman', 'Yusuf', 'Murat',
+                     'Omer', 'Enes', 'Emre', 'Baran', 'Can', 'Deniz', 'Eren', 'Furkan', 'Gokhan', 'Kemal']
+        female_names = ['Ayse', 'Fatma', 'Emine', 'Hatice', 'Zeynep', 'Elif', 'Meryem', 'Esra', 'Nur', 'Zehra',
+                       'Melek', 'Ebru', 'Derya', 'Canan', 'Busra', 'Asli', 'Gul', 'Seda', 'Pinar', 'Ozge']
         
         if gender == 'male':
             return random.choice(male_names)
@@ -957,7 +957,7 @@ class Command(BaseCommand):
             return random.choice(female_names)
 
     def get_random_last_name(self):
-        """Rastgele Türkçe soyadı döndürür."""
-        last_names = ['Yılmaz', 'Kaya', 'Demir', 'Çelik', 'Şahin', 'Yıldız', 'Yıldırım', 'Öztürk', 'Aydın', 'Özdemir',
-                     'Arslan', 'Doğan', 'Kılıç', 'Aslan', 'Çetin', 'Kara', 'Koç', 'Kurt', 'Özkan', 'Şimşek']
+        """Returns a random Turkish surname."""
+        last_names = ['Yilmaz', 'Kaya', 'Demir', 'Celik', 'Sahin', 'Yildiz', 'Yildirim', 'Ozturk', 'Aydin', 'Ozdemir',
+                     'Arslan', 'Dogan', 'Kilic', 'Aslan', 'Cetin', 'Kara', 'Koc', 'Kurt', 'Ozkan', 'Simsek']
         return random.choice(last_names)

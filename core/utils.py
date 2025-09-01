@@ -13,17 +13,17 @@ from users.models import User
 
 def create_notification(user, notification_type, title, message, related_url=None):
     """
-    Kullanıcı için bildirim oluşturan yardımcı fonksiyon.
+    Helper function that creates a notification for the user.
     
     Args:
-        user: Kullanıcı nesnesi (User)
-        notification_type: Bildirim tipi (choices'dan biri)
-        title: Bildirim başlığı
-        message: Bildirim mesajı
-        related_url: İlgili URL (isteğe bağlı)
+        user: User object (User)
+        notification_type: Notification type (one of choices)
+        title: Notification title
+        message: Notification message
+        related_url: Related URL (optional)
     
     Returns:
-        Oluşturulan bildirim nesnesi
+        The created notification object
     """
     notification = CommunicationNotification.objects.create(
         user=user,
@@ -38,54 +38,54 @@ def create_notification(user, notification_type, title, message, related_url=Non
 
 def create_availability_change_notification(doctor, operation_type, day=None, start_time=None, end_time=None):
     """
-    Doktor uygunluk değişikliği için hastalarına bildirim gönderen fonksiyon.
+    Function that sends a notification to patients for a doctor's availability change.
     
     Args:
-        doctor: Doktor nesnesi (User)
-        operation_type: İşlem tipi ('added', 'updated', 'deleted')
-        day: Değişiklik yapılan gün (isteğe bağlı)
-        start_time: Başlangıç saati (isteğe bağlı)
-        end_time: Bitiş saati (isteğe bağlı)
+        doctor: Doctor object (User)
+        operation_type: Operation type ('added', 'updated', 'deleted')
+        day: Day of the change (optional)
+        start_time: Start time (optional)
+        end_time: End time (optional)
     """
-    # Doktorun hastalarını bul (doktorla randevusu olan benzersiz hastalar)
+    # Find the doctor's patients (unique patients who have an appointment with the doctor)
     patients = User.objects.filter(
         user_type='patient',
         patient_appointments__doctor=doctor
     ).distinct()
     
-    # İşlem tipine göre bildirim başlığı ve mesajı oluştur
+    # Create notification title and message based on the operation type
     if operation_type == 'added':
-        title = f"Dr. {doctor.get_full_name()} yeni çalışma saatleri ekledi"
+        title = f"Dr. {doctor.get_full_name()} has added new working hours"
         if day is not None and start_time is not None and end_time is not None:
             day_name = DoctorAvailability.WEEKDAY_CHOICES[day][1]
-            message = f"Dr. {doctor.get_full_name()}, {day_name} günleri için {start_time} - {end_time} saatleri arasında yeni çalışma saati ekledi."
+            message = f"Dr. {doctor.get_full_name()} has added new working hours between {start_time} - {end_time} for {day_name}s."
         else:
-            message = f"Dr. {doctor.get_full_name()} çalışma saatlerini güncelledi. Randevu almak için doktor takvimini kontrol ediniz."
+            message = f"Dr. {doctor.get_full_name()} has updated his working hours. Please check the doctor's calendar to make an appointment."
     
     elif operation_type == 'updated':
-        title = f"Dr. {doctor.get_full_name()} çalışma saatlerini güncelledi"
+        title = f"Dr. {doctor.get_full_name()} has updated his working hours"
         if day is not None and start_time is not None and end_time is not None:
             day_name = DoctorAvailability.WEEKDAY_CHOICES[day][1]
-            message = f"Dr. {doctor.get_full_name()}, {day_name} günleri için çalışma saatlerini {start_time} - {end_time} olarak güncelledi."
+            message = f"Dr. {doctor.get_full_name()} has updated his working hours to {start_time} - {end_time} for {day_name}s."
         else:
-            message = f"Dr. {doctor.get_full_name()} çalışma saatlerini güncelledi. Randevu almak için doktor takvimini kontrol ediniz."
+            message = f"Dr. {doctor.get_full_name()} has updated his working hours. Please check the doctor's calendar to make an appointment."
     
     elif operation_type == 'deleted':
-        title = f"Dr. {doctor.get_full_name()} bazı çalışma saatleri kaldırıldı"
+        title = f"Dr. {doctor.get_full_name()} has removed some working hours"
         if day is not None:
             day_name = DoctorAvailability.WEEKDAY_CHOICES[day][1]
-            message = f"Dr. {doctor.get_full_name()}, {day_name} günü için bazı çalışma saatleri kaldırıldı. Randevu almak için doktor takvimini kontrol ediniz."
+            message = f"Dr. {doctor.get_full_name()} has removed some working hours for {day_name}. Please check the doctor's calendar to make an appointment."
         else:
-            message = f"Dr. {doctor.get_full_name()} çalışma saatlerinde değişiklik yapıldı. Randevu almak için doktor takvimini kontrol ediniz."
+            message = f"Dr. {doctor.get_full_name()} has made changes to his working hours. Please check the doctor's calendar to make an appointment."
     
-    else:  # İzin ekleme/güncelleme/silme
-        title = f"Dr. {doctor.get_full_name()} izin durumunda değişiklik"
-        message = f"Dr. {doctor.get_full_name()}'in izin durumunda değişiklik oldu. Randevu almak için doktor takvimini kontrol ediniz."
+    else:  # Add/update/delete time off
+        title = f"Change in Dr. {doctor.get_full_name()}'s time off status"
+        message = f"There has been a change in Dr. {doctor.get_full_name()}'s time off status. Please check the doctor's calendar to make an appointment."
     
-    # İlgili URL oluştur (doktor takvimi)
+    # Create related URL (doctor calendar)
     related_url = reverse('doctor-calendar', kwargs={'doctor_id': doctor.id})
     
-    # Her hasta için bildirim oluştur
+    # Create a notification for each patient
     for patient in patients:
         create_notification(
             user=patient,
@@ -96,12 +96,12 @@ def create_availability_change_notification(doctor, operation_type, day=None, st
         )
 
 
-# Signal alıcıları
+# Signal receivers
 @receiver(post_save, sender=DoctorAvailability)
 def doctor_availability_changed(sender, instance, created, **kwargs):
-    """DoctorAvailability modelinde değişiklik olduğunda çalışan sinyal alıcısı"""
+    """Signal receiver that runs when the DoctorAvailability model changes"""
     if created:
-        # Yeni bir çalışma saati eklendiğinde
+        # When a new working hour is added
         create_availability_change_notification(
             doctor=instance.doctor,
             operation_type='added',
@@ -110,7 +110,7 @@ def doctor_availability_changed(sender, instance, created, **kwargs):
             end_time=instance.end_time
         )
     else:
-        # Mevcut bir çalışma saati güncellendiğinde
+        # When an existing working hour is updated
         create_availability_change_notification(
             doctor=instance.doctor,
             operation_type='updated', 
@@ -122,7 +122,7 @@ def doctor_availability_changed(sender, instance, created, **kwargs):
 
 @receiver(post_delete, sender=DoctorAvailability)
 def doctor_availability_deleted(sender, instance, **kwargs):
-    """DoctorAvailability modeli silindiğinde çalışan sinyal alıcısı"""
+    """Signal receiver that runs when the DoctorAvailability model is deleted"""
     create_availability_change_notification(
         doctor=instance.doctor,
         operation_type='deleted',
@@ -132,7 +132,7 @@ def doctor_availability_deleted(sender, instance, **kwargs):
 
 @receiver(post_save, sender=DoctorTimeOff)
 def doctor_timeoff_changed(sender, instance, created, **kwargs):
-    """DoctorTimeOff modelinde değişiklik olduğunda çalışan sinyal alıcısı"""
+    """Signal receiver that runs when the DoctorTimeOff model changes"""
     create_availability_change_notification(
         doctor=instance.doctor,
         operation_type='timeoff'
@@ -141,7 +141,7 @@ def doctor_timeoff_changed(sender, instance, created, **kwargs):
 
 @receiver(post_delete, sender=DoctorTimeOff)
 def doctor_timeoff_deleted(sender, instance, **kwargs):
-    """DoctorTimeOff modeli silindiğinde çalışan sinyal alıcısı"""
+    """Signal receiver that runs when the DoctorTimeOff model is deleted"""
     create_availability_change_notification(
         doctor=instance.doctor, 
         operation_type='timeoff'
@@ -150,24 +150,24 @@ def doctor_timeoff_deleted(sender, instance, **kwargs):
 
 def send_appointment_reminder_email(appointment):
     """
-    Randevu hatırlatma e-postası gönderir
+    Sends an appointment reminder email
     """
-    subject = f'Laso Healthcare - Randevu Hatırlatması: {appointment.date.strftime("%d.%m.%Y")}'
+    subject = f'Laso Healthcare - Appointment Reminder: {appointment.date.strftime("%d.%m.%Y")}'
     
-    message = f"""Sayın {appointment.patient.get_full_name()},
+    message = f"""Dear {appointment.patient.get_full_name()},
 
-Bu e-posta, yaklaşan randevunuzu hatırlatmak için gönderilmiştir.
+This email is sent to remind you of your upcoming appointment.
 
-Randevu Bilgileri:
-Tarih: {appointment.date.strftime("%d.%m.%Y")}
-Saat: {appointment.time.strftime("%H:%M")}
-Doktor: Dr. {appointment.doctor.get_full_name()}
-Açıklama: {appointment.description}
+Appointment Information:
+Date: {appointment.date.strftime("%d.%m.%Y")}
+Time: {appointment.time.strftime("%H:%M")}
+Doctor: Dr. {appointment.doctor.get_full_name()}
+Description: {appointment.description}
 
-Randevunuza zamanında gelmenizi rica ederiz. Herhangi bir değişiklik için lütfen kliniğimizle iletişime geçiniz.
+Please be on time for your appointment. Please contact our clinic for any changes.
 
-Saygılarımızla,
-Laso Healthcare Sağlık Sistemi
+Sincerely,
+Laso Healthcare Health System
 """
     
     send_mail(
@@ -183,7 +183,7 @@ Laso Healthcare Sağlık Sistemi
 
 def get_upcoming_appointments(days=1):
     """
-    Belirtilen gün sayısı içindeki yaklaşan randevuları getirir
+    Returns upcoming appointments within the specified number of days
     """
     from appointments.models import Appointment
     

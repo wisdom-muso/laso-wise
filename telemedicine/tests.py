@@ -5,7 +5,7 @@ from django.contrib.auth import get_user_model
 from django.urls import reverse
 from django.utils import timezone
 from datetime import timedelta
-from .models import TeleconsultationSession, TeleconsultationMessage, TeleconsultationSettings
+from .models import VideoSession, TeleMedicineMessage, TeleMedicineSettings
 
 User = get_user_model()
 

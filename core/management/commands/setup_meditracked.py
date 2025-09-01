@@ -178,7 +178,7 @@ class Command(BaseCommand):
         self.stdout.write('🌍 Setting up multi-language support...')
         
         languages = [
-            {'code': 'tr', 'name': 'Türkçe', 'native_name': 'Türkçe', 'is_active': True},
+            {'code': 'tr', 'name': 'Turkish', 'native_name': 'Turkish', 'is_active': True},
             {'code': 'en', 'name': 'English', 'native_name': 'English', 'is_active': True},
             {'code': 'ar', 'name': 'Arabic', 'native_name': 'العربية', 'is_active': True},
             {'code': 'de', 'name': 'German', 'native_name': 'Deutsch', 'is_active': True},
@@ -198,7 +198,7 @@ class Command(BaseCommand):
             {
                 'term_key': 'appointment',
                 'language': Language.objects.get(code='tr'),
-                'translation': 'randevu',
+                'translation': 'appointment',
                 'category': 'general'
             },
             {
@@ -210,7 +210,7 @@ class Command(BaseCommand):
             {
                 'term_key': 'doctor',
                 'language': Language.objects.get(code='tr'),
-                'translation': 'doktor',
+                'translation': 'doctor',
                 'category': 'personnel'
             },
             {
@@ -222,7 +222,7 @@ class Command(BaseCommand):
             {
                 'term_key': 'patient',
                 'language': Language.objects.get(code='tr'),
-                'translation': 'hasta',
+                'translation': 'patient',
                 'category': 'personnel'
             },
             {
@@ -234,7 +234,7 @@ class Command(BaseCommand):
             {
                 'term_key': 'prescription',
                 'language': Language.objects.get(code='tr'),
-                'translation': 'reçete',
+                'translation': 'prescription',
                 'category': 'medical'
             },
             {

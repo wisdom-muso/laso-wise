@@ -2,7 +2,7 @@
 {% load static %}
 {% load i18n %}
 
-{% block title %}{% translate "Video Konsültasyon Odası" %}{% endblock %}
+{% block title %}{% translate "Video Consultation Room" %}{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -289,9 +289,9 @@
                 <div>
                     <h4 class="mb-2">
                         {% if is_doctor %}
-                            {% translate "Hasta ile Konsültasyon" %}: {{ consultation.appointment.patient.get_full_name }}
+                            {% translate "Consultation with Patient" %}: {{ consultation.appointment.patient.get_full_name }}
                         {% else %}
-                            {% translate "Doktor Konsültasyonu" %}: Dr. {{ consultation.appointment.doctor.get_full_name }}
+                            {% translate "Doctor Consultation" %}: Dr. {{ consultation.appointment.doctor.get_full_name }}
                         {% endif %}
                     </h4>
                     <div class="participant-info">
@@ -304,13 +304,13 @@
                         </div>
                         <div>
                             <div class="duration-timer" id="duration-timer">00:00:00</div>
-                            <small>{% translate "Konsültasyon Süresi" %}</small>
+                            <small>{% translate "Consultation Duration" %}</small>
                         </div>
                     </div>
                 </div>
                 <div class="connection-status">
                     <div class="status-indicator" id="connection-indicator"></div>
-                    <span id="connection-status">{% translate "Bağlantı İyi" %}</span>
+                    <span id="connection-status">{% translate "Connection Good" %}</span>
                 </div>
             </div>
         </div>
@@ -327,17 +327,17 @@
                     
                     <!-- Video Controls -->
                     <div class="video-controls">
-                        <button class="control-btn video-btn" id="videoToggle" title="{% translate 'Kamerayı Aç/Kapat' %}">
+                        <button class="control-btn video-btn" id="videoToggle" title="{% translate 'Toggle Camera' %}">
                             <i class="fas fa-video"></i>
                         </button>
-                        <button class="control-btn audio-btn" id="audioToggle" title="{% translate 'Mikrofonu Aç/Kapat' %}">
+                        <button class="control-btn audio-btn" id="audioToggle" title="{% translate 'Toggle Microphone' %}">
                             <i class="fas fa-microphone"></i>
                         </button>
-                        <button class="control-btn" style="background: rgba(156, 39, 176, 0.9);" id="screenShare" title="{% translate 'Ekran Paylaş' %}">
+                        <button class="control-btn" style="background: rgba(156, 39, 176, 0.9);" id="screenShare" title="{% translate 'Share Screen' %}">
                             <i class="fas fa-desktop"></i>
                         </button>
                         {% if is_doctor %}
-                        <button class="control-btn end-btn" id="endConsultation" title="{% translate 'Konsültasyonu Sonlandır' %}">
+                        <button class="control-btn end-btn" id="endConsultation" title="{% translate 'End Consultation' %}">
                             <i class="fas fa-phone-slash"></i>
                         </button>
                         {% endif %}
@@ -348,16 +348,16 @@
                         <div class="waiting-spinner">
                             <i class="fas fa-spinner"></i>
                         </div>
-                        <h3>{% translate "Bekleme Odasında" %}</h3>
-                        <p>{% translate "Diğer katılımcının bağlanması bekleniyor..." %}</p>
+                        <h3>{% translate "In Waiting Room" %}</h3>
+                        <p>{% translate "Waiting for the other participant to connect..." %}</p>
                     </div>
                     
                     <!-- Consultation Ended -->
                     <div id="consultationEnded" class="consultation-ended" style="display: none;">
-                        <h3>{% translate "Konsültasyon Sonlandırıldı" %}</h3>
-                        <p>{% translate "Teşekkürler! Konsültasyonunuz başarıyla tamamlandı." %}</p>
+                        <h3>{% translate "Consultation Ended" %}</h3>
+                        <p>{% translate "Thank you! Your consultation has been successfully completed." %}</p>
                         <a href="{% url 'telemedicine-consultation-list' %}" class="btn btn-primary">
-                            {% translate "Konsültasyon Listesine Dön" %}
+                            {% translate "Back to Consultation List" %}
                         </a>
                     </div>
                 </div>
@@ -380,7 +380,7 @@
                     <div class="chat-input">
                         <div class="input-group">
                             <input type="text" class="message-input" id="messageInput" 
-                                   placeholder="{% translate 'Mesaj yazın...' %}"
+                                   placeholder="{% translate 'Write a message...' %}"
                                    maxlength="500">
                             <button class="send-btn" id="sendMessage">
                                 <i class="fas fa-paper-plane"></i>
@@ -397,27 +397,27 @@
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">{% translate "Konsültasyonu Sonlandır" %}</h5>
+                        <h5 class="modal-title">{% translate "End Consultation" %}</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
                         <form id="endConsultationForm">
                             <div class="mb-3">
-                                <label for="consultationNotes" class="form-label">{% translate "Konsültasyon Notları" %}</label>
+                                <label for="consultationNotes" class="form-label">{% translate "Consultation Notes" %}</label>
                                 <textarea class="form-control" id="consultationNotes" rows="4"
-                                          placeholder="{% translate 'Konsültasyon sırasında yapılan değerlendirmeler, öneriler vb.' %}"></textarea>
+                                          placeholder="{% translate 'Assessments, recommendations, etc. made during the consultation.' %}"></textarea>
                             </div>
                             <div class="mb-3">
-                                <label for="patientFeedback" class="form-label">{% translate "Hasta Geri Bildirimi" %}</label>
+                                <label for="patientFeedback" class="form-label">{% translate "Patient Feedback" %}</label>
                                 <textarea class="form-control" id="patientFeedback" rows="3"
-                                          placeholder="{% translate 'Hastanın belirttiği geri bildirimler' %}"></textarea>
+                                          placeholder="{% translate 'Feedback provided by the patient' %}"></textarea>
                             </div>
                         </form>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% translate "İptal" %}</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% translate "Cancel" %}</button>
                         <button type="button" class="btn btn-danger" id="confirmEndConsultation">
-                            {% translate "Konsültasyonu Sonlandır" %}
+                            {% translate "End Consultation" %}
                         </button>
                     </div>
                 </div>
@@ -469,7 +469,7 @@ class TeleMedicineConsultation {
             
         } catch (error) {
             console.error('Error accessing media devices:', error);
-            this.showError('Kamera ve mikrofon erişimi gerekli');
+            this.showError('Camera and microphone access is required');
         }
     }
     
@@ -481,7 +481,7 @@ class TeleMedicineConsultation {
         remoteVideo.style.display = 'flex';
         remoteVideo.style.alignItems = 'center';
         remoteVideo.style.justifyContent = 'center';
-        remoteVideo.innerHTML = '<div style="color: white; text-align: center;"><i class="fas fa-user fa-5x mb-3"></i><br>Diğer Katılımcı</div>';
+        remoteVideo.innerHTML = '<div style="color: white; text-align: center;"><i class="fas fa-user fa-5x mb-3"></i><br>Other Participant</div>';
     }
     
     setupEventListeners() {
@@ -641,7 +641,7 @@ class TeleMedicineConsultation {
         const div = document.createElement('div');
         div.className = `message ${message.is_own ? 'sent' : 'received'}`;
         
-        const time = new Date(message.timestamp).toLocaleTimeString('tr-TR', {
+        const time = new Date(message.timestamp).toLocaleTimeString('en-US', {
             hour: '2-digit',
             minute: '2-digit'
         });

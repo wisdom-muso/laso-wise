@@ -82,7 +82,7 @@ class EnhancedDashboardView(LoginRequiredMixin, TemplateView):
         return actions
     
     def get_recent_activities(self):
-        """Son aktiviteler"""
+        """Recent activities"""
         user = self.request.user
         activities = []
         
@@ -96,14 +96,14 @@ class EnhancedDashboardView(LoginRequiredMixin, TemplateView):
             for appointment in recent_appointments:
                 activities.append({
                     'type': 'appointment',
-                    'title': f'{appointment.patient.get_full_name()} ile randevu',
+                    'title': f'Appointment with {appointment.patient.get_full_name()}',
                     'date': appointment.date,
                     'time': appointment.time,
                     'status': appointment.status,
                     'url': f'/appointments/{appointment.id}/',
                 })
             
-            # Son tedaviler
+            # Recent treatments
             recent_treatments = Treatment.objects.filter(
                 appointment__doctor=user
             ).order_by('-created_at')[:3]
@@ -111,7 +111,7 @@ class EnhancedDashboardView(LoginRequiredMixin, TemplateView):
             for treatment in recent_treatments:
                 activities.append({
                     'type': 'treatment',
-                    'title': f'{treatment.appointment.patient.get_full_name()} tedavisi',
+                    'title': f'{treatment.appointment.patient.get_full_name()} treatment',
                     'date': treatment.created_at.date(),
                     'description': treatment.diagnosis[:50] + '...' if len(treatment.diagnosis) > 50 else treatment.diagnosis,
                     'url': f'/treatments/{treatment.id}/',
@@ -126,7 +126,7 @@ class EnhancedDashboardView(LoginRequiredMixin, TemplateView):
             for appointment in recent_appointments:
                 activities.append({
                     'type': 'appointment',
-                    'title': f'Dr. {appointment.doctor.get_full_name()} ile randevu',
+                    'title': f'Appointment with Dr. {appointment.doctor.get_full_name()}',
                     'date': appointment.date,
                     'time': appointment.time,
                     'status': appointment.status,
@@ -142,7 +142,7 @@ class EnhancedDashboardView(LoginRequiredMixin, TemplateView):
             for test in pending_tests:
                 activities.append({
                     'type': 'lab_test',
-                    'title': f'{test.test_name} - Test bekleniyor',
+                    'title': f'{test.test_name} - Test pending',
                     'date': test.requested_date.date(),
                     'status': test.status,
                     'url': f'/lab-tests/{test.id}/',
@@ -246,7 +246,7 @@ class DoctorPerformanceView(LoginRequiredMixin, TemplateView):
         context['performance_data'] = performance_data
         context['doctor'] = self.request.user
         
-        # Hasta memnuniyet verileri (gelecekte eklenebilir)
+        # Patient satisfaction data (can be added in the future)
         context['satisfaction_ratings'] = self.get_satisfaction_data()
         
         return context
@@ -292,7 +292,7 @@ class SystemReportsView(LoginRequiredMixin, TemplateView):
             'total_lab_tests': LabTest.objects.count(),
         }
         
-        # En aktif doktorlar
+        # Top active doctors
         context['top_doctors'] = User.objects.filter(
             user_type='doctor'
         ).annotate(

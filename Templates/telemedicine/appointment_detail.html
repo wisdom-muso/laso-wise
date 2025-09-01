@@ -1,0 +1,296 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Telemedicine Appointment Details{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="h3 mb-0">Telemedicine Appointment Details</h1>
+            <p class="text-muted">Detailed information about the telemedicine appointment</p>
+        </div>
+        <div class="col-auto">
+            <div class="d-flex">
+                <a href="{% url 'telemedicine:appointment-list' %}" class="btn btn-sm btn-light me-2">
+                    <i class="fas fa-arrow-left"></i> Go Back
+                </a>
+                
+                {% if user.is_doctor and user == appointment.doctor and appointment.status == 'planned' %}
+                <a href="{% url 'telemedicine:start-video-session' appointment.id %}" class="btn btn-sm btn-success me-2">
+                    <i class="fas fa-video"></i> Start Session
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Appointment Details -->
+        <div class="col-md-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Appointment Information</h6>
+                    <span class="badge bg-{{ appointment.status|yesno:'success,danger,primary' }}">
+                        {{ appointment.get_status_display }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Patient:</label>
+                                <div>{{ appointment.patient.get_full_name }}</div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Doctor:</label>
+                                <div>{{ appointment.doctor.get_full_name }}</div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Date:</label>
+                                <div>{{ appointment.date }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Time:</label>
+                                <div>{{ appointment.time }}</div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Created Date:</label>
+                                <div>{{ appointment.created_at }}</div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Last Updated:</label>
+                                <div>{{ appointment.updated_at }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Description:</label>
+                        <div>
+                            {% if appointment.description %}
+                                {{ appointment.description }}
+                            {% else %}
+                                <em>No description</em>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Documents -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Documents</h6>
+                    {% if user.is_doctor and document_form %}
+                    <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#uploadDocumentModal">
+                        <i class="fas fa-upload"></i> Upload Document
+                    </button>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    {% if documents %}
+                    <ul class="list-group">
+                        {% for doc in documents %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <a href="{{ doc.file.url }}" target="_blank">{{ doc.title }}</a>
+                            <span class="badge bg-info rounded-pill">{{ doc.uploaded_by.get_full_name }} on {{ doc.uploaded_at|date:"Y-m-d" }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p>No documents available for this appointment.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Prescriptions -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Prescriptions</h6>
+                    {% if user.is_doctor and prescription_form %}
+                    <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#createPrescriptionModal">
+                        <i class="fas fa-plus"></i> Add Prescription
+                    </button>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    {% if prescriptions %}
+                    <ul class="list-group">
+                        {% for prescription in prescriptions %}
+                        <li class="list-group-item">
+                            <strong>{{ prescription.medication_name }}</strong> ({{ prescription.dosage }}) - {{ prescription.instructions }}
+                            <br>
+                            <small class="text-muted">Prescribed by {{ prescription.created_by.get_full_name }} on {{ prescription.created_at|date:"Y-m-d" }}</small>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p>No prescriptions available for this appointment.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Notes -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Notes</h6>
+                    {% if user.is_doctor and note_form %}
+                    <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#createNoteModal">
+                        <i class="fas fa-plus"></i> Add Note
+                    </button>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    {% if notes %}
+                    <ul class="list-group">
+                        {% for note in notes %}
+                        <li class="list-group-item">
+                            {{ note.content }}
+                            <br>
+                            <small class="text-muted">By {{ note.created_by.get_full_name }} on {{ note.created_at|date:"Y-m-d" }}</small>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p>No notes available for this appointment.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Session History -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Session History</h6>
+                </div>
+                <div class="card-body">
+                    {% if sessions %}
+                    <ul class="list-group">
+                        {% for session in sessions %}
+                        <li class="list-group-item">
+                            Session started by {{ session.started_by.get_full_name }} at {{ session.start_time|date:"Y-m-d H:i" }}
+                            {% if session.end_time %}- Ended at {{ session.end_time|date:"Y-m-d H:i" }}{% endif %}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p>No session history for this appointment.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Panels (Patient Information) -->
+        <div class="col-md-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Patient Information</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Full Name:</label>
+                        <div>{{ appointment.patient.get_full_name }}</div>
+                    </div>
+                    
+                    {% if appointment.patient.date_of_birth %}
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Date of Birth:</label>
+                        <div>{{ appointment.patient.date_of_birth }}</div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if appointment.patient.phone_number %}
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Phone:</label>
+                        <div>{{ appointment.patient.phone_number }}</div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if appointment.patient.blood_type %}
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Blood Type:</label>
+                        <div>{{ appointment.patient.blood_type }}</div>
+                    </div>
+                    {% endif %}
+                    
+                    <a href="{% url 'patient-detail' appointment.patient.id %}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-user"></i> Patient Profile
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modals for Forms -->
+{% if user.is_doctor %}
+<!-- Upload Document Modal -->
+<div class="modal fade" id="uploadDocumentModal" tabindex="-1" aria-labelledby="uploadDocumentModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="uploadDocumentModalLabel">Upload Document</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{% url 'telemedicine:upload-document' appointment.id %}" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body">
+                    {{ document_form.as_p }}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Upload</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Create Prescription Modal -->
+<div class="modal fade" id="createPrescriptionModal" tabindex="-1" aria-labelledby="createPrescriptionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createPrescriptionModalLabel">Add Prescription</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{% url 'telemedicine:create-prescription' appointment.id %}" method="post">
+                {% csrf_token %}
+                <div class="modal-body">
+                    {{ prescription_form.as_p }}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Add</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Create Note Modal -->
+<div class="modal fade" id="createNoteModal" tabindex="-1" aria-labelledby="createNoteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createNoteModalLabel">Add Note</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{% url 'telemedicine:create-note' appointment.id %}" method="post">
+                {% csrf_token %}
+                <div class="modal-body">
+                    {{ note_form.as_p }}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Add</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}

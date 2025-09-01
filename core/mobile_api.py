@@ -1,8 +1,6 @@
-"""
-Mobile API Endpoints for Laso Healthcare
+"Mobile API Endpoints for Laso Healthcare
 REST API for mobile applications
-"""
-from django.http import JsonResponse
+"from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
@@ -26,7 +24,7 @@ User = get_user_model()
 
 
 class MobileAPIResponse:
-    """Mobil API yanıtları için yardımcı sınıf"""
+    """Helper class for mobile API responses"""
     
     @staticmethod
     def success(data=None, message="Success"):
@@ -51,7 +49,7 @@ class MobileAPIResponse:
 @require_http_methods(["POST"])
 def mobile_login(request):
     """
-    Mobil giriş API
+    Mobile login API
     """
     try:
         data = json.loads(request.body)
@@ -85,14 +83,14 @@ def mobile_login(request):
 @require_http_methods(["GET"])
 def mobile_dashboard(request):
     """
-    Mobil dashboard verisi
+    Mobile dashboard data
     """
     try:
         user = request.user
         
-        # Kullanıcı tipine göre farklı veriler
+        # Different data depending on user type
         if user.is_patient():
-            # Hasta dashboard'u
+            # Patient dashboard
             next_appointment = Appointment.objects.filter(
                 patient=user,
                 date__gte=timezone.now().date(),
@@ -123,15 +121,15 @@ def mobile_dashboard(request):
                 'pending_tests_count': pending_tests,
                 'unread_notifications': unread_notifications,
                 'quick_actions': [
-                    {'title': 'Randevu Al', 'action': 'book_appointment', 'icon': 'calendar'},
-                    {'title': 'Test Sonuçları', 'action': 'view_lab_results', 'icon': 'flask'},
-                    {'title': 'Reçeteler', 'action': 'view_prescriptions', 'icon': 'pills'},
-                    {'title': 'Doktor Ara', 'action': 'find_doctor', 'icon': 'search'}
+                    {'title': 'Book Appointment', 'action': 'book_appointment', 'icon': 'calendar'},
+                    {'title': 'Test Results', 'action': 'view_lab_results', 'icon': 'flask'},
+                    {'title': 'Prescriptions', 'action': 'view_prescriptions', 'icon': 'pills'},
+                    {'title': 'Find a Doctor', 'action': 'find_doctor', 'icon': 'search'}
                 ]
             }
         
         elif user.is_doctor():
-            # Doktor dashboard'u
+            # Doctor dashboard
             today_appointments = Appointment.objects.filter(
                 doctor=user,
                 date=timezone.now().date()
@@ -146,15 +144,15 @@ def mobile_dashboard(request):
                 'today_appointments': today_appointments,
                 'pending_treatments': pending_treatments,
                 'quick_actions': [
-                    {'title': 'Bugünün Randevuları', 'action': 'today_appointments', 'icon': 'calendar'},
-                    {'title': 'Hasta Arama', 'action': 'search_patient', 'icon': 'search'},
-                    {'title': 'Yeni Tedavi', 'action': 'new_treatment', 'icon': 'plus'},
-                    {'title': 'Lab Test İste', 'action': 'order_lab_test', 'icon': 'flask'}
+                    {'title': 'Today\'s Appointments', 'action': 'today_appointments', 'icon': 'calendar'},
+                    {'title': 'Patient Search', 'action': 'search_patient', 'icon': 'search'},
+                    {'title': 'New Treatment', 'action': 'new_treatment', 'icon': 'plus'},
+                    {'title': 'Order Lab Test', 'action': 'order_lab_test', 'icon': 'flask'}
                 ]
             }
         
         else:
-            # Diğer kullanıcı tipleri için genel dashboard
+            # General dashboard for other user types
             dashboard_data = {
                 'message': 'Welcome to Laso Healthcare',
                 'user_type': user.user_type
@@ -170,7 +168,7 @@ def mobile_dashboard(request):
 @require_http_methods(["GET"])
 def mobile_appointments(request):
     """
-    Mobil randevu listesi
+    Mobile appointment list
     """
     try:
         user = request.user
@@ -218,7 +216,7 @@ def mobile_appointments(request):
 @require_http_methods(["GET"])
 def mobile_notifications(request):
     """
-    Mobil bildirimler
+    Mobile notifications
     """
     try:
         user = request.user
@@ -259,7 +257,7 @@ def mobile_notifications(request):
 @require_http_methods(["POST"])
 def mobile_mark_notification_read(request, notification_id):
     """
-    Bildirimi okundu olarak işaretle
+    Mark notification as read
     """
     try:
         notification = get_object_or_404(
@@ -283,7 +281,7 @@ def mobile_mark_notification_read(request, notification_id):
 @require_http_methods(["GET"])
 def mobile_health_summary(request):
     """
-    Mobil sağlık özeti (sadece hastalar için)
+    Mobile health summary (for patients only)
     """
     try:
         user = request.user
@@ -291,11 +289,11 @@ def mobile_health_summary(request):
         if not user.is_patient():
             return MobileAPIResponse.error("Only patients can access health summary", 403)
         
-        # AI insights kullan
+        # Use AI insights
         ai_insights = AIHealthInsights()
         insights = ai_insights.generate_patient_insights(user)
         
-        # Son lab testleri
+        # Recent lab tests
         recent_tests = LabTest.objects.filter(
             patient=user,
             status='completed'
@@ -309,7 +307,7 @@ def mobile_health_summary(request):
                 'status': test.status
             })
         
-        # Aktif ilaçlar
+        # Active medications
         active_medications = MedicalHistory.objects.filter(
             patient=user,
             condition_type='medication',
@@ -332,7 +330,7 @@ def mobile_health_summary(request):
             'last_appointment': None
         }
         
-        # Son randevu
+        # Last appointment
         last_appointment = Appointment.objects.filter(
             patient=user,
             status='completed'
@@ -356,7 +354,7 @@ def mobile_health_summary(request):
 @require_http_methods(["POST"])
 def mobile_symptom_checker(request):
     """
-    Mobil semptom kontrol API
+    Mobile symptom check API
     """
     try:
         data = json.loads(request.body)
@@ -365,12 +363,12 @@ def mobile_symptom_checker(request):
         if not symptoms:
             return MobileAPIResponse.error("Symptoms required", 400)
         
-        # AI semptom analizi
+        # AI symptom analysis
         from core.ai_features import SymptomAnalyzer
         analyzer = SymptomAnalyzer()
         analysis = analyzer.analyze_symptoms(symptoms)
         
-        # Önerilen lab testleri
+        # Recommended lab tests
         from core.ai_features import TreatmentRecommendationEngine
         treatment_engine = TreatmentRecommendationEngine()
         recommended_tests = treatment_engine.recommend_lab_tests(symptoms)
@@ -378,7 +376,7 @@ def mobile_symptom_checker(request):
         result = {
             'symptom_analysis': analysis,
             'recommended_tests': recommended_tests,
-            'warning': 'Bu analiz sadece bilgilendirme amaçlıdır. Ciddi semptomlarınız varsa lütfen doktora başvurun.'
+            'warning': 'This analysis is for informational purposes only. Please consult a doctor if you have serious symptoms.'
         }
         
         return MobileAPIResponse.success(result)
@@ -393,7 +391,7 @@ def mobile_symptom_checker(request):
 @require_http_methods(["GET"])
 def mobile_doctor_search(request):
     """
-    Doktor arama API
+    Doctor search API
     """
     try:
         search_query = request.GET.get('q', '')
@@ -410,7 +408,7 @@ def mobile_doctor_search(request):
                 Q(username__icontains=search_query)
             )
         
-        # Uzmanlık alanı filtresi (gelecekte eklenebilir)
+        # Specialty filter (can be added in the future)
         # if specialty:
         #     doctors = doctors.filter(specialty__icontains=specialty)
         
@@ -419,7 +417,7 @@ def mobile_doctor_search(request):
         
         doctors_data = []
         for doctor in page_obj:
-            # Doktorun müsaitlik durumunu kontrol et
+            # Check the doctor's availability
             next_available = get_next_available_slot(doctor)
             
             doctors_data.append({
@@ -428,7 +426,7 @@ def mobile_doctor_search(request):
                 'username': doctor.username,
                 'email': doctor.email,
                 'next_available': next_available,
-                'rating': 4.8,  # Placeholder - gelecekte gerçek rating sistemi
+                'rating': 4.8,  # Placeholder - real rating system in the future
                 'total_reviews': 156  # Placeholder
             })
         
@@ -445,14 +443,14 @@ def mobile_doctor_search(request):
 
 
 def get_next_available_slot(doctor):
-    """Doktorun bir sonraki müsait slot'ını bul"""
-    # Bu fonksiyon doktor takvim sistemi ile entegre edilebilir
-    # Şimdilik basit bir örnek
+    """Find the doctor's next available slot"""
+    # This function can be integrated with the doctor calendar system
+    # For now, a simple example
     next_week = timezone.now().date() + timedelta(days=7)
     return next_week.isoformat()
 
 
-# API endpoint'leri listesi
+# List of API endpoints
 mobile_api_urls = [
     ('api/mobile/login/', mobile_login),
     ('api/mobile/dashboard/', mobile_dashboard),

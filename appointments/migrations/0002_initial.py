@@ -18,11 +18,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='appointment',
             name='doctor',
-            field=models.ForeignKey(limit_choices_to={'user_type': 'doctor'}, on_delete=django.db.models.deletion.CASCADE, related_name='doctor_appointments', to=settings.AUTH_USER_MODEL, verbose_name='Doktor'),
+            field=models.ForeignKey(limit_choices_to={'user_type': 'doctor'}, on_delete=django.db.models.deletion.CASCADE, related_name='doctor_appointments', to=settings.AUTH_USER_MODEL, verbose_name='Doctor'),
         ),
         migrations.AddField(
             model_name='appointment',
             name='patient',
-            field=models.ForeignKey(limit_choices_to={'user_type': 'patient'}, on_delete=django.db.models.deletion.CASCADE, related_name='patient_appointments', to=settings.AUTH_USER_MODEL, verbose_name='Hasta'),
+            field=models.ForeignKey(limit_choices_to={'user_type': 'patient'}, on_delete=django.db.models.deletion.CASCADE, related_name='patient_appointments', to=settings.AUTH_USER_MODEL, verbose_name='Patient'),
         ),
     ]

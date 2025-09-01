@@ -8,11 +8,11 @@ class MedicalImage(models.Model):
     Medical image model. Represents images like X-ray, MRI, CT scans.
     """
     IMAGE_TYPE_CHOICES = [
-        ('xray', _('Röntgen')),
-        ('mri', _('MR')),
-        ('ct', _('BT (Bilgisayarlı Tomografi)')),
-        ('ultrasound', _('Ultrason')),
-        ('other', _('Diğer')),
+        ('xray', _('X-ray')),
+        ('mri', _('MRI')),
+        ('ct', _('CT (Computed Tomography)')),
+        ('ultrasound', _('Ultrasound')),
+        ('other', _('Other')),
     ]
     
     treatment = models.ForeignKey(
@@ -51,14 +51,14 @@ class MedicalImage(models.Model):
     description = models.TextField(
         blank=True,
         null=True,
-        verbose_name=_('Açıklama')
+        verbose_name=_('Description')
     )
     taken_date = models.DateField(
-        verbose_name=_('Çekim Tarihi')
+        verbose_name=_('Date Taken')
     )
     created_at = models.DateTimeField(
         auto_now_add=True,
-        verbose_name=_('Oluşturulma Tarihi')
+        verbose_name=_('Creation Date')
     )
     
     class Meta:
@@ -71,74 +71,74 @@ class MedicalImage(models.Model):
 
 class Report(models.Model):
     """
-    Rapor modeli. Doktorlar tarafından oluşturulan raporları temsil eder.
+    Report model. Represents reports created by doctors.
     """
     REPORT_TYPE_CHOICES = [
-        ('diagnostic', _('Tanı Raporu')),
-        ('progress', _('İlerleme Raporu')),
-        ('discharge', _('Taburcu Raporu')),
-        ('consultation', _('Konsültasyon Raporu')),
-        ('sick_leave', _('İş Göremezlik Raporu')),
-        ('other', _('Diğer')),
+        ('diagnostic', _('Diagnostic Report')),
+        ('progress', _('Progress Report')),
+        ('discharge', _('Discharge Report')),
+        ('consultation', _('Consultation Report')),
+        ('sick_leave', _('Sick Leave Report')),
+        ('other', _('Other')),
     ]
     
     treatment = models.ForeignKey(
         Treatment,
         on_delete=models.CASCADE,
         related_name='reports',
-        verbose_name=_('Tedavi')
+        verbose_name=_('Treatment')
     )
     patient = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='reports',
-        verbose_name=_('Hasta'),
+        verbose_name=_('Patient'),
         limit_choices_to={'user_type': 'patient'}
     )
     doctor = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='written_reports',
-        verbose_name=_('Raporu Yazan Doktor'),
+        verbose_name=_('Reporting Doctor'),
         limit_choices_to={'user_type': 'doctor'}
     )
     report_type = models.CharField(
         max_length=20,
         choices=REPORT_TYPE_CHOICES,
-        verbose_name=_('Rapor Tipi')
+        verbose_name=_('Report Type')
     )
     title = models.CharField(
         max_length=200,
-        verbose_name=_('Rapor Başlığı')
+        verbose_name=_('Report Title')
     )
     content = models.TextField(
-        verbose_name=_('Rapor İçeriği')
+        verbose_name=_('Report Content')
     )
     valid_from = models.DateField(
-        verbose_name=_('Geçerlilik Başlangıcı')
+        verbose_name=_('Valid From')
     )
     valid_until = models.DateField(
         blank=True,
         null=True,
-        verbose_name=_('Geçerlilik Sonu')
+        verbose_name=_('Valid Until')
     )
     report_file = models.FileField(
         upload_to='reports/',
         blank=True,
         null=True,
-        verbose_name=_('Rapor Dosyası')
+        verbose_name=_('Report File')
     )
     created_at = models.DateTimeField(
         auto_now_add=True,
-        verbose_name=_('Oluşturulma Tarihi')
+        verbose_name=_('Creation Date')
     )
     updated_at = models.DateTimeField(
         auto_now=True,
-        verbose_name=_('Güncellenme Tarihi')
+        verbose_name=_('Update Date')
     )
     
     class Meta:
-        verbose_name = _('Rapor')
+        verbose_name = _('Report')
         verbose_name_plural = _('Reports')
         ordering = ['-created_at']
     

@@ -18,14 +18,14 @@ User = get_user_model()
 
 class DoctorAvailabilityListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     """
-    Doktor uygunluk takvimi listesi görünümü.
+    Doctor availability schedule list view.
     """
     model = DoctorAvailability
     template_name = 'appointments/availability_list.html'
     context_object_name = 'availabilities'
     
     def test_func(self):
-        # Sadece doktorun kendisi, resepsiyonistler ve adminler görebilir
+        # Only the doctor himself, receptionists and admins can see
         user = self.request.user
         doctor_id = self.kwargs.get('doctor_id')
         
@@ -46,14 +46,14 @@ class DoctorAvailabilityListView(LoginRequiredMixin, UserPassesTestMixin, ListVi
 
 class DoctorAvailabilityCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     """
-    Doktor uygunluk takvimi oluşturma görünümü.
+    Doctor availability schedule creation view.
     """
     model = DoctorAvailability
     form_class = DoctorAvailabilityForm
     template_name = 'appointments/availability_form.html'
     
     def test_func(self):
-        # Sadece doktorun kendisi, resepsiyonistler ve adminler ekleyebilir
+        # Only the doctor himself, receptionists and admins can add
         user = self.request.user
         doctor_id = self.kwargs.get('doctor_id')
         
@@ -72,7 +72,7 @@ class DoctorAvailabilityCreateView(LoginRequiredMixin, UserPassesTestMixin, Crea
         context = super().get_context_data(**kwargs)
         doctor_id = self.kwargs.get('doctor_id')
         context['doctor'] = get_object_or_404(User, id=doctor_id)
-        context['title'] = _('Yeni Çalışma Saati Ekle')
+        context['title'] = _('Add New Working Hour')
         return context
     
     def get_success_url(self):
@@ -80,19 +80,19 @@ class DoctorAvailabilityCreateView(LoginRequiredMixin, UserPassesTestMixin, Crea
     
     def form_valid(self, form):
         response = super().form_valid(form)
-        messages.success(self.request, _('Çalışma saati başarıyla eklendi.'))
+        messages.success(self.request, _('Working hour added successfully.'))
         return response
 
 class DoctorAvailabilityUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     """
-    Doktor uygunluk takvimi güncelleme görünümü.
+    Doctor availability schedule update view.
     """
     model = DoctorAvailability
     form_class = DoctorAvailabilityForm
     template_name = 'appointments/availability_form.html'
     
     def test_func(self):
-        # Sadece doktorun kendisi, resepsiyonistler ve adminler güncelleyebilir
+        # Only the doctor himself, receptionists and admins can update
         user = self.request.user
         availability = self.get_object()
         
@@ -103,7 +103,7 @@ class DoctorAvailabilityUpdateView(LoginRequiredMixin, UserPassesTestMixin, Upda
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['doctor'] = self.object.doctor
-        context['title'] = _('Çalışma Saati Düzenle')
+        context['title'] = _('Edit Working Hour')
         return context
     
     def get_success_url(self):
@@ -111,18 +111,18 @@ class DoctorAvailabilityUpdateView(LoginRequiredMixin, UserPassesTestMixin, Upda
     
     def form_valid(self, form):
         response = super().form_valid(form)
-        messages.success(self.request, _('Çalışma saati başarıyla güncellendi.'))
+        messages.success(self.request, _('Working hour updated successfully.'))
         return response
 
 class DoctorAvailabilityDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     """
-    Doktor uygunluk takvimi silme görünümü.
+    Doctor availability schedule deletion view.
     """
     model = DoctorAvailability
     template_name = 'appointments/availability_confirm_delete.html'
     
     def test_func(self):
-        # Sadece doktorun kendisi, resepsiyonistler ve adminler silebilir
+        # Only the doctor himself, receptionists and admins can delete
         user = self.request.user
         availability = self.get_object()
         
@@ -135,24 +135,24 @@ class DoctorAvailabilityDeleteView(LoginRequiredMixin, UserPassesTestMixin, Dele
     
     def delete(self, request, *args, **kwargs):
         response = super().delete(request, *args, **kwargs)
-        messages.success(self.request, _('Çalışma saati başarıyla silindi.'))
+        messages.success(self.request, _('Working hour deleted successfully.'))
         return response
 
 class DoctorCalendarView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     """
-    Doktor takvim görünümü. Doktorun müsait olduğu günleri ve izin günlerini gösterir.
-    Hem doktorlar hem de hastalar için erişilebilir.
+    Doctor calendar view. Shows the days the doctor is available and off.
+    Accessible to both doctors and patients.
     """
     template_name = 'appointments/doctor_calendar.html'
     
     def test_func(self):
-        # Doktorun kendisi, hastalar, resepsiyonistler ve adminler görebilir
+        # The doctor himself, patients, receptionists and admins can see
         user = self.request.user
         doctor_id = self.kwargs.get('doctor_id')
         
         if user.is_doctor():
             return str(user.id) == str(doctor_id)
-        # Tüm hasta kullanıcıların erişimine izin ver
+        # Allow access to all patient users
         if user.is_patient():
             return True
         return user.is_receptionist() or user.is_admin_user()
@@ -162,7 +162,7 @@ class DoctorCalendarView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         doctor_id = self.kwargs.get('doctor_id')
         doctor = get_object_or_404(User, id=doctor_id)
         
-        # Seçilen ay (varsayılan olarak şu anki ay)
+        # Selected month (defaults to the current month)
         year = self.request.GET.get('year', datetime.now().year)
         month = self.request.GET.get('month', datetime.now().month)
         try:
@@ -172,16 +172,16 @@ class DoctorCalendarView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
             year = datetime.now().year
             month = datetime.now().month
             
-        # Ay adını al
+        # Get month name
         month_name = calendar.month_name[month]
         
-        # Takvim oluştur
+        # Create calendar
         cal = calendar.monthcalendar(year, month)
         
-        # Doktor müsaitlik bilgilerini al
+        # Get doctor availability information
         availabilities = DoctorAvailability.objects.filter(doctor_id=doctor_id, is_active=True)
         
-        # Doktor izin günlerini al
+        # Get doctor time off days
         start_date = datetime(year, month, 1).date()
         end_date = datetime(year, month, calendar.monthrange(year, month)[1]).date()
         time_offs = DoctorTimeOff.objects.filter(
@@ -190,23 +190,23 @@ class DoctorCalendarView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
             end_date__gte=start_date
         )
         
-        # Takvim verilerini oluştur
+        # Create calendar data
         calendar_data = []
         for week in cal:
             week_data = []
             for day in week:
-                if day == 0:  # Ay içinde olmayan günler
+                if day == 0:  # Days not in the month
                     week_data.append({'day': '', 'availabilities': [], 'time_offs': []})
                 else:
                     date = datetime(year, month, day).date()
                     
-                    # Bu günün haftanın hangi günü olduğunu bul
+                    # Find out which day of the week this day is
                     weekday = date.weekday()
                     
-                    # Bu gün için müsait saatleri bul
+                    # Find available hours for this day
                     day_availabilities = [av for av in availabilities if av.weekday == weekday]
                     
-                    # Bu gün için izinleri bul
+                    # Find time offs for this day
                     day_time_offs = [
                         to for to in time_offs 
                         if to.start_date <= date <= to.end_date
@@ -220,7 +220,7 @@ class DoctorCalendarView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
                     })
             calendar_data.append(week_data)
         
-        # Önceki ve sonraki ay için linkler
+        # Links for previous and next month
         prev_month = month - 1
         prev_year = year
         if prev_month == 0:
@@ -243,21 +243,21 @@ class DoctorCalendarView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
             'prev_year': prev_year,
             'next_month': next_month,
             'next_year': next_year,
-            'weekdays': [_('Pazartesi'), _('Salı'), _('Çarşamba'), _('Perşembe'), _('Cuma'), _('Cumartesi'), _('Pazar')],
+            'weekdays': [_('Monday'), _('Tuesday'), _('Wednesday'), _('Thursday'), _('Friday'), _('Saturday'), _('Sunday')],
         })
         
         return context
 
 class DoctorTimeOffListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     """
-    Doktor izin günleri listesi görünümü.
+    Doctor time off days list view.
     """
     model = DoctorTimeOff
     template_name = 'appointments/timeoff_list.html'
     context_object_name = 'time_offs'
     
     def test_func(self):
-        # Sadece doktorun kendisi, resepsiyonistler ve adminler görebilir
+        # Only the doctor himself, receptionists and admins can see
         user = self.request.user
         doctor_id = self.kwargs.get('doctor_id')
         
@@ -277,14 +277,14 @@ class DoctorTimeOffListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
 
 class DoctorTimeOffCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     """
-    Doktor izin günü oluşturma görünümü.
+    Doctor time off day creation view.
     """
     model = DoctorTimeOff
     form_class = DoctorTimeOffForm
     template_name = 'appointments/timeoff_form.html'
     
     def test_func(self):
-        # Sadece doktorun kendisi, resepsiyonistler ve adminler ekleyebilir
+        # Only the doctor himself, receptionists and admins can add
         user = self.request.user
         doctor_id = self.kwargs.get('doctor_id')
         
@@ -303,7 +303,7 @@ class DoctorTimeOffCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateVie
         context = super().get_context_data(**kwargs)
         doctor_id = self.kwargs.get('doctor_id')
         context['doctor'] = get_object_or_404(User, id=doctor_id)
-        context['title'] = _('Yeni İzin Günü Ekle')
+        context['title'] = _('Add New Time Off Day')
         return context
     
     def get_success_url(self):
@@ -311,19 +311,19 @@ class DoctorTimeOffCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateVie
     
     def form_valid(self, form):
         response = super().form_valid(form)
-        messages.success(self.request, _('İzin günü başarıyla eklendi.'))
+        messages.success(self.request, _('Time off day added successfully.'))
         return response
 
 class DoctorTimeOffUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     """
-    Doktor izin günü güncelleme görünümü.
+    Doctor time off day update view.
     """
     model = DoctorTimeOff
     form_class = DoctorTimeOffForm
     template_name = 'appointments/timeoff_form.html'
     
     def test_func(self):
-        # Sadece doktorun kendisi, resepsiyonistler ve adminler güncelleyebilir
+        # Only the doctor himself, receptionists and admins can update
         user = self.request.user
         timeoff = self.get_object()
         
@@ -334,7 +334,7 @@ class DoctorTimeOffUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateVie
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['doctor'] = self.object.doctor
-        context['title'] = _('İzin Günü Düzenle')
+        context['title'] = _('Edit Time Off Day')
         return context
     
     def get_success_url(self):
@@ -342,18 +342,18 @@ class DoctorTimeOffUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateVie
     
     def form_valid(self, form):
         response = super().form_valid(form)
-        messages.success(self.request, _('İzin günü başarıyla güncellendi.'))
+        messages.success(self.request, _('Time off day updated successfully.'))
         return response
 
 class DoctorTimeOffDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     """
-    Doktor izin günü silme görünümü.
+    Doctor time off day deletion view.
     """
     model = DoctorTimeOff
     template_name = 'appointments/timeoff_confirm_delete.html'
     
     def test_func(self):
-        # Sadece doktorun kendisi, resepsiyonistler ve adminler silebilir
+        # Only the doctor himself, receptionists and admins can delete
         user = self.request.user
         timeoff = self.get_object()
         
@@ -366,5 +366,5 @@ class DoctorTimeOffDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteVie
     
     def delete(self, request, *args, **kwargs):
         response = super().delete(request, *args, **kwargs)
-        messages.success(self.request, _('İzin günü başarıyla silindi.'))
+        messages.success(self.request, _('Time off day deleted successfully.'))
         return response

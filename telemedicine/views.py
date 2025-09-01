@@ -4,7 +4,7 @@ Telemedicine Views for Laso Healthcare
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, View, TemplateView
 from django.http import JsonResponse, HttpResponseForbidden
 from django.contrib import messages
 from django.utils.translation import gettext_lazy as _
@@ -50,7 +50,7 @@ class TeleMedicineConsultationListView(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
-        # Bugünkü konsültasyonlar
+        # Today's consultations
         today_consultations = self.get_queryset().filter(
             scheduled_start_time__date=timezone.now().date()
         )
@@ -83,14 +83,14 @@ class TeleMedicineConsultationDetailView(LoginRequiredMixin, UserPassesTestMixin
         context = super().get_context_data(**kwargs)
         consultation = self.get_object()
         
-        # Chat mesajları
+        # Chat messages
         context['chat_messages'] = consultation.chat_messages.all()
         
-        # Kullanıcı katılabilir mi?
+        # Can the user join?
         context['can_join'] = consultation.can_join(self.request.user)
         context['join_url'] = consultation.get_join_url()
         
-        # Konsültasyon durumu
+        # Consultation status
         context['is_active'] = consultation.is_active()
         context['time_until_start'] = None
         
@@ -112,7 +112,7 @@ def create_telemedicine_consultation(request, appointment_id):
     if not request.user.is_doctor() or appointment.doctor != request.user:
         return JsonResponse({'error': 'Unauthorized'}, status=403)
     
-    # Zaten konsültasyon var mı?
+    # Does a consultation already exist?
     if hasattr(appointment, 'telemedicine_consultation'):
         return JsonResponse({'error': 'Consultation already exists'}, status=400)
     
@@ -120,7 +120,7 @@ def create_telemedicine_consultation(request, appointment_id):
         data = json.loads(request.body)
         consultation_type = data.get('consultation_type', 'video')
         
-        # Konsültasyon oluştur
+        # Create consultation
         consultation = TeleMedicineConsultation.objects.create(
             appointment=appointment,
             consultation_type=consultation_type,
@@ -152,28 +152,25 @@ def create_telemedicine_consultation(request, appointment_id):
         return JsonResponse({'error': str(e)}, status=500)
 
 
-@login_required
-def join_consultation(request, meeting_id):
+class TeleMedicineConsultationJoinView(LoginRequiredMixin, UserPassesTestMixin, View):
     """
-    Konsültasyona katıl
+    Join a telemedicine consultation
     """
-    consultation = get_object_or_404(TeleMedicineConsultation, meeting_id=meeting_id)
-    
-    # Kullanıcı katılabilir mi?
-    if not consultation.can_join(request.user):
-        messages.error(request, _('You do not have permission to join this consultation.'))
-        return redirect('telemedicine-consultation-list')
-    
-    # Konsültasyonu başlat
-    consultation.mark_as_started(request.user)
-    
-    # Konsültasyon odasına yönlendir
-    return render(request, 'telemedicine/consultation_room.html', {
-        'consultation': consultation,
-        'user_role': 'doctor' if request.user.is_doctor() else 'patient',
-        'is_doctor': request.user.is_doctor(),
-        'is_patient': request.user.is_patient()
-    })
+    def test_func(self):
+        session_id = self.kwargs.get('session_id')
+        consultation = get_object_or_404(TeleMedicineConsultation, meeting_id=session_id)
+        return consultation.can_join(self.request.user)
+
+    def get(self, request, *args, **kwargs):
+        session_id = self.kwargs.get('session_id')
+        consultation = get_object_or_404(TeleMedicineConsultation, meeting_id=session_id)
+        consultation.mark_as_started(request.user)
+        return render(request, 'telemedicine/consultation_room.html', {
+            'consultation': consultation,
+            'user_role': 'doctor' if request.user.is_doctor() else 'patient',
+            'is_doctor': request.user.is_doctor(),
+            'is_patient': request.user.is_patient()
+        })
 
 
 @csrf_exempt
@@ -181,11 +178,11 @@ def join_consultation(request, meeting_id):
 @require_http_methods(["POST"])
 def send_consultation_message(request, consultation_id):
     """
-    Konsültasyon sırasında mesaj gönder
+    Send a message during a consultation
     """
     consultation = get_object_or_404(TeleMedicineConsultation, id=consultation_id)
     
-    # Erişim kontrolü
+    # Access control
     if not consultation.can_join(request.user):
         return JsonResponse({'error': 'Unauthorized'}, status=403)
     
@@ -197,7 +194,7 @@ def send_consultation_message(request, consultation_id):
         if not content:
             return JsonResponse({'error': 'Message content required'}, status=400)
         
-        # Mesaj oluştur
+        # Create message
         message = TeleMedicineMessage.objects.create(
             consultation=consultation,
             sender=request.user,
@@ -226,11 +223,11 @@ def send_consultation_message(request, consultation_id):
 @require_http_methods(["GET"])
 def get_consultation_messages(request, consultation_id):
     """
-    Konsültasyon mesajlarını al
+    Get consultation messages
     """
     consultation = get_object_or_404(TeleMedicineConsultation, id=consultation_id)
     
-    # Erişim kontrolü
+    # Access control
     if not consultation.can_join(request.user):
         return JsonResponse({'error': 'Unauthorized'}, status=403)
     
@@ -258,7 +255,7 @@ def get_consultation_messages(request, consultation_id):
 @require_http_methods(["POST"])
 def end_consultation(request, consultation_id):
     """
-    Konsültasyonu sonlandır
+    End a consultation
     """
     consultation = get_object_or_404(TeleMedicineConsultation, id=consultation_id)
     
@@ -271,7 +268,7 @@ def end_consultation(request, consultation_id):
         consultation_notes = data.get('notes', '')
         patient_feedback = data.get('patient_feedback', '')
         
-        # Konsültasyonu sonlandır
+        # End consultation
         consultation.mark_as_completed()
         consultation.consultation_notes = consultation_notes
         consultation.patient_feedback = patient_feedback
@@ -288,7 +285,7 @@ def end_consultation(request, consultation_id):
             sender=request.user,
             notification_type=NotificationType.TREATMENT_COMPLETED,
             title=_('Telemedicine Consultation Completed'),
-            message=_(f'Dr. {request.user.get_full_name()} ile online konsültasyonunuz tamamlandı.'),
+            message=_(f'Your online consultation with Dr. {request.user.get_full_name()} has been completed.'),
             related_object=consultation
         )
         
@@ -308,11 +305,11 @@ def end_consultation(request, consultation_id):
 @require_http_methods(["POST"])
 def update_consultation_status(request, consultation_id):
     """
-    Konsültasyon durumunu güncelle
+    Update consultation status
     """
     consultation = get_object_or_404(TeleMedicineConsultation, id=consultation_id)
     
-    # Erişim kontrolü
+    # Access control
     if not consultation.can_join(request.user):
         return JsonResponse({'error': 'Unauthorized'}, status=403)
     
@@ -416,12 +413,12 @@ class TeleMedicineSettingsView(LoginRequiredMixin, UpdateView):
 @require_http_methods(["GET"])
 def consultation_analytics(request):
     """
-    Telemedicine analitikleri
+    Telemedicine analytics
     """
     if not request.user.is_doctor():
         return JsonResponse({'error': 'Only doctors can access analytics'}, status=403)
     
-    # Son 30 gün
+    # Last 30 days
     end_date = timezone.now().date()
     start_date = end_date - timezone.timedelta(days=30)
     
@@ -441,7 +438,7 @@ def consultation_analytics(request):
         'daily_stats': []
     }
     
-    # Ortalama süre hesapla
+    # Calculate average duration
     completed = consultations.filter(status='completed', duration_minutes__isnull=False)
     if completed.exists():
         total_duration = sum(c.duration_minutes for c in completed)
@@ -454,7 +451,7 @@ def consultation_analytics(request):
         total_rating = sum(c.patient_rating for c in rated_consultations)
         analytics['patient_satisfaction'] = total_rating / rated_consultations.count()
     
-    # Bağlantı kalitesi istatistikleri
+    # Connection quality statistics
     quality_stats = consultations.values('connection_quality').annotate(
         count=models.Count('connection_quality')
     )
@@ -524,7 +521,7 @@ def create_telemedicine_appointment(request):
         if form.is_valid():
             appointment = form.save(commit=False)
             
-            # Kullanıcı tipine göre atama
+            # Assignment based on user type
             if request.user.is_patient():
                 appointment.patient = request.user
             else:
@@ -571,7 +568,7 @@ def create_telemedicine_appointment(request):
 def start_video_session(request, appointment_id):
     appointment = get_object_or_404(TelemedicineAppointment, id=appointment_id)
     
-    # Yetki kontrolü
+    # Authorization check
     if not (request.user == appointment.doctor or request.user == appointment.patient):
         messages.error(request, "You do not have permission to access this session.")
         return redirect('telemedicine:appointment-list')
@@ -579,7 +576,7 @@ def start_video_session(request, appointment_id):
     # Appointment time check
     now = timezone.now()
     appointment_datetime = timezone.make_aware(datetime.combine(appointment.date, appointment.time))
-    time_diff = (appointment_datetime - now).total_seconds() / 60  # Dakika cinsinden
+    time_diff = (appointment_datetime - now).total_seconds() / 60  # In minutes
     
     # Allow access 10 minutes before or 30 minutes after appointment
     if time_diff > 10:
@@ -590,13 +587,13 @@ def start_video_session(request, appointment_id):
         messages.warning(request, "This appointment has expired. Please create a new appointment.")
         return redirect('telemedicine:appointment-list')
     
-    # Aktif görüşme var mı kontrol et
+    # Check if there is an active session
     active_session = VideoSession.objects.filter(
         appointment=appointment,
         end_time__isnull=True
     ).first()
     
-    # Yoksa yeni görüşme başlat
+    # If not, start a new session
     if not active_session:
         active_session = VideoSession.objects.create(
             appointment=appointment,
@@ -604,13 +601,13 @@ def start_video_session(request, appointment_id):
             room_name=f"telemed_{appointment.id}_{int(time.time())}"
         )
         
-        # Karşı tarafa bildirim gönder
+        # Send notification to the other party
         recipient = appointment.patient if request.user == appointment.doctor else appointment.doctor
         Notification.objects.create(
             recipient=recipient,
             notification_type=NotificationType.APPOINTMENT_REMINDER,
-            title="Görüşme Başladı",
-            message=f"{request.user.get_full_name()} görüşmeyi başlattı. Şimdi katılabilirsiniz.",
+            title="Session Started",
+            message=f"{request.user.get_full_name()} has started the session. You can join now.",
             priority="high",
             extra_data={
                 "appointment_id": appointment.id,
@@ -618,7 +615,7 @@ def start_video_session(request, appointment_id):
             }
         )
     
-    # Görüşme sayfasına yönlendir
+    # Redirect to the session page
     return render(request, 'telemedicine/video_session.html', {
         'appointment': appointment,
         'session': active_session,
@@ -631,12 +628,12 @@ def end_video_session(request, session_id):
     session = get_object_or_404(VideoSession, id=session_id)
     appointment = session.appointment
     
-    # Yetki kontrolü
+    # Authorization check
     if not (request.user == appointment.doctor or request.user == appointment.patient):
         messages.error(request, "You do not have permission for this operation.")
         return JsonResponse({'status': 'error', 'message': 'Permission error'})
     
-    # Görüşmeyi sonlandır
+    # End the session
     if not session.end_time:
         session.end_time = timezone.now()
         session.ended_by = request.user
@@ -654,18 +651,18 @@ class TelemedicineAppointmentListView(LoginRequiredMixin, ListView):
         user = self.request.user
         queryset = TelemedicineAppointment.objects.all()
         
-        # Kullanıcı tipine göre filtrele
+        # Filter by user type
         if user.is_patient():
             queryset = queryset.filter(patient=user)
         elif user.is_doctor():
             queryset = queryset.filter(doctor=user)
         
-        # Durum filtresi
+        # Status filter
         status = self.request.GET.get('status')
         if status:
             queryset = queryset.filter(status=status)
         
-        # Tarih filtresi
+        # Date filter
         date_filter = self.request.GET.get('date_filter', 'upcoming')
         today = timezone.now().date()
         
@@ -694,28 +691,151 @@ class TelemedicineAppointmentDetailView(LoginRequiredMixin, UserPassesTestMixin,
         context = super().get_context_data(**kwargs)
         appointment = self.get_object()
         
-        # Belgeleri ekle
+        # Add documents
         context['documents'] = TelemedDocument.objects.filter(appointment=appointment)
         
-        # Reçeteleri ekle
+        # Add prescriptions
         context['prescriptions'] = TelemedPrescription.objects.filter(appointment=appointment)
         
-        # Notları ekle
+        # Add notes
         context['notes'] = TelemedNote.objects.filter(appointment=appointment)
         
-        # Görüşme geçmişini ekle
+        # Add session history
         context['sessions'] = VideoSession.objects.filter(appointment=appointment)
         
-        # Aktif görüşme var mı?
+        # Is there an active session?
         context['active_session'] = VideoSession.objects.filter(
             appointment=appointment,
             end_time__isnull=True
         ).first()
         
-        # Formları ekle
+        # Add forms
         if self.request.user == appointment.doctor:
             context['document_form'] = TelemedDocumentForm()
             context['prescription_form'] = TelemedPrescriptionForm()
             context['note_form'] = TelemedNoteForm()
         
         return context
+
+
+@login_required
+def upload_telemed_document(request, appointment_id):
+    appointment = get_object_or_404(TelemedicineAppointment, id=appointment_id)
+    
+    if request.method == 'POST':
+        form = TelemedDocumentForm(request.POST, request.FILES)
+        if form.is_valid():
+            document = form.save(commit=False)
+            document.appointment = appointment
+            document.uploaded_by = request.user
+            document.save()
+            
+            messages.success(request, "Document uploaded successfully.")
+        else:
+            messages.error(request, "Error uploading document.")
+    
+    return redirect('telemedicine:appointment-detail', pk=appointment_id)
+
+
+@login_required
+def create_telemed_prescription(request, appointment_id):
+    appointment = get_object_or_404(TelemedicineAppointment, id=appointment_id)
+    
+    if request.method == 'POST':
+        form = TelemedPrescriptionForm(request.POST)
+        if form.is_valid():
+            prescription = form.save(commit=False)
+            prescription.appointment = appointment
+            prescription.created_by = request.user
+            prescription.save()
+            
+            messages.success(request, "Prescription created successfully.")
+        else:
+            messages.error(request, "Error creating prescription.")
+    
+    return redirect('telemedicine:appointment-detail', pk=appointment_id)
+
+
+@login_required
+def create_telemed_note(request, appointment_id):
+    appointment = get_object_or_404(TelemedicineAppointment, id=appointment_id)
+    
+    if request.method == 'POST':
+        form = TelemedNoteForm(request.POST)
+        if form.is_valid():
+            note = form.save(commit=False)
+            note.appointment = appointment
+            note.created_by = request.user
+            note.save()
+            
+            messages.success(request, "Note created successfully.")
+        else:
+            messages.error(request, "Error creating note.")
+    
+    return redirect('telemedicine:appointment-detail', pk=appointment_id)
+
+
+class TeleconsultationAnalyticsView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+    template_name = 'telemedicine/analytics.html'
+    
+    def test_func(self):
+        return self.request.user.is_doctor() or self.request.user.is_admin_user()
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Last 30 days
+        end_date = timezone.now().date()
+        start_date = end_date - timezone.timedelta(days=30)
+        
+        consultations = TeleMedicineConsultation.objects.filter(
+            scheduled_start_time__date__range=[start_date, end_date]
+        )
+        
+        # Doctor filter
+        if self.request.user.is_doctor():
+            consultations = consultations.filter(appointment__doctor=self.request.user)
+        
+        context['total_consultations'] = consultations.count()
+        context['completed_consultations'] = consultations.filter(status='completed').count()
+        context['cancelled_consultations'] = consultations.filter(status='cancelled').count()
+        
+        # Average duration
+        completed = consultations.filter(status='completed', duration_minutes__isnull=False)
+        if completed.exists():
+            total_duration = sum(c.duration_minutes for c in completed)
+            context['average_duration'] = total_duration / completed.count()
+        else:
+            context['average_duration'] = 0
+        
+        # Daily statistics
+        daily_stats = consultations.values('scheduled_start_time__date').annotate(
+            count=models.Count('id')
+        ).order_by('scheduled_start_time__date')
+        
+        context['daily_stats_labels'] = [
+            item['scheduled_start_time__date'].strftime('%d.%m') for item in daily_stats
+        ]
+        context['daily_stats_data'] = [item['count'] for item in daily_stats]
+        
+        return context
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def webrtc_signal(request, session_id):
+    """
+    WebRTC signaling server (simple)
+    """
+    try:
+        data = json.loads(request.body)
+        # This part should be integrated with a real WebRTC signaling server
+        # For example, a WebSocket server or Redis pub/sub can be used
+        print(f"Received signal for session {session_id}: {data}")
+        return JsonResponse({'status': 'ok'})
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+

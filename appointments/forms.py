@@ -23,7 +23,7 @@ class DoctorAvailabilityForm(forms.ModelForm):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Sadece doktor tipi kullanıcıları göster
+        # Show only users of type doctor
         self.fields['doctor'].queryset = User.objects.filter(user_type='doctor')
         
     def clean(self):
@@ -32,7 +32,7 @@ class DoctorAvailabilityForm(forms.ModelForm):
         end_time = cleaned_data.get('end_time')
         
         if start_time and end_time and start_time >= end_time:
-            raise forms.ValidationError(_('Başlangıç saati bitiş saatinden önce olmalıdır.'))
+            raise forms.ValidationError(_('Start time must be before end time.'))
         
         return cleaned_data
 
@@ -55,10 +55,10 @@ class DoctorTimeOffForm(forms.ModelForm):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Sadece doktor tipi kullanıcıları göster
+        # Show only users of type doctor
         self.fields['doctor'].queryset = User.objects.filter(user_type='doctor')
         
-        # İsteğe bağlı alanlar
+        # Optional fields
         self.fields['reason'].required = False
         self.fields['start_time'].required = False
         self.fields['end_time'].required = False
@@ -72,14 +72,14 @@ class DoctorTimeOffForm(forms.ModelForm):
         end_time = cleaned_data.get('end_time')
         
         if start_date and end_date and start_date > end_date:
-            raise forms.ValidationError(_('Başlangıç tarihi bitiş tarihinden önce olmalıdır.'))
+            raise forms.ValidationError(_('Start date must be before end date.'))
         
         if not is_full_day:
             if not start_time:
-                self.add_error('start_time', _('Tam gün izin değilse başlangıç saati gereklidir.'))
+                self.add_error('start_time', _('Start time is required if not a full day off.'))
             if not end_time:
-                self.add_error('end_time', _('Tam gün izin değilse bitiş saati gereklidir.'))
+                self.add_error('end_time', _('End time is required if not a full day off.'))
             elif start_time and end_time and start_time >= end_time:
-                raise forms.ValidationError(_('Başlangıç saati bitiş saatinden önce olmalıdır.'))
+                raise forms.ValidationError(_('Start time must be before end time.'))
         
         return cleaned_data

@@ -16,7 +16,7 @@ User = settings.AUTH_USER_MODEL
 
 class LabTestListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     """
-    Laboratuvar testleri listesi görünümü.
+    Laboratory tests list view.
     """
     model = LabTest
     template_name = 'treatments/lab_test_list.html'
@@ -58,7 +58,7 @@ class LabTestListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
 
 class LabTestDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     """
-    Laboratuvar testi detay görünümü.
+    Laboratory test detail view.
     """
     model = LabTest
     template_name = 'treatments/lab_test_detail.html'
@@ -76,55 +76,55 @@ class LabTestDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
         context = super().get_context_data(**kwargs)
         lab_test = self.get_object()
         
-        # Eğer test sonucu varsa ve numerik değer içeriyorsa, geçmiş sonuçları al
+        # If the test result exists and contains a numeric value, get the past results
         if lab_test.result and lab_test.patient:
             try:
-                # Aynı isimli testler için geçmiş sonuçları al
+                # Get past results for tests with the same name
                 previous_tests = LabTest.objects.filter(
                     patient=lab_test.patient,
                     test_name=lab_test.test_name,
                     status='completed'
                 ).exclude(id=lab_test.id).order_by('requested_date')
                 
-                # Eğer sonuçlar varsa ve numerik değerler içeriyorsa, grafik verilerini hazırla
+                # If there are results and they contain numeric values, prepare the chart data
                 if previous_tests.exists() and all(test.result for test in previous_tests):
                     dates = [test.result.created_at.strftime('%d.%m.%Y') for test in previous_tests]
                     dates.append(lab_test.result.created_at.strftime('%d.%m.%Y'))
                     
-                    # Sonuç değerlerini parslamaya çalış
+                    # Try to parse the result values
                     import re
                     values = []
                     unit = ''
                     reference_min = 0
                     reference_max = 0
                     
-                    # Mevcut testin referans aralığını bul
+                    # Find the reference range of the current test
                     if lab_test.result.reference_values:
                         ref_match = re.search(r'(\d+\.?\d*)\s*-\s*(\d+\.?\d*)', lab_test.result.reference_values)
                         if ref_match:
                             reference_min = float(ref_match.group(1))
                             reference_max = float(ref_match.group(2))
                     
-                    # Birim bilgisini bul
+                    # Find the unit information
                     if lab_test.result.result_text:
                         unit_match = re.search(r'(\d+\.?\d*)\s*([a-zA-Z/]+)', lab_test.result.result_text)
                         if unit_match:
                             unit = unit_match.group(2)
                     
-                    # Geçmiş test sonuçlarını parsla
+                    # Parse past test results
                     for test in previous_tests:
                         if test.result and test.result.result_text:
                             value_match = re.search(r'(\d+\.?\d*)', test.result.result_text)
                             if value_match:
                                 values.append(float(value_match.group(1)))
                     
-                    # Mevcut test sonucunu parsla
+                    # Parse the current test result
                     if lab_test.result.result_text:
                         value_match = re.search(r'(\d+\.?\d*)', lab_test.result.result_text)
                         if value_match:
                             values.append(float(value_match.group(1)))
                     
-                    # Eğer değerler başarıyla parse edildiyse, grafik verilerini ekle
+                    # If the values are successfully parsed, add the chart data
                     if len(values) == len(dates) and len(values) > 0:
                         context['lab_results_chart_data'] = {
                             'dates': dates,
@@ -136,21 +136,21 @@ class LabTestDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
                             }
                         }
             except Exception as e:
-                # Hata durumunda grafik verilerini hazırlama
+                # Do not prepare chart data in case of error
                 print(f"Error processing lab results chart data: {e}")
         
         return context
 
 class LabTestCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     """
-    Laboratuvar testi oluşturma görünümü.
+    Laboratory test creation view.
     """
     model = LabTest
     form_class = LabTestForm
     template_name = 'treatments/lab_test_form.html'
     
     def test_func(self):
-        # Sadece doktorlar, adminler ve resepsiyonistler ekleyebilir
+        # Only doctors, admins and receptionists can add
         user = self.request.user
         return user.is_doctor() or user.is_admin_user() or user.is_receptionist()
     
@@ -183,7 +183,7 @@ class LabTestCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         if patient_id:
             context['patient'] = get_object_or_404(User, id=patient_id)
             
-        context['title'] = _('Yeni Laboratuvar Testi İste')
+        context['title'] = _('Request New Lab Test')
         return context
     
     def get_success_url(self):
@@ -195,12 +195,12 @@ class LabTestCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     
     def form_valid(self, form):
         response = super().form_valid(form)
-        messages.success(self.request, _('Laboratuvar testi başarıyla oluşturuldu.'))
+        messages.success(self.request, _('Lab test created successfully.'))
         return response
 
 class LabTestUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     """
-    Laboratuvar testi güncelleme görünümü.
+    Laboratory test update view.
     """
     model = LabTest
     form_class = LabTestForm
@@ -209,14 +209,14 @@ class LabTestUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     def test_func(self):
         lab_test = self.get_object()
         user = self.request.user
-        # Sadece isteyen doktor veya adminler güncelleyebilir
+        # Only the requesting doctor or admins can update
         if user.is_doctor():
             return lab_test.doctor == user
         return user.is_admin_user()
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = _('Laboratuvar Testi Güncelle')
+        context['title'] = _('Update Lab Test')
         return context
     
     def get_success_url(self):
@@ -224,12 +224,12 @@ class LabTestUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     
     def form_valid(self, form):
         response = super().form_valid(form)
-        messages.success(self.request, _('Laboratuvar testi başarıyla güncellendi.'))
+        messages.success(self.request, _('Lab test updated successfully.'))
         return response
 
 class LabTestDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     """
-    Laboratuvar testi silme görünümü.
+    Laboratory test deletion view.
     """
     model = LabTest
     template_name = 'treatments/lab_test_confirm_delete.html'
@@ -237,7 +237,7 @@ class LabTestDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     def test_func(self):
         lab_test = self.get_object()
         user = self.request.user
-        # Sadece isteyen doktor veya adminler silebilir
+        # Only the requesting doctor or admins can delete
         if user.is_doctor():
             return lab_test.doctor == user
         return user.is_admin_user()
@@ -249,19 +249,19 @@ class LabTestDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     
     def delete(self, request, *args, **kwargs):
         response = super().delete(request, *args, **kwargs)
-        messages.success(self.request, _('Laboratuvar testi başarıyla silindi.'))
+        messages.success(self.request, _('Lab test deleted successfully.'))
         return response
 
 class TestResultCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     """
-    Test sonucu oluşturma görünümü.
+    Test result creation view.
     """
     model = TestResult
     form_class = TestResultForm
     template_name = 'treatments/test_result_form.html'
     
     def test_func(self):
-        # Sadece doktorlar, laborantlar ve adminler ekleyebilir
+        # Only doctors, lab technicians and admins can add
         user = self.request.user
         return user.is_doctor() or user.is_admin_user() or user.is_receptionist()
     
@@ -282,7 +282,7 @@ class TestResultCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         if lab_test_id:
             context['lab_test'] = get_object_or_404(LabTest, id=lab_test_id)
             
-        context['title'] = _('Test Sonucu Ekle')
+        context['title'] = _('Add Test Result')
         return context
     
     def get_success_url(self):
@@ -294,25 +294,25 @@ class TestResultCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         form.instance.lab_test.save()
         
         response = super().form_valid(form)
-        messages.success(self.request, _('Test sonucu başarıyla eklendi.'))
+        messages.success(self.request, _('Test result added successfully.'))
         return response
 
 class TestResultUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     """
-    Test sonucu güncelleme görünümü.
+    Test result update view.
     """
     model = TestResult
     form_class = TestResultForm
     template_name = 'treatments/test_result_form.html'
     
     def test_func(self):
-        # Sadece doktorlar, laborantlar ve adminler güncelleyebilir
+        # Only doctors, lab technicians and admins can update
         user = self.request.user
         return user.is_doctor() or user.is_admin_user() or user.is_receptionist()
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = _('Test Sonucu Güncelle')
+        context['title'] = _('Update Test Result')
         context['lab_test'] = self.object.lab_test
         return context
     
@@ -321,5 +321,5 @@ class TestResultUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     
     def form_valid(self, form):
         response = super().form_valid(form)
-        messages.success(self.request, _('Test sonucu başarıyla güncellendi.'))
+        messages.success(self.request, _('Test result updated successfully.'))
         return response

@@ -7,7 +7,7 @@ from django.utils.translation import gettext_lazy as _
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.core.paginator import Paginator
-from django.http import FileResponse
+from django.http import FileResponse, Http404
 from django.utils import timezone
 
 
@@ -115,7 +115,7 @@ class MedicalImageCreateView(LoginRequiredMixin, PermissionRequiredMixin, Create
         return reverse('medical-image-list')
     
     def form_valid(self, form):
-        messages.success(self.request, _("Tıbbi görüntü başarıyla eklendi."))
+        messages.success(self.request, _("Medical image added successfully."))
         return super().form_valid(form)
 
 class MedicalImageUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
@@ -131,7 +131,7 @@ class MedicalImageUpdateView(LoginRequiredMixin, PermissionRequiredMixin, Update
         return reverse('medical-image-detail', kwargs={'pk': self.object.pk})
     
     def form_valid(self, form):
-        messages.success(self.request, _("Tıbbi görüntü başarıyla güncellendi."))
+        messages.success(self.request, _("Medical image updated successfully."))
         return super().form_valid(form)
 
 class MedicalImageDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
@@ -148,7 +148,7 @@ class MedicalImageDeleteView(LoginRequiredMixin, PermissionRequiredMixin, Delete
         return reverse('medical-image-list')
     
     def delete(self, request, *args, **kwargs):
-        messages.success(self.request, _("Tıbbi görüntü başarıyla silindi."))
+        messages.success(self.request, _("Medical image deleted successfully."))
         return super().delete(request, *args, **kwargs)
 
 # Report views
@@ -246,7 +246,7 @@ class ReportCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
         return reverse('report-list')
     
     def form_valid(self, form):
-        messages.success(self.request, _("Tıbbi rapor başarıyla oluşturuldu."))
+        messages.success(self.request, _("Medical report created successfully."))
         return super().form_valid(form)
 
 class ReportUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
@@ -262,7 +262,7 @@ class ReportUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
         return reverse('report-detail', kwargs={'pk': self.object.pk})
     
     def form_valid(self, form):
-        messages.success(self.request, _("Tıbbi rapor başarıyla güncellendi."))
+        messages.success(self.request, _("Medical report updated successfully."))
         return super().form_valid(form)
 
 class ReportDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
@@ -279,7 +279,7 @@ class ReportDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
         return reverse('report-list')
     
     def delete(self, request, *args, **kwargs):
-        messages.success(self.request, _("Tıbbi rapor başarıyla silindi."))
+        messages.success(self.request, _("Medical report deleted successfully."))
         return super().delete(request, *args, **kwargs)
 
 # File serving views
@@ -293,13 +293,15 @@ def serve_medical_image(request, pk):
     # Check permissions
     if not (request.user.is_staff or request.user == medical_image.patient or 
             request.user == medical_image.doctor):
-        messages.error(request, _("Bu görüntüyü görüntüleme yetkiniz yok."))
+        messages.error(request, _("You do not have permission to view this image."))
         return redirect('medical-image-detail', pk=pk)
     
     try:
         return FileResponse(medical_image.image_file.open(), content_type='image/jpeg')
+    except FileNotFoundError:
+        raise Http404("Image file not found")
     except Exception as e:
-        messages.error(request, _("Dosya açılırken bir hata oluştu: {}").format(str(e)))
+        messages.error(request, _("An error occurred while opening the file: {}").format(str(e)))
         return redirect('medical-image-detail', pk=pk)
 
 @login_required
@@ -312,15 +314,17 @@ def serve_report_file(request, pk):
     # Check permissions
     if not (request.user.is_staff or request.user == report.patient or 
             request.user == report.doctor):
-        messages.error(request, _("Bu raporu görüntüleme yetkiniz yok."))
+        messages.error(request, _("You do not have permission to view this report."))
         return redirect('report-detail', pk=pk)
     
     if not report.report_file:
-        messages.error(request, _("Bu rapor için dosya yüklenmemiş."))
+        messages.error(request, _("No file has been uploaded for this report."))
         return redirect('report-detail', pk=pk)
     
     try:
         return FileResponse(report.report_file.open(), content_type='application/pdf')
+    except FileNotFoundError:
+        raise Http404("Report file not found")
     except Exception as e:
-        messages.error(request, _("Dosya açılırken bir hata oluştu: {}").format(str(e)))
+        messages.error(request, _("An error occurred while opening the file: {}").format(str(e)))
         return redirect('report-detail', pk=pk)

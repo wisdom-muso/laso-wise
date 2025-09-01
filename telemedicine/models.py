@@ -175,7 +175,7 @@ class VideoSession(models.Model):
         ordering = ['-start_time']
     
     def __str__(self):
-        return f"Oturum: {self.appointment} - {self.start_time}"
+        return f"Session: {self.appointment} - {self.start_time}"
     
     def get_duration(self):
         """Calculate session duration"""
@@ -211,7 +211,7 @@ class TelemedDocument(models.Model):
             ('lab_result', _('Lab Result')),
             ('prescription', _('Prescription')),
             ('medical_image', _('Medical Image')),
-            ('referral', _('Sevk')),
+            ('referral', _('Referral')),
             ('other', _('Other')),
         ],
         verbose_name=_('Document Type')
@@ -375,16 +375,16 @@ class TeleMedicineConsultation(models.Model):
     ]
     
     STATUS_CHOICES = [
-        ('scheduled', _('Zamanlandı')),
-        ('waiting', _('Bekleniyor')),
-        ('in_progress', _('Devam Ediyor')),
-        ('completed', _('Tamamlandı')),
+        ('scheduled', _('Scheduled')),
+        ('waiting', _('Waiting')),
+        ('in_progress', _('In Progress')),
+        ('completed', _('Completed')),
         ('cancelled', _('Cancelled')),
         ('no_show', _('No Show')),
-        ('technical_issue', _('Teknik Sorun')),
+        ('technical_issue', _('Technical Issue')),
     ]
     
-    # Temel bilgiler
+    # Basic information
     appointment = models.OneToOneField(
         Appointment,
         on_delete=models.CASCADE,
@@ -403,7 +403,7 @@ class TeleMedicineConsultation(models.Model):
         max_length=20,
         choices=STATUS_CHOICES,
         default='scheduled',
-        verbose_name=_('Durum')
+        verbose_name=_('Status')
     )
     
     # Video conference information
@@ -425,7 +425,7 @@ class TeleMedicineConsultation(models.Model):
         verbose_name=_('Meeting Password')
     )
     
-    # Platform bilgileri
+    # Platform information
     platform = models.CharField(
         max_length=50,
         choices=[
@@ -439,7 +439,7 @@ class TeleMedicineConsultation(models.Model):
         verbose_name=_('Platform')
     )
     
-    # Zaman bilgileri
+    # Time information
     scheduled_start_time = models.DateTimeField(
         verbose_name=_('Scheduled Start')
     )
@@ -475,17 +475,17 @@ class TeleMedicineConsultation(models.Model):
         verbose_name=_('Patient Join Time')
     )
     
-    # Teknik detaylar
+    # Technical details
     connection_quality = models.CharField(
         max_length=20,
         choices=[
             ('excellent', _('Excellent')),
             ('good', _('Good')),
-            ('fair', _('Orta')),
+            ('fair', _('Fair')),
             ('poor', _('Poor')),
         ],
         blank=True,
-        verbose_name=_('Bağlantı Kalitesi')
+        verbose_name=_('Connection Quality')
     )
     
     technical_issues = models.TextField(
@@ -531,7 +531,7 @@ class TeleMedicineConsultation(models.Model):
         verbose_name=_('Doctor Rating (1-5)')
     )
     
-    # Kayıt ve dosya paylaşımı
+    # Recording and file sharing
     is_recorded = models.BooleanField(
         default=False,
         verbose_name=_('Recording Made?')
@@ -549,7 +549,7 @@ class TeleMedicineConsultation(models.Model):
         help_text=_('List of files shared during consultation')
     )
     
-    # Güvenlik ve gizlilik
+    # Security and privacy
     is_encrypted = models.BooleanField(
         default=True,
         verbose_name=_('Encrypted?')
@@ -576,14 +576,15 @@ class TeleMedicineConsultation(models.Model):
         verbose_name_plural = _('Telemedicine Consultations')
         ordering = ['-scheduled_start_time']
     
+
     def __str__(self):
         return f"{self.appointment.patient} - {self.appointment.doctor} - {self.scheduled_start_time}"
     
     def get_duration(self):
-        """Calculate consultation duration"""
+        """Calculate consultation duration in minutes"""
         if self.actual_start_time and self.end_time:
             duration = self.end_time - self.actual_start_time
-            return duration.total_seconds() / 60  # Dakika cinsinden
+            return duration.total_seconds() / 60
         return 0
     
     def is_active(self):
@@ -599,11 +600,11 @@ class TeleMedicineConsultation(models.Model):
         return user in [self.appointment.doctor, self.appointment.patient]
     
     def get_join_url(self):
-        """Katılım URL'sini oluştur"""
+        """Generate join URL"""
         if self.meeting_url:
             return self.meeting_url
         
-        # Internal sistem için URL oluştur
+        # Generate URL for internal system
         return f"/telemedicine/join/{self.meeting_id}/"
     
     def mark_as_started(self, user):
@@ -625,7 +626,7 @@ class TeleMedicineConsultation(models.Model):
             self.end_time = timezone.now()
             self.status = 'completed'
             
-            # Süreyi hesapla
+            # Calculate duration
             if self.actual_start_time:
                 duration = self.end_time - self.actual_start_time
                 self.duration_minutes = int(duration.total_seconds() / 60)
@@ -692,7 +693,7 @@ class TeleMedicineMessage(models.Model):
 
 class TeleMedicineSettings(models.Model):
     """
-    Telemedicine ayarları
+    Telemedicine settings
     """
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
@@ -715,15 +716,15 @@ class TeleMedicineSettings(models.Model):
     video_quality = models.CharField(
         max_length=20,
         choices=[
-            ('low', _('Düşük (360p)')),
-            ('medium', _('Orta (720p)')),
-            ('high', _('Yüksek (1080p)')),
+            ('low', _('Low (360p)')),
+            ('medium', _('Medium (720p)')),
+            ('high', _('High (1080p)')),
         ],
         default='medium',
         verbose_name=_('Video Quality')
     )
     
-    # Bildirim ayarları
+    # Notification settings
     consultation_reminders = models.BooleanField(
         default=True,
         verbose_name=_('Consultation Reminders')
@@ -744,7 +745,7 @@ class TeleMedicineSettings(models.Model):
         verbose_name=_('SMS Notifications')
     )
     
-    # Güvenlik ayarları
+    # Security settings
     require_waiting_room = models.BooleanField(
         default=True,
         verbose_name=_('Waiting Room Required')
@@ -757,10 +758,10 @@ class TeleMedicineSettings(models.Model):
     
     allow_file_sharing = models.BooleanField(
         default=True,
-        verbose_name=_('Dosya Paylaşım İzni')
+        verbose_name=_('File Sharing Permission')
     )
     
-    # Gelişmiş ayarlar
+    # Advanced settings
     max_consultation_duration = models.PositiveIntegerField(
         default=60,
         verbose_name=_('Maximum Consultation Duration (Minutes)')
@@ -777,3 +778,4 @@ class TeleMedicineSettings(models.Model):
     
     def __str__(self):
         return f"{self.user} Settings"
+
