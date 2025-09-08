@@ -7,12 +7,13 @@ from django.contrib import messages
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 from django.utils import timezone
+from django.contrib.auth import get_user_model
 
 from .models_lab import LabTest, TestResult
 from .forms import LabTestForm, TestResultForm
 from treatments.models import Treatment
 
-User = settings.AUTH_USER_MODEL
+User = get_user_model()
 
 class LabTestListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     """

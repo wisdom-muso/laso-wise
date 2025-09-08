@@ -697,7 +697,17 @@ def ai_chat(request):
     AI Chat endpoint for processing user messages
     """
     try:
-        message = request.POST.get('message', '').strip()
+        import json
+        from .ai_service import ai_service
+        
+        # Handle both JSON and form data
+        if request.content_type == 'application/json':
+            data = json.loads(request.body)
+            message = data.get('message', '').strip()
+            session_id = data.get('session_id')
+        else:
+            message = request.POST.get('message', '').strip()
+            session_id = request.POST.get('session_id')
         
         if not message:
             return JsonResponse({
@@ -705,19 +715,25 @@ def ai_chat(request):
                 'error': 'No message provided'
             })
         
-        # Simple AI response for now - this can be enhanced with actual AI integration
-        ai_response = f"Thank you for your message: '{message}'. I'm currently a prototype AI assistant. For real medical advice, please consult with your healthcare provider."
+        # Use the enhanced AI service
+        result = ai_service.chat(request.user, message, session_id)
         
         return JsonResponse({
-            'success': True,
-            'response': ai_response,
+            'success': result['success'],
+            'response': result.get('response', ''),
+            'session_id': result.get('session_id'),
+            'conversation_id': result.get('conversation_id'),
+            'tokens_used': result.get('tokens_used', 0),
+            'response_time': result.get('response_time', 0),
+            'error': result.get('error'),
             'timestamp': timezone.now().isoformat()
         })
         
     except Exception as e:
         return JsonResponse({
             'success': False,
-            'error': 'An error occurred processing your request'
+            'error': 'An error occurred processing your request',
+            'response': 'I apologize, but I encountered an error. Please try again or contact support if the issue persists.'
         })
 
 class ProfileSettingsView(LoginRequiredMixin, UpdateView):

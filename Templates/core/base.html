@@ -31,6 +31,9 @@
     <!-- Complete Teal Theme Override -->
     <link href="{% static 'css/teal_theme_override.css' %}" rel="stylesheet" type="text/css" />
     
+    <!-- Dark Mode CSS -->
+    <link href="{% static 'css/dark_mode.css' %}" rel="stylesheet" type="text/css" />
+    
     <!-- Custom CSS -->
     <style>
         /* Teal Color Theme Override */
@@ -509,6 +512,61 @@
     
     <!-- Theme JavaScript -->
     <script src="{% static 'assets/js/theme.js' %}"></script>
+    
+    <!-- Dark Mode JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const themeToggle = document.getElementById('theme-toggle');
+            const moonIcon = themeToggle.querySelector('.fa-moon');
+            const sunIcon = themeToggle.querySelector('.fa-sun');
+            const body = document.body;
+            
+            // Get current theme from localStorage or default to light
+            const currentTheme = localStorage.getItem('theme') || 'light';
+            
+            // Apply current theme
+            if (currentTheme === 'dark') {
+                body.setAttribute('data-bs-theme', 'dark');
+                moonIcon.style.display = 'none';
+                sunIcon.style.display = 'inline';
+            } else {
+                body.setAttribute('data-bs-theme', 'light');
+                moonIcon.style.display = 'inline';
+                sunIcon.style.display = 'none';
+            }
+            
+            // Theme toggle functionality
+            themeToggle.addEventListener('click', function() {
+                const currentTheme = body.getAttribute('data-bs-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                
+                body.setAttribute('data-bs-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                
+                if (newTheme === 'dark') {
+                    moonIcon.style.display = 'none';
+                    sunIcon.style.display = 'inline';
+                } else {
+                    moonIcon.style.display = 'inline';
+                    sunIcon.style.display = 'none';
+                }
+                
+                // Optional: Send theme preference to server
+                fetch('{% url "toggle-theme" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({
+                        dark_mode: newTheme === 'dark'
+                    })
+                }).catch(error => {
+                    console.log('Theme preference not saved to server:', error);
+                });
+            });
+        });
+    </script>
     
     <!-- Custom JavaScript -->
     {% block extra_js %}{% endblock %}

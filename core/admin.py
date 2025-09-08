@@ -8,6 +8,9 @@ from .models_communication import CommunicationNotification, Message, EmailTempl
 from .models_notifications import Notification, NotificationType, NotificationTemplate, NotificationLog
 from .models_sessions import LoginSession
 
+# Import AI admin configurations
+from .admin_ai import AIConfigurationAdmin, AIConversationAdmin, AIPromptTemplateAdmin
+
 @admin.register(CommunicationNotification)
 class CommunicationNotificationAdmin(admin.ModelAdmin):
     list_display = ('user', 'notification_type', 'title', 'is_read', 'created_at')

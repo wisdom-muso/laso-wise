@@ -35,6 +35,8 @@ CSRF_TRUSTED_ORIGINS = [
     'https://work-2-piihhelknqfzruzd.prod-runtime.all-hands.dev',
     'https://work-1-oaiiljcdqikvohfq.prod-runtime.all-hands.dev',
     'https://work-2-oaiiljcdqikvohfq.prod-runtime.all-hands.dev',
+    'https://work-1-rpqxmrerpfzteyap.prod-runtime.all-hands.dev',
+    'https://work-2-rpqxmrerpfzteyap.prod-runtime.all-hands.dev',
     'http://localhost:12000',
     'http://localhost:12001',
     'http://127.0.0.1:12000',
@@ -163,23 +165,25 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# WhiteNoise configuration for static files - Simplified for stability
+# WhiteNoise configuration for static files - Enhanced for production stability
 # For Django 4.2+ use STORAGES setting, fall back to STATICFILES_STORAGE for older versions
 STORAGES = {
     'default': {
         'BACKEND': 'django.core.files.storage.FileSystemStorage',
     },
     'staticfiles': {
-        'BACKEND': 'whitenoise.storage.CompressedStaticFilesStorage',
+        'BACKEND': 'whitenoise.storage.StaticFilesStorage',
     },
 }
 
 # Fallback for older Django versions  
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+STATICFILES_STORAGE = 'whitenoise.storage.StaticFilesStorage'
 
-# WhiteNoise settings - More conservative approach
+# WhiteNoise settings - Enhanced for production
 WHITENOISE_USE_FINDERS = True
 WHITENOISE_AUTOREFRESH = DEBUG
+WHITENOISE_SKIP_COMPRESS_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'zip', 'gz', 'tgz', 'bz2', 'tbz', 'xz', 'br', 'map']
+WHITENOISE_MAX_AGE = 31536000  # 1 year
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -465,6 +469,19 @@ if REDIS_URL:
     CELERY_RESULT_SERIALIZER = 'json'
     CELERY_TIMEZONE = TIME_ZONE
     CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+    
+    # Enhanced Celery Beat configuration for stability
+    CELERY_BEAT_SCHEDULE_FILENAME = '/tmp/celerybeat-schedule'
+    CELERY_WORKER_HIJACK_ROOT_LOGGER = False
+    CELERY_WORKER_LOG_FORMAT = '[%(asctime)s: %(levelname)s/%(processName)s] %(message)s'
+    CELERY_WORKER_TASK_LOG_FORMAT = '[%(asctime)s: %(levelname)s/%(processName)s][%(task_name)s(%(task_id)s)] %(message)s'
+    
+    # Database connection settings for Celery
+    CELERY_DATABASE_ENGINE_OPTIONS = {
+        'isolation_level': None,
+        'pool_pre_ping': True,
+        'pool_recycle': 300,
+    }
 
 LOG_TO_FILE = config('LOG_TO_FILE', default=False, cast=bool)
 
