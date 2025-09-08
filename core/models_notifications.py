@@ -145,14 +145,14 @@ class Notification(models.Model):
         return f"{self.recipient} - {self.title}"
     
     def mark_as_read(self):
-        """Bildirimi okundu olarak işaretle"""
+        """Mark notification as read"""
         if not self.is_read:
             self.is_read = True
             self.read_at = timezone.now()
             self.save(update_fields=['is_read', 'read_at'])
     
     def get_priority_color(self):
-        """Öncelik seviyesine göre renk döndür"""
+        """Return color based on priority level"""
         colors = {
             'low': 'secondary',
             'normal': 'primary', 
@@ -162,7 +162,7 @@ class Notification(models.Model):
         return colors.get(self.priority, 'primary')
     
     def get_icon(self):
-        """Bildirim türüne göre ikon döndür"""
+        """Return icon based on notification type"""
         icons = {
             'appointment_reminder': 'calendar-alt',
             'appointment_cancelled': 'calendar-times',

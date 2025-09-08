@@ -6,6 +6,7 @@ from .models_theme import UserThemePreference
 from .models_statistics import DoctorPerformanceMetric
 from .models_communication import CommunicationNotification, Message, EmailTemplate
 from .models_notifications import Notification, NotificationType, NotificationTemplate, NotificationLog
+from .models_sessions import LoginSession
 
 @admin.register(CommunicationNotification)
 class CommunicationNotificationAdmin(admin.ModelAdmin):
@@ -60,3 +61,14 @@ class UserThemePreferenceAdmin(admin.ModelAdmin):
     list_display = ('user', 'theme', 'sidebar_mode', 'updated_at')
     list_filter = ('theme', 'sidebar_mode')
     search_fields = ('user__username', 'user__email')
+
+@admin.register(LoginSession)
+class LoginSessionAdmin(admin.ModelAdmin):
+    list_display = ('user', 'login_time', 'logout_time', 'duration_display', 'ip_address', 'is_active')
+    list_filter = ('is_active', 'login_time', 'user__user_type')
+    search_fields = ('user__username', 'user__email', 'user__first_name', 'user__last_name', 'ip_address')
+    date_hierarchy = 'login_time'
+    readonly_fields = ('duration_display', 'created_at', 'updated_at')
+    
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('user')

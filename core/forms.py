@@ -8,6 +8,7 @@ from appointments.models import Appointment
 from treatments.models import Treatment, Prescription
 from treatments.models_medications import Medication, MedicationInteraction
 from treatments.models_medical_history import MedicalHistory
+from .models_theme import UserThemePreference
 
 User = get_user_model()
 
@@ -137,7 +138,7 @@ class TreatmentForm(forms.ModelForm):
 
 class PrescriptionForm(forms.ModelForm):
     """
-    Reçete oluşturma ve düzenleme formu.
+    Prescription creation and editing form.
     """
     medication = forms.ModelChoiceField(
         queryset=Medication.objects.all().order_by('name'),
@@ -159,7 +160,7 @@ class PrescriptionForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
-        # İlk gelen instance varsa ve medication değeri doluysa, name alanını doldur
+        # If instance exists and has medication value, populate name field
         if self.instance and self.instance.pk and self.instance.medication:
             self.fields['name'].initial = self.instance.medication.name
             self.fields['medication'].initial = self.instance.medication
@@ -169,7 +170,7 @@ class PrescriptionForm(forms.ModelForm):
         medication = cleaned_data.get('medication')
         name = cleaned_data.get('name')
         
-        # Eğer ilaç veritabanından seçilmişse, ilaç adını otomatik doldur
+        # If medication is selected from database, auto-populate medication name
         if medication and not name:
             cleaned_data['name'] = medication.name
         
@@ -188,13 +189,13 @@ class DoctorCreationForm(forms.ModelForm):
     Doctor creation form
     """
     password1 = forms.CharField(
-        label=_('Şifre'),
-        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': _('Şifre')}),
+        label=_('Password'),
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': _('Password')}),
         strip=False,
     )
     password2 = forms.CharField(
-        label=_('Şifre (Tekrar)'),
-        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': _('Şifre (Tekrar)')}),
+        label=_('Password (Repeat)'),
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': _('Password (Repeat)')}),
         strip=False,
     )
     
@@ -202,9 +203,9 @@ class DoctorCreationForm(forms.ModelForm):
         model = User
         fields = ['username', 'first_name', 'last_name', 'email', 'specialization', 'password1', 'password2']
         widgets = {
-            'username': forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Kullanıcı Adı')}),
-            'first_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Ad')}),
-            'last_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Soyad')}),
+            'username': forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Username')}),
+            'first_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('First Name')}),
+            'last_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Last Name')}),
             'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': _('Email')}),
             'specialization': forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Specialization')}),
         }
@@ -213,7 +214,7 @@ class DoctorCreationForm(forms.ModelForm):
         password1 = self.cleaned_data.get("password1")
         password2 = self.cleaned_data.get("password2")
         if password1 and password2 and password1 != password2:
-            raise forms.ValidationError(_("Şifreler eşleşmiyor."))
+            raise forms.ValidationError(_("Passwords do not match."))
         return password2
     
     def save(self, commit=True):
@@ -232,8 +233,8 @@ class DoctorUpdateForm(forms.ModelForm):
         model = User
         fields = ['first_name', 'last_name', 'email', 'specialization', 'phone_number']
         widgets = {
-            'first_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Ad')}),
-            'last_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Soyad')}),
+            'first_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('First Name')}),
+            'last_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Last Name')}),
             'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': _('Email')}),
             'specialization': forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Specialization')}),
             'phone_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Phone')}),
@@ -264,4 +265,47 @@ class MedicalHistoryForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Show only patient type users
-        self.fields['patient'].queryset = User.objects.filter(user_type='patient') 
+        self.fields['patient'].queryset = User.objects.filter(user_type='patient')
+
+class ProfileSettingsForm(forms.ModelForm):
+    """
+    Profile settings form for updating user profile and preferences.
+    """
+    theme = forms.ChoiceField(
+        choices=UserThemePreference.THEME_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        label=_('Theme Preference'),
+        required=False
+    )
+    
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'email', 'phone_number', 'profile_picture']
+        widgets = {
+            'first_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('First Name')}),
+            'last_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Last Name')}),
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': _('Email')}),
+            'phone_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Phone Number')}),
+            'profile_picture': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Set initial theme value if user has theme preference
+        if self.instance and hasattr(self.instance, 'theme_preference'):
+            self.fields['theme'].initial = self.instance.theme_preference.theme
+        else:
+            self.fields['theme'].initial = 'light'
+    
+    def save(self, commit=True):
+        user = super().save(commit)
+        
+        # Save theme preference
+        theme = self.cleaned_data.get('theme')
+        if theme:
+            theme_preference, created = UserThemePreference.objects.get_or_create(user=user)
+            theme_preference.theme = theme
+            theme_preference.dark_mode = (theme == 'dark')
+            theme_preference.save()
+        
+        return user 

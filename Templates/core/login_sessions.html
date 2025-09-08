@@ -1,0 +1,224 @@
+{% extends 'core/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Login Sessions" %} - Laso Healthcare{% endblock %}
+
+{% block content %}
+<div class="row g-5 g-xl-10 mb-5 mb-xl-10">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="ki-outline ki-security-user fs-2 me-2"></i>
+                    {% trans "Login Sessions" %}
+                </h3>
+            </div>
+            <div class="card-body">
+                <!-- Summary Statistics -->
+                <div class="row mb-5">
+                    <div class="col-md-4">
+                        <div class="card card-flush bg-light-primary">
+                            <div class="card-body text-center">
+                                <i class="ki-outline ki-profile-user fs-2x text-primary mb-2"></i>
+                                <div class="fs-2 fw-bold text-primary">{{ total_sessions }}</div>
+                                <div class="fs-6 text-gray-600">{% trans "Total Sessions" %}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card card-flush bg-light-success">
+                            <div class="card-body text-center">
+                                <i class="ki-outline ki-check-circle fs-2x text-success mb-2"></i>
+                                <div class="fs-2 fw-bold text-success">{{ active_sessions }}</div>
+                                <div class="fs-6 text-gray-600">{% trans "Active Sessions" %}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card card-flush bg-light-info">
+                            <div class="card-body text-center">
+                                <i class="ki-outline ki-calendar-2 fs-2x text-info mb-2"></i>
+                                <div class="fs-2 fw-bold text-info">{{ today_sessions }}</div>
+                                <div class="fs-6 text-gray-600">{% trans "Today's Sessions" %}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filters -->
+                <div class="card mb-5">
+                    <div class="card-body">
+                        <form method="get" class="row g-3">
+                            <div class="col-md-3">
+                                <label class="form-label">{% trans "User Type" %}</label>
+                                <select name="user_type" class="form-select">
+                                    <option value="">{% trans "All Types" %}</option>
+                                    {% for value, label in user_types %}
+                                        <option value="{{ value }}" {% if current_user_type == value %}selected{% endif %}>
+                                            {{ label }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">{% trans "Status" %}</label>
+                                <select name="is_active" class="form-select">
+                                    <option value="">{% trans "All Sessions" %}</option>
+                                    <option value="true" {% if current_is_active == 'true' %}selected{% endif %}>
+                                        {% trans "Active" %}
+                                    </option>
+                                    <option value="false" {% if current_is_active == 'false' %}selected{% endif %}>
+                                        {% trans "Inactive" %}
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">{% trans "Search" %}</label>
+                                <input type="text" name="search" class="form-control" 
+                                       placeholder="{% trans 'Search by name, username, email, or IP...' %}"
+                                       value="{{ current_search }}">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">&nbsp;</label>
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="ki-outline ki-magnifier fs-6"></i>
+                                        {% trans "Filter" %}
+                                    </button>
+                                    <a href="{% url 'core:login-sessions' %}" class="btn btn-light">
+                                        <i class="ki-outline ki-cross fs-6"></i>
+                                        {% trans "Clear" %}
+                                    </a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Sessions Table -->
+                <div class="table-responsive">
+                    <table class="table table-row-dashed table-row-gray-300 gy-7">
+                        <thead>
+                            <tr class="fw-bold fs-6 text-gray-800">
+                                <th>{% trans "User" %}</th>
+                                <th>{% trans "Type" %}</th>
+                                <th>{% trans "Login Time" %}</th>
+                                <th>{% trans "Logout Time" %}</th>
+                                <th>{% trans "Duration" %}</th>
+                                <th>{% trans "IP Address" %}</th>
+                                <th>{% trans "Status" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for session in sessions %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="symbol symbol-35px me-3">
+                                            <div class="symbol-label bg-light-primary text-primary fs-6 fw-bold">
+                                                {{ session.user.first_name|first|upper }}{{ session.user.last_name|first|upper }}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold">{{ session.user.get_full_name }}</div>
+                                            <div class="text-muted fs-7">{{ session.user.username }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge badge-light-{% if session.user.user_type == 'doctor' %}primary{% elif session.user.user_type == 'patient' %}info{% elif session.user.user_type == 'receptionist' %}warning{% else %}success{% endif %}">
+                                        {{ session.user.get_user_type_display }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="fw-bold">{{ session.login_time|date:"M d, Y" }}</div>
+                                    <div class="text-muted fs-7">{{ session.login_time|time:"H:i:s" }}</div>
+                                </td>
+                                <td>
+                                    {% if session.logout_time %}
+                                        <div class="fw-bold">{{ session.logout_time|date:"M d, Y" }}</div>
+                                        <div class="text-muted fs-7">{{ session.logout_time|time:"H:i:s" }}</div>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="fw-bold">{{ session.duration_display }}</span>
+                                </td>
+                                <td>
+                                    <span class="text-gray-800">{{ session.ip_address|default:"-" }}</span>
+                                </td>
+                                <td>
+                                    {% if session.is_active %}
+                                        <span class="badge badge-light-success">
+                                            <i class="ki-outline ki-check-circle fs-7 me-1"></i>
+                                            {% trans "Active" %}
+                                        </span>
+                                    {% else %}
+                                        <span class="badge badge-light-secondary">
+                                            <i class="ki-outline ki-cross-circle fs-7 me-1"></i>
+                                            {% trans "Ended" %}
+                                        </span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center py-10">
+                                    <div class="text-muted">
+                                        <i class="ki-outline ki-information fs-2x mb-3"></i>
+                                        <div class="fs-5">{% trans "No login sessions found" %}</div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                {% if is_paginated %}
+                <div class="d-flex justify-content-between align-items-center mt-5">
+                    <div class="text-muted">
+                        {% blocktrans with start=page_obj.start_index end=page_obj.end_index total=paginator.count %}
+                            Showing {{ start }} to {{ end }} of {{ total }} sessions
+                        {% endblocktrans %}
+                    </div>
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?{% if current_user_type %}user_type={{ current_user_type }}&{% endif %}{% if current_is_active %}is_active={{ current_is_active }}&{% endif %}{% if current_search %}search={{ current_search }}&{% endif %}page={{ page_obj.previous_page_number }}">
+                                        <i class="ki-outline ki-left fs-6"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+                            
+                            {% for num in page_obj.paginator.page_range %}
+                                {% if page_obj.number == num %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?{% if current_user_type %}user_type={{ current_user_type }}&{% endif %}{% if current_is_active %}is_active={{ current_is_active }}&{% endif %}{% if current_search %}search={{ current_search }}&{% endif %}page={{ num }}">{{ num }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?{% if current_user_type %}user_type={{ current_user_type }}&{% endif %}{% if current_is_active %}is_active={{ current_is_active }}&{% endif %}{% if current_search %}search={{ current_search }}&{% endif %}page={{ page_obj.next_page_number }}">
+                                        <i class="ki-outline ki-right fs-6"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

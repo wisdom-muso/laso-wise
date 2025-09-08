@@ -3,9 +3,9 @@
 
 {% block title %}
     {% if form.instance.pk %}
-    {% translate "Etkileşim Düzenle" %}
+    {% translate "Edit Interaction" %}
     {% else %}
-    {% translate "Yeni İlaç Etkileşimi Ekle" %}
+    {% translate "Add New Drug Interaction" %}
     {% endif %}
 {% endblock %}
 
@@ -14,9 +14,9 @@
     <div class="mb-4">
         <h1 class="mb-0">
             {% if form.instance.pk %}
-            {% translate "Etkileşim Düzenle" %}
+            {% translate "Edit Interaction" %}
             {% else %}
-            {% translate "Yeni İlaç Etkileşimi Ekle" %}
+            {% translate "Add New Drug Interaction" %}
             {% endif %}
         </h1>
     </div>

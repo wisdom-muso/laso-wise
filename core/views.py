@@ -15,7 +15,8 @@ import json
 
 from .forms import (
     LoginForm, PatientRegistrationForm, AppointmentForm, 
-    TreatmentForm, PrescriptionFormSet, DoctorCreationForm, DoctorUpdateForm
+    TreatmentForm, PrescriptionFormSet, DoctorCreationForm, DoctorUpdateForm,
+    ProfileSettingsForm
 )
 from appointments.models import Appointment
 from treatments.models import Treatment, Prescription
@@ -718,3 +719,87 @@ def ai_chat(request):
             'success': False,
             'error': 'An error occurred processing your request'
         })
+
+class ProfileSettingsView(LoginRequiredMixin, UpdateView):
+    """
+    Profile settings view for updating user profile and theme preferences.
+    """
+    model = User
+    form_class = ProfileSettingsForm
+    template_name = 'core/profile_settings.html'
+    success_url = reverse_lazy('core:profile-settings')
+    
+    def get_object(self):
+        return self.request.user
+    
+    def form_valid(self, form):
+        messages.success(self.request, _('Profile settings updated successfully!'))
+        return super().form_valid(form)
+
+
+class LoginSessionListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+    """
+    Admin view to display login sessions
+    """
+    template_name = 'core/login_sessions.html'
+    context_object_name = 'sessions'
+    paginate_by = 50
+    
+    def test_func(self):
+        """Only allow admin users to access this view"""
+        return self.request.user.is_admin_user() or self.request.user.is_superuser
+    
+    def get_queryset(self):
+        from .models_sessions import LoginSession
+        queryset = LoginSession.objects.select_related('user').order_by('-login_time')
+        
+        # Filter by user type if specified
+        user_type = self.request.GET.get('user_type')
+        if user_type:
+            queryset = queryset.filter(user__user_type=user_type)
+        
+        # Filter by active status if specified
+        is_active = self.request.GET.get('is_active')
+        if is_active == 'true':
+            queryset = queryset.filter(is_active=True)
+        elif is_active == 'false':
+            queryset = queryset.filter(is_active=False)
+        
+        # Search by user name or IP
+        search = self.request.GET.get('search')
+        if search:
+            queryset = queryset.filter(
+                Q(user__first_name__icontains=search) |
+                Q(user__last_name__icontains=search) |
+                Q(user__username__icontains=search) |
+                Q(user__email__icontains=search) |
+                Q(ip_address__icontains=search)
+            )
+        
+        return queryset
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        from .models_sessions import LoginSession
+        
+        # Add summary statistics
+        context['total_sessions'] = LoginSession.objects.count()
+        context['active_sessions'] = LoginSession.objects.filter(is_active=True).count()
+        context['today_sessions'] = LoginSession.objects.filter(
+            login_time__date=timezone.now().date()
+        ).count()
+        
+        # Add filter options
+        context['user_types'] = [
+            ('patient', _('Patient')),
+            ('doctor', _('Doctor')),
+            ('receptionist', _('Receptionist')),
+            ('admin', _('Admin')),
+        ]
+        
+        # Preserve current filters
+        context['current_user_type'] = self.request.GET.get('user_type', '')
+        context['current_is_active'] = self.request.GET.get('is_active', '')
+        context['current_search'] = self.request.GET.get('search', '')
+        
+        return context

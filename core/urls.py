@@ -76,4 +76,10 @@ urlpatterns = [
     # AI Assistant
     path('ai-assistant/', views.ai_assistant, name='ai_assistant'),
     path('ai-chat/', views.ai_chat, name='ai_chat'),
+    
+    # Profile Settings
+    path('profile/settings/', views.ProfileSettingsView.as_view(), name='profile-settings'),
+    
+    # Admin Login Sessions
+    path('admin/login-sessions/', views.LoginSessionListView.as_view(), name='login-sessions'),
 ]

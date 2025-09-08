@@ -25,15 +25,15 @@
                     </div>
                     
                     <div class="border p-4 rounded mb-4">
-                        <p><strong>Hasta:</strong> {{ object.patient.get_full_name }}</p>
-                        <p><strong>Durum Tipi:</strong> {{ object.get_condition_type_display }}</p>
-                        <p><strong>Durum Adı/Tanımı:</strong> {{ object.condition_name }}</p>
-                        <p><strong>Tanı Tarihi:</strong> {{ object.diagnosed_date|default:"Belirtilmemiş" }}</p>
-                        <p><strong>Durum:</strong> 
+                        <p><strong>Patient:</strong> {{ object.patient.get_full_name }}</p>
+                        <p><strong>Condition Type:</strong> {{ object.get_condition_type_display }}</p>
+                        <p><strong>Condition Name/Description:</strong> {{ object.condition_name }}</p>
+                        <p><strong>Diagnosis Date:</strong> {{ object.diagnosed_date|default:"Not specified" }}</p>
+                        <p><strong>Status:</strong> 
                             {% if object.is_active %}
-                            <span class="badge badge-success">Aktif</span>
+                            <span class="badge badge-success">Active</span>
                             {% else %}
-                            <span class="badge badge-danger">Geçmiş</span>
+                            <span class="badge badge-danger">Past</span>
                             {% endif %}
                         </p>
                     </div>

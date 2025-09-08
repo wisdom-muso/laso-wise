@@ -21,7 +21,7 @@ from datetime import datetime
 from .models import TeleMedicineConsultation, TeleMedicineMessage, TeleMedicineSettings, TelemedicineAppointment, VideoSession, TelemedDocument, TelemedPrescription, TelemedNote
 from appointments.models import Appointment
 from core.models_notifications import Notification, NotificationType
-from .forms import TelemedicineAppointmentForm, TelemedDocumentForm, TelemedPrescriptionForm, TelemedNoteForm
+from .forms import TelemedicineAppointmentForm, TelemedDocumentForm, TelemedPrescriptionForm, TelemedNoteForm, AppointmentSearchForm
 
 
 class TeleMedicineConsultationListView(LoginRequiredMixin, ListView):
@@ -60,6 +60,9 @@ class TeleMedicineConsultationListView(LoginRequiredMixin, ListView):
             status='scheduled',
             scheduled_start_time__gt=timezone.now()
         ).count()
+        
+        # Add search form
+        context['search_form'] = AppointmentSearchForm(self.request.GET)
         
         return context
 

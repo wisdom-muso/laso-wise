@@ -191,10 +191,12 @@
                 </a>
                 {% endif %}
                 {% else %}
+                {% if user.is_doctor or user.is_receptionist or user.is_admin_user %}
                 <p class="text-muted">Select a patient to view their laboratory tests.</p>
                 <a href="{% url 'core:patient-list' %}" class="btn btn-primary">
                     <i class="ki-outline ki-profile-user fs-2"></i> View Patients
                 </a>
+                {% endif %}
                 {% endif %}
             </div>
             {% endif %}

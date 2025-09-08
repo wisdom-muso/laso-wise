@@ -86,7 +86,7 @@
                                 <tr>
                                     <th>Related Treatment</th>
                                     <td>
-                                        <a href="{% url 'treatment-detail' lab_test.treatment.id %}">
+                                        <a href="{% url 'core:treatment-detail' lab_test.treatment.id %}">
                                             {{ lab_test.treatment.diagnosis }} ({{ lab_test.treatment.created_at|date:"d.m.Y" }})
                                         </a>
                                     </td>
