@@ -31,8 +31,8 @@ ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,65.108.91.1
 
 # CSRF trusted origins for secure forms
 CSRF_TRUSTED_ORIGINS = [
-    'https://work-1-cldasskqizsxcsnt.prod-runtime.all-hands.dev',
-    'https://work-2-cldasskqizsxcsnt.prod-runtime.all-hands.dev',
+    'https://work-1-piihhelknqfzruzd.prod-runtime.all-hands.dev',
+    'https://work-2-piihhelknqfzruzd.prod-runtime.all-hands.dev',
     'http://localhost:12000',
     'http://localhost:12001',
     'http://127.0.0.1:12000',
@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'corsheaders',
+    'django_celery_beat',  # Celery Beat scheduler
     # Our applications
     'users',
     'appointments',
