@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # PostgreSQL Database
   db:
@@ -159,7 +157,7 @@ services:
 
   # Database Backup Service
   db-backup:
-    image: postgres:15-alpine
+    image: postgres:17-alpine
     container_name: laso_db_backup
     restart: "no"
     environment:
