@@ -111,6 +111,6 @@ class MedicationInteraction(models.Model):
 #         null=True,
 #         blank=True,
 #         related_name='prescriptions',
-#         verbose_name=_('İlaç')
+#         verbose_name=_('Medication')
 #     )
 #     ...

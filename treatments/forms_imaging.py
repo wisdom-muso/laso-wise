@@ -123,23 +123,23 @@ class MedicalImageSearchForm(forms.Form):
     Form for searching medical images
     """
     image_type = forms.ChoiceField(
-        label=_('Görüntü Tipi'),
+        label=_('Image Type'),
         required=False,
-        choices=[('', _('Tümü'))] + MedicalImage.IMAGE_TYPE_CHOICES,
+        choices=[('', _('All'))] + MedicalImage.IMAGE_TYPE_CHOICES,
         widget=forms.Select(attrs={'class': 'form-select'})
     )
     body_part = forms.CharField(
-        label=_('Vücut Bölgesi'),
+        label=_('Body Part'),
         required=False,
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Vücut bölgesi ara...')})
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Search body part...')})
     )
     date_from = forms.DateField(
-        label=_('Başlangıç Tarihi'),
+        label=_('Start Date'),
         required=False,
         widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'})
     )
     date_to = forms.DateField(
-        label=_('Bitiş Tarihi'),
+        label=_('End Date'),
         required=False,
         widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'})
     )
@@ -149,23 +149,23 @@ class ReportSearchForm(forms.Form):
     Form for searching medical reports
     """
     report_type = forms.ChoiceField(
-        label=_('Rapor Tipi'),
+        label=_('Report Type'),
         required=False,
-        choices=[('', _('Tümü'))] + Report.REPORT_TYPE_CHOICES,
+        choices=[('', _('All'))] + Report.REPORT_TYPE_CHOICES,
         widget=forms.Select(attrs={'class': 'form-select'})
     )
     title = forms.CharField(
-        label=_('Başlık'),
+        label=_('Title'),
         required=False,
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Rapor başlığı ara...')})
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Search report title...')})
     )
     date_from = forms.DateField(
-        label=_('Başlangıç Tarihi'),
+        label=_('Start Date'),
         required=False,
         widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'})
     )
     date_to = forms.DateField(
-        label=_('Bitiş Tarihi'),
+        label=_('End Date'),
         required=False,
         widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'})
     )

@@ -39,7 +39,11 @@
 
         body {
             font-family: 'Inter', 'Poppins', sans-serif;
-            background: linear-gradient(135deg, var(--neutral-50) 0%, #e0f7fa 50%, var(--neutral-100) 100%);
+            background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url("{% static 'assets/images/login_bg.jpg' %}");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -54,11 +58,13 @@
         }
 
         .login-card {
-            background: white;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
             border-radius: 16px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
             padding: 40px;
             width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .login-header {
