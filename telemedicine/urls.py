@@ -28,6 +28,8 @@ urlpatterns = [
     # Appointment views
     path('appointments/', views.TelemedicineAppointmentListView.as_view(), name='appointment-list'),
     path('appointment/<int:pk>/', views.TelemedicineAppointmentDetailView.as_view(), name='appointment-detail'),
+    path('appointment/<int:appointment_id>/start-video-session/', views.start_video_session, name='start-video-session'),
+    path('video-session/<int:session_id>/end/', views.end_video_session, name='end-video-session'),
     path('appointment/<int:appointment_id>/upload-document/', views.upload_telemed_document, name='upload-document'),
     path('appointment/<int:appointment_id>/create-prescription/', views.create_telemed_prescription, name='create-prescription'),
     path('appointment/<int:appointment_id>/create-note/', views.create_telemed_note, name='create-note'),

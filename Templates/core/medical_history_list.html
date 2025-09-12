@@ -1,16 +1,16 @@
 {% extends 'core/base.html' %}
 {% load static %}
 
-{% block title %}Sağlık Geçmişi - {{ patient.get_full_name }}{% endblock %}
+{% block title %}Medical History - {{ patient.get_full_name }}{% endblock %}
 
 {% block content %}
 <div class="container py-4">
     <div class="card shadow">
         <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-            <h4 class="mb-0">{{ patient.get_full_name }} - Sağlık Geçmişi</h4>
+            <h4 class="mb-0">{{ patient.get_full_name }} - Medical History</h4>
             {% if user.is_doctor or user.is_admin_user %}
             <a href="{% url 'core:medical-history-create' patient.id %}" class="btn btn-light">
-                <i class="ki-outline ki-plus fs-2"></i> Yeni Kayıt Ekle
+                <i class="ki-outline ki-plus fs-2"></i> Add New Record
             </a>
             {% endif %}
         </div>
@@ -31,11 +31,11 @@
                 <table class="table table-row-bordered table-hover">
                     <thead>
                         <tr class="fw-bold fs-6 text-gray-800">
-                            <th>Durum Tipi</th>
-                            <th>Durum Adı/Tanımı</th>
-                            <th>Tanı Tarihi</th>
-                            <th>Durum</th>
-                            <th>İşlemler</th>
+                            <th>Condition Type</th>
+                            <th>Condition Name/Description</th>
+                            <th>Diagnosis Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -46,9 +46,9 @@
                             <td>{{ history.diagnosed_date|default:"-" }}</td>
                             <td>
                                 {% if history.is_active %}
-                                <span class="badge badge-light-success">Aktif</span>
+                                <span class="badge badge-light-success">Active</span>
                                 {% else %}
-                                <span class="badge badge-light-danger">Geçmiş</span>
+                                <span class="badge badge-light-danger">Past</span>
                                 {% endif %}
                             </td>
                             <td>
@@ -76,23 +76,23 @@
                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                     </div>
                                     <div class="modal-body">
-                                        <p><strong>Durum Tipi:</strong> {{ history.get_condition_type_display }}</p>
-                                        <p><strong>Tanı Tarihi:</strong> {{ history.diagnosed_date|default:"Belirtilmemiş" }}</p>
-                                        <p><strong>Durum:</strong> 
+                                        <p><strong>Condition Type:</strong> {{ history.get_condition_type_display }}</p>
+                                        <p><strong>Diagnosis Date:</strong> {{ history.diagnosed_date|default:"Not specified" }}</p>
+                                        <p><strong>Status:</strong> 
                                             {% if history.is_active %}
-                                            <span class="badge badge-success">Aktif</span>
+                                            <span class="badge badge-success">Active</span>
                                             {% else %}
-                                            <span class="badge badge-danger">Geçmiş</span>
+                                            <span class="badge badge-danger">Past</span>
                                             {% endif %}
                                         </p>
-                                        <p><strong>Notlar:</strong></p>
+                                        <p><strong>Notes:</strong></p>
                                         <div class="border p-3 rounded bg-light">
-                                            {{ history.notes|linebreaks|default:"Not eklenmemiş." }}
+                                            {{ history.notes|linebreaks|default:"No notes added." }}
                                         </div>
-                                        <p class="mt-3 text-muted"><small>Eklenme Tarihi: {{ history.created_at }}</small></p>
+                                        <p class="mt-3 text-muted"><small>Added Date: {{ history.created_at }}</small></p>
                                     </div>
                                     <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                                     </div>
                                 </div>
                             </div>

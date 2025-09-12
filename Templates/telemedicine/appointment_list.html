@@ -1,0 +1,189 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Telemedicine Appointments - Laso Healthcare{% endblock %}
+
+{% block extra_css %}
+<style>
+    .appointment-card {
+        transition: all 0.3s ease;
+        border-left: 4px solid transparent;
+    }
+    
+    .appointment-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    
+    .appointment-scheduled {
+        border-left-color: var(--primary);
+    }
+    
+    .appointment-completed {
+        border-left-color: var(--success);
+    }
+    
+    .appointment-cancelled {
+        border-left-color: var(--danger);
+    }
+    
+    .status-badge {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.375rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header border-0 pt-6">
+        <div class="card-title">
+            <h3 class="card-label">
+                <i class="ki-outline ki-calendar fs-2 me-2"></i>
+                Telemedicine Appointments
+            </h3>
+        </div>
+        <div class="card-toolbar">
+            <a href="{% url 'telemedicine:schedule' %}" class="btn btn-primary">
+                <i class="ki-outline ki-plus fs-2"></i>
+                Schedule New Appointment
+            </a>
+        </div>
+    </div>
+
+    <div class="card-body">
+        {% if appointments %}
+            <div class="row g-6">
+                {% for appointment in appointments %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card appointment-card appointment-{{ appointment.status }}">
+                        <div class="card-body">
+                            <!-- Status Badge -->
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <span class="badge status-badge 
+                                    {% if appointment.status == 'scheduled' %}badge-light-primary
+                                    {% elif appointment.status == 'completed' %}badge-light-success
+                                    {% elif appointment.status == 'cancelled' %}badge-light-danger
+                                    {% else %}badge-light-warning{% endif %}">
+                                    {{ appointment.get_status_display }}
+                                </span>
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-light btn-active-light-primary" data-bs-toggle="dropdown">
+                                        <i class="ki-outline ki-dots-horizontal fs-5"></i>
+                                    </button>
+                                    <div class="dropdown-menu">
+                                        <a class="dropdown-item" href="{% url 'telemedicine:appointment-detail' appointment.pk %}">
+                                            <i class="ki-outline ki-eye fs-6 me-2"></i>View Details
+                                        </a>
+                                        {% if appointment.status == 'scheduled' %}
+                                        <a class="dropdown-item" href="{% url 'telemedicine:join' appointment.pk %}">
+                                            <i class="ki-outline ki-video fs-6 me-2"></i>Join Session
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Patient/Doctor Info -->
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="symbol symbol-40px me-3">
+                                    <div class="symbol-label bg-light-primary">
+                                        <i class="ki-outline ki-profile-circle fs-2 text-primary"></i>
+                                    </div>
+                                </div>
+                                <div>
+                                    {% if user.user_type == 'doctor' %}
+                                        <h6 class="mb-0">{{ appointment.patient.get_full_name }}</h6>
+                                        <small class="text-muted">Patient</small>
+                                    {% else %}
+                                        <h6 class="mb-0">Dr. {{ appointment.doctor.get_full_name }}</h6>
+                                        <small class="text-muted">Doctor</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Date & Time -->
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="ki-outline ki-calendar fs-4 text-primary me-2"></i>
+                                <div>
+                                    <div class="fw-bold">{{ appointment.date|date:"M d, Y" }}</div>
+                                    <small class="text-muted">{{ appointment.time|time:"g:i A" }}</small>
+                                </div>
+                            </div>
+
+                            <!-- Chief Complaint -->
+                            {% if appointment.chief_complaint %}
+                            <div class="mb-3">
+                                <small class="text-muted">Chief Complaint:</small>
+                                <p class="mb-0 fs-7">{{ appointment.chief_complaint|truncatechars:60 }}</p>
+                            </div>
+                            {% endif %}
+
+                            <!-- Description -->
+                            {% if appointment.description %}
+                            <div class="mb-3">
+                                <small class="text-muted">Description:</small>
+                                <p class="mb-0 fs-7">{{ appointment.description|truncatechars:80 }}</p>
+                            </div>
+                            {% endif %}
+
+                            <!-- Actions -->
+                            <div class="d-flex gap-2 mt-4">
+                                <a href="{% url 'telemedicine:appointment-detail' appointment.pk %}" 
+                                   class="btn btn-sm btn-light-primary flex-grow-1">
+                                    <i class="ki-outline ki-eye fs-6"></i>
+                                    View Details
+                                </a>
+                                {% if appointment.status == 'scheduled' %}
+                                <a href="{% url 'telemedicine:join' appointment.pk %}" 
+                                   class="btn btn-sm btn-primary">
+                                    <i class="ki-outline ki-video fs-6"></i>
+                                    Join
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Pagination -->
+            {% if is_paginated %}
+            <div class="d-flex justify-content-center mt-6">
+                <div class="pagination">
+                    {% if page_obj.has_previous %}
+                        <a href="?page=1" class="btn btn-sm btn-light-primary me-2">First</a>
+                        <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-sm btn-primary me-2">Previous</a>
+                    {% endif %}
+                    
+                    <span class="btn btn-sm btn-primary me-2">
+                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                    </span>
+                    
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}" class="btn btn-sm btn-primary me-2">Next</a>
+                        <a href="?page={{ page_obj.paginator.num_pages }}" class="btn btn-sm btn-light-primary">Last</a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        {% else %}
+            <div class="text-center py-10">
+                <div class="symbol symbol-100px mx-auto mb-5">
+                    <div class="symbol-label bg-light-primary">
+                        <i class="ki-outline ki-calendar fs-4x text-primary"></i>
+                    </div>
+                </div>
+                <h5 class="text-gray-900 fw-bold mb-2">No Appointments Found</h5>
+                <div class="fs-6 text-gray-500 mb-5">You don't have any telemedicine appointments yet.</div>
+                <a href="{% url 'telemedicine:schedule' %}" class="btn btn-primary">
+                    <i class="ki-outline ki-plus fs-2"></i>
+                    Schedule Your First Appointment
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

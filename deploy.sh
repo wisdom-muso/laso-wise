@@ -59,13 +59,13 @@ if [ ! -f .env ]; then
 # Database Configuration
 POSTGRES_DB=laso_healthcare
 POSTGRES_USER=laso_user
-POSTGRES_PASSWORD=laso_secure_password_$(date +%s)
+POSTGRES_PASSWORD=laso_secure_password_2024
 
 # Redis Configuration
-REDIS_PASSWORD=redis_secure_password_$(date +%s)
+REDIS_PASSWORD=redis_secure_password_2024
 
 # Django Configuration
-SECRET_KEY=django_secret_key_$(openssl rand -base64 32 2>/dev/null || echo "fallback_secret_key_$(date +%s)")
+SECRET_KEY=django_secret_key_laso_healthcare_production_2024_secure
 DEBUG=False
 ALLOWED_HOSTS=localhost,127.0.0.1,65.108.91.110
 
@@ -83,7 +83,7 @@ HUGGINGFACE_API_KEY=
 EOF
     print_success ".env file created with secure defaults"
 else
-    print_status ".env file already exists"
+    print_status ".env file already exists - using existing credentials"
 fi
 
 # Stop any running containers
