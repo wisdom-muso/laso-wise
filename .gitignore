@@ -26,6 +26,7 @@ MANIFEST
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
+staticfiles/
 media/
 
 # Virtual Environment
@@ -58,9 +59,6 @@ coverage.xml
 *.mo
 *.pot
 
-# Django stuff:
-staticfiles/
-
 # Jupyter Notebook
 .ipynb_checkpoints
 
@@ -77,37 +75,8 @@ npm-debug.log
 yarn-debug.log
 yarn-error.log
 
-# Python cache files
-__pycache__/
-*.py[cod]
-*$py.class
-*/__pycache__/
-*/*/__pycache__/
-*/*/*/__pycache__/
-*/*/*/*/__pycache__/
-*/*/*/*/*/__pycache__/
-*.so
-.Python
-
-
 # Docker
 docker-compose.override.yml
-
-# Project specific
-*.sqlite3
-*.sqlite3-journal
-*.db
-*.bak
-*.swp
-*~
-*.pid
-*.log
-*.pot
-*.pyc
-local_settings.py
-
-# Docker
-.env
 logs/
 backups/
 docker/nginx/ssl/
@@ -116,5 +85,3 @@ docker/nginx/ssl/
 # Container volumes
 postgres_data/
 redis_data/
-staticfiles/
-media/

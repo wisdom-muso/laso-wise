@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>LASO Healthcare - Login</title>
+    <title>LASO Healthcare - Admin Login</title>
     
     <!-- Favicon -->
     {% load static %}
@@ -96,6 +96,17 @@
             color: var(--neutral-600);
         }
 
+        .admin-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--primary-teal) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
         .form-group {
             margin-bottom: 24px;
         }
@@ -130,8 +141,6 @@
             color: var(--neutral-600);
             opacity: 0.7;
         }
-
-
 
         .btn-signin {
             width: 100%;
@@ -173,13 +182,6 @@
         .login-links a:hover {
             color: var(--primary-dark);
             text-decoration: underline;
-        }
-
-        .admin-login {
-            margin-top: 24px;
-            padding-top: 24px;
-            border-top: 1px solid var(--neutral-200);
-            text-align: center;
         }
 
         .alert {
@@ -225,8 +227,9 @@
                 <div class="login-logo">
                     <img src="{% static 'assets/images/logo.png' %}" alt="LASO Logo">
                 </div>
-                <h1 class="welcome-title">Welcome to LASO</h1>
-                <p class="welcome-subtitle">Your Health, In Your Hands</p>
+                <div class="admin-badge">ADMIN ACCESS</div>
+                <h1 class="welcome-title">Admin Panel</h1>
+                <p class="welcome-subtitle">Sign in to access the admin dashboard</p>
             </div>
 
             <!-- Flash Messages -->
@@ -244,21 +247,30 @@
             {% if form.errors %}
             <div class="alert alert-danger">
                 <strong>Login Failed</strong><br>
-                Please check your username and password.
+                {% for field, errors in form.errors.items %}
+                    {% for error in errors %}
+                        {{ error }}<br>
+                    {% endfor %}
+                {% endfor %}
             </div>
             {% endif %}
 
-            <form method="post" id="loginForm">
+            <form method="post" id="adminLoginForm">
                 {% csrf_token %}
+                
+                <!-- Hidden next field -->
+                {% if request.GET.next %}
+                <input type="hidden" name="next" value="{{ request.GET.next }}">
+                {% endif %}
                 
                 <!-- Email/Username Field -->
                 <div class="form-group">
-                    <label class="form-label" for="{{ form.username.id_for_label }}">Email address*</label>
+                    <label class="form-label" for="{{ form.username.id_for_label }}">Username or Email*</label>
                     <input type="text" 
                            id="{{ form.username.id_for_label }}" 
                            name="{{ form.username.name }}" 
                            class="form-control" 
-                           placeholder="you@example.com" 
+                           placeholder="admin@example.com" 
                            value="{{ form.username.value|default:'' }}"
                            required>
                 </div>
@@ -270,37 +282,24 @@
                            id="{{ form.password.id_for_label }}" 
                            name="{{ form.password.name }}" 
                            class="form-control" 
-                           placeholder="Enter your password" 
+                           placeholder="Enter your password"
                            required>
                 </div>
-
-                <!-- Note: Role is automatically determined based on your account type -->
                 
-                <!-- Sign In Button -->
-                <button type="submit" class="btn-signin" id="signInBtn">
-                    Sign in
+                <!-- Submit Button -->
+                <button type="submit" class="btn-signin">
+                    Sign In to Admin
                 </button>
-                
-                <input type="hidden" name="next" value="{{ next }}">
             </form>
 
+            <!-- Login Links -->
             <div class="login-links">
-                <p>Don't have an account? <a href="{% url 'core:patient-register' %}">Sign up here</a></p>
-            </div>
-
-            <div class="admin-login">
-                <a href="{% url 'admin_login' %}">Administrator Login</a>
+                <p><a href="{% url 'login' %}">← Back to main login</a></p>
             </div>
         </div>
     </div>
 
-    <!-- JavaScript -->
-    <script>
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            const submitBtn = document.getElementById('signInBtn');
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = 'Signing in...';
-        });
-    </script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

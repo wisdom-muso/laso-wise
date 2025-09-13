@@ -206,6 +206,9 @@ LOGIN_URL = 'login'
 # Admin login redirect fix
 ADMIN_REDIRECT_URL = '/admin/'
 
+# Custom admin login URL
+ADMIN_LOGIN_URL = '/admin/login/'
+
 # Email settings (console backend for development)
 EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
 

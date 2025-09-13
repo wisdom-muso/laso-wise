@@ -16,6 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.contrib.admin.views.decorators import staff_member_required
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
@@ -24,11 +25,13 @@ from core.forms import LoginForm
 from core.views import HomeView, dashboard
 from core.views_auth import CustomLoginView, HomeRedirectView
 from core.logout_view import logout_view
+from core.admin_login import AdminLoginView
 from core.views_theme import toggle_theme, get_theme_preference
 from core.health_check import health_check, readiness_check, liveness_check
 from core import views_debug
 
 urlpatterns = [
+    path('admin/login/', AdminLoginView.as_view(), name='admin_login'),
     path('admin/', admin.site.urls),
     
     # Home page - redirect to login if not authenticated, otherwise to dashboard
@@ -80,3 +83,6 @@ urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 # Add static files in debug mode or when not using WhiteNoise
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+# Configure admin site login URL
+admin.site.login_url = '/admin/login/'
