@@ -343,17 +343,41 @@
                         </div>
                     </div>
                     
-                    <!-- Gender -->
+                    <!-- Gender and Blood Type -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="{{ form.gender.id_for_label }}">Gender</label>
+                            <select id="{{ form.gender.id_for_label }}" 
+                                    name="{{ form.gender.name }}" 
+                                    class="form-control form-select">
+                                <option value="">Select gender</option>
+                                {% for value, label in form.gender.field.choices %}
+                                    <option value="{{ value }}" {% if form.gender.value == value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="{{ form.blood_type.id_for_label }}">Blood Type</label>
+                            <select id="{{ form.blood_type.id_for_label }}" 
+                                    name="{{ form.blood_type.name }}" 
+                                    class="form-control form-select">
+                                <option value="">Select blood type</option>
+                                {% for value, label in form.blood_type.field.choices %}
+                                    <option value="{{ value }}" {% if form.blood_type.value == value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Address -->
                     <div class="form-group">
-                        <label class="form-label" for="{{ form.gender.id_for_label }}">Gender</label>
-                        <select id="{{ form.gender.id_for_label }}" 
-                                name="{{ form.gender.name }}" 
-                                class="form-control form-select">
-                            <option value="">Select gender</option>
-                            {% for value, label in form.gender.field.choices %}
-                                <option value="{{ value }}" {% if form.gender.value == value %}selected{% endif %}>{{ label }}</option>
-                            {% endfor %}
-                        </select>
+                        <label class="form-label" for="{{ form.address.id_for_label }}">Address</label>
+                        <textarea id="{{ form.address.id_for_label }}" 
+                                  name="{{ form.address.name }}" 
+                                  class="form-control" 
+                                  rows="3"
+                                  placeholder="Enter your full address">{{ form.address.value|default:'' }}</textarea>
                     </div>
                     
                     <!-- Password Fields -->
@@ -377,6 +401,7 @@
                                    placeholder="Confirm password"
                                    required>
                         </div>
+                    </div>
                     
                     <!-- Submit Button -->
                     <button type="submit" class="btn-register">

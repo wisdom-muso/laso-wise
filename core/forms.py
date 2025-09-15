@@ -55,7 +55,7 @@ class PatientRegistrationForm(UserCreationForm):
     )
     blood_type = forms.ChoiceField(
         choices=[
-            ('', _('Select')),
+            ('', _('Select Blood Type')),
             ('A+', 'A+'),
             ('A-', 'A-'),
             ('B+', 'B+'),
@@ -66,13 +66,26 @@ class PatientRegistrationForm(UserCreationForm):
             ('0-', '0-'),
         ],
         widget=forms.Select(attrs={'class': 'form-control'}),
-        label=_('Blood Type')
+        label=_('Blood Type'),
+        required=False
+    )
+    
+    gender = forms.ChoiceField(
+        choices=[
+            ('', _('Select Gender')),
+            ('M', _('Male')),
+            ('F', _('Female')),
+            ('O', _('Other')),
+        ],
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        label=_('Gender'),
+        required=False
     )
     
     class Meta:
         model = User
         fields = ('username', 'first_name', 'last_name', 'email', 'password1', 'password2', 
-                 'date_of_birth', 'phone_number', 'address', 'blood_type')
+                 'date_of_birth', 'phone_number', 'address', 'blood_type', 'gender')
         
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

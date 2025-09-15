@@ -61,20 +61,6 @@ class User(AbstractUser):
         verbose_name=_('Blood Type')
     )
     
-    GENDER_CHOICES = [
-        ('M', _('Male')),
-        ('F', _('Female')),
-        ('O', _('Other')),
-    ]
-    
-    gender = models.CharField(
-        max_length=1,
-        choices=GENDER_CHOICES,
-        blank=True,
-        null=True,
-        verbose_name=_('Gender')
-    )
-    
     def is_patient(self):
         return self.user_type == 'patient'
     
