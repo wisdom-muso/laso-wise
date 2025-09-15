@@ -63,7 +63,7 @@ class Language(models.Model):
 
 class UserLanguagePreference(models.Model):
     """
-    Kullanıcı dil tercihleri
+    User language preferences
     """
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
@@ -75,7 +75,7 @@ class UserLanguagePreference(models.Model):
     language = models.ForeignKey(
         Language,
         on_delete=models.CASCADE,
-        verbose_name=_('Tercih Edilen Dil')
+        verbose_name=_('Preferred Language')
     )
     
     date_format = models.CharField(
@@ -87,23 +87,23 @@ class UserLanguagePreference(models.Model):
             ('DD.MM.YYYY', 'DD.MM.YYYY'),
         ],
         default='DD/MM/YYYY',
-        verbose_name=_('Tarih Formatı')
+        verbose_name=_('Date Format')
     )
     
     time_format = models.CharField(
         max_length=10,
         choices=[
-            ('24h', '24 Saat (14:30)'),
-            ('12h', '12 Saat (2:30 PM)'),
+            ('24h', '24 Hour (14:30)'),
+            ('12h', '12 Hour (2:30 PM)'),
         ],
         default='24h',
-        verbose_name=_('Saat Formatı')
+        verbose_name=_('Time Format')
     )
     
     timezone = models.CharField(
         max_length=50,
         default='Europe/Istanbul',
-        verbose_name=_('Saat Dilimi')
+        verbose_name=_('Timezone')
     )
     
     number_format = models.CharField(
@@ -114,22 +114,22 @@ class UserLanguagePreference(models.Model):
             ('1 234,56', '1 234,56 (French)'),
         ],
         default='1,234.56',
-        verbose_name=_('Sayı Formatı')
+        verbose_name=_('Number Format')
     )
     
     created_at = models.DateTimeField(
         auto_now_add=True,
-        verbose_name=_('Oluşturulma Tarihi')
+        verbose_name=_('Created At')
     )
     
     updated_at = models.DateTimeField(
         auto_now=True,
-        verbose_name=_('Güncellenme Tarihi')
+        verbose_name=_('Updated At')
     )
     
     class Meta:
-        verbose_name = _('Kullanıcı Dil Tercihi')
-        verbose_name_plural = _('Kullanıcı Dil Tercihleri')
+        verbose_name = _('User Language Preference')
+        verbose_name_plural = _('User Language Preferences')
     
     def __str__(self):
         return f"{self.user} - {self.language}"
@@ -137,11 +137,11 @@ class UserLanguagePreference(models.Model):
 
 class TranslationContext(models.Model):
     """
-    Çeviri bağlamları - medikal terimler için özel çeviriler
+    Translation contexts - special translations for medical terms
     """
     CONTEXT_TYPES = [
-        ('medical', _('Medikal Terimler')),
-        ('ui', _('Kullanıcı Arayüzü')),
+        ('medical', _('Medical Terms')),
+        ('ui', _('User Interface')),
         ('notification', _('Notifications')),
         ('report', _('Reports')),
         ('appointment', _('Appointment')),
@@ -153,25 +153,25 @@ class TranslationContext(models.Model):
     context_type = models.CharField(
         max_length=20,
         choices=CONTEXT_TYPES,
-        verbose_name=_('Bağlam Türü')
+        verbose_name=_('Context Type')
     )
     
     source_text = models.TextField(
-        verbose_name=_('Kaynak Metin'),
-        help_text=_('Çevrilecek orijinal metin')
+        verbose_name=_('Source Text'),
+        help_text=_('Original text to be translated')
     )
     
     context_key = models.CharField(
         max_length=100,
         unique=True,
-        verbose_name=_('Bağlam Anahtarı'),
+        verbose_name=_('Context Key'),
         help_text=_('Unique key (e.g.: diagnosis.diabetes)')
     )
     
     description = models.TextField(
         blank=True,
         verbose_name=_('Description'),
-        help_text=_('Çevirmenler için açıklama')
+        help_text=_('Description for translators')
     )
     
     is_active = models.BooleanField(
@@ -181,12 +181,12 @@ class TranslationContext(models.Model):
     
     created_at = models.DateTimeField(
         auto_now_add=True,
-        verbose_name=_('Oluşturulma Tarihi')
+        verbose_name=_('Created At')
     )
     
     class Meta:
-        verbose_name = _('Çeviri Bağlamı')
-        verbose_name_plural = _('Çeviri Bağlamları')
+        verbose_name = _('Translation Context')
+        verbose_name_plural = _('Translation Contexts')
         ordering = ['context_type', 'context_key']
     
     def __str__(self):
@@ -195,13 +195,13 @@ class TranslationContext(models.Model):
 
 class Translation(models.Model):
     """
-    Çeviriler
+    Translations
     """
     context = models.ForeignKey(
         TranslationContext,
         on_delete=models.CASCADE,
         related_name='translations',
-        verbose_name=_('Bağlam')
+        verbose_name=_('Context')
     )
     
     language = models.ForeignKey(
@@ -211,12 +211,12 @@ class Translation(models.Model):
     )
     
     translated_text = models.TextField(
-        verbose_name=_('Çevrilmiş Metin')
+        verbose_name=_('Translated Text')
     )
     
     is_approved = models.BooleanField(
         default=False,
-        verbose_name=_('Onaylandı mı?')
+        verbose_name=_('Is Approved?')
     )
     
     translator = models.ForeignKey(
@@ -233,30 +233,30 @@ class Translation(models.Model):
         null=True,
         blank=True,
         related_name='reviewed_translations',
-        verbose_name=_('İnceleyici')
+        verbose_name=_('Reviewer')
     )
     
     quality_score = models.FloatField(
         null=True,
         blank=True,
-        verbose_name=_('Kalite Puanı'),
-        help_text=_('1-5 arası kalite puanı')
+        verbose_name=_('Quality Score'),
+        help_text=_('Quality score from 1-5')
     )
     
     notes = models.TextField(
         blank=True,
-        verbose_name=_('Notlar'),
-        help_text=_('Çeviri ile ilgili notlar')
+        verbose_name=_('Notes'),
+        help_text=_('Notes about the translation')
     )
     
     created_at = models.DateTimeField(
         auto_now_add=True,
-        verbose_name=_('Oluşturulma Tarihi')
+        verbose_name=_('Created At')
     )
     
     updated_at = models.DateTimeField(
         auto_now=True,
-        verbose_name=_('Güncellenme Tarihi')
+        verbose_name=_('Updated At')
     )
     
     class Meta:
@@ -271,16 +271,16 @@ class Translation(models.Model):
 
 class MedicalTerminology(models.Model):
     """
-    Medikal terminoloji sözlüğü
+    Medical terminology dictionary
     """
     CATEGORY_CHOICES = [
-        ('anatomy', _('Anatomi')),
-        ('disease', _('Hastalık')),
-        ('symptom', _('Semptom')),
-        ('medication', _('İlaç')),
-        ('procedure', _('Prosedür')),
-        ('test', _('Test/Tahlil')),
-        ('specialty', _('Uzmanlık')),
+        ('anatomy', _('Anatomy')),
+        ('disease', _('Disease')),
+        ('symptom', _('Symptom')),
+        ('medication', _('Medication')),
+        ('procedure', _('Procedure')),
+        ('test', _('Test/Analysis')),
+        ('specialty', _('Specialty')),
     ]
     
     category = models.CharField(
@@ -319,33 +319,33 @@ class MedicalTerminology(models.Model):
     icd_code = models.CharField(
         max_length=20,
         blank=True,
-        verbose_name=_('ICD Kodu'),
-        help_text=_('Hastalıklar için ICD-10 kodu')
+        verbose_name=_('ICD Code'),
+        help_text=_('ICD-10 code for diseases')
     )
     
     is_commonly_used = models.BooleanField(
         default=False,
-        verbose_name=_('Sık Kullanılan mı?')
+        verbose_name=_('Is Commonly Used?')
     )
     
     usage_count = models.PositiveIntegerField(
         default=0,
-        verbose_name=_('Kullanım Sayısı')
+        verbose_name=_('Usage Count')
     )
     
     created_at = models.DateTimeField(
         auto_now_add=True,
-        verbose_name=_('Oluşturulma Tarihi')
+        verbose_name=_('Created At')
     )
     
     updated_at = models.DateTimeField(
         auto_now=True,
-        verbose_name=_('Güncellenme Tarihi')
+        verbose_name=_('Updated At')
     )
     
     class Meta:
-        verbose_name = _('Medikal Terminoloji')
-        verbose_name_plural = _('Medikal Terminolojiler')
+        verbose_name = _('Medical Terminology')
+        verbose_name_plural = _('Medical Terminologies')
         ordering = ['category', 'term_en']
         indexes = [
             models.Index(fields=['term_en']),

@@ -1,12 +1,12 @@
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 from .models import Treatment, Prescription
+from core.admin import admin_site
 
 class PrescriptionInline(admin.TabularInline):
     model = Prescription
     extra = 1
 
-@admin.register(Treatment)
 class TreatmentAdmin(admin.ModelAdmin):
     list_display = ('get_patient', 'get_doctor', 'get_date', 'diagnosis')
     list_filter = ('appointment__doctor', 'appointment__date')
@@ -29,7 +29,6 @@ class TreatmentAdmin(admin.ModelAdmin):
     get_date.short_description = _('Date')
     get_date.admin_order_field = 'appointment__date'
 
-@admin.register(Prescription)
 class PrescriptionAdmin(admin.ModelAdmin):
     list_display = ('name', 'dosage', 'get_patient', 'get_doctor')
     list_filter = ('treatment__appointment__doctor', 'treatment__appointment__date')
@@ -47,12 +46,13 @@ class PrescriptionAdmin(admin.ModelAdmin):
 try:
     from .models_medical_history import MedicalHistory
 
-    @admin.register(MedicalHistory)
     class MedicalHistoryAdmin(admin.ModelAdmin):
         list_display = ('patient', 'condition_type', 'condition_name', 'diagnosed_date', 'is_active')
         list_filter = ('condition_type', 'is_active', 'diagnosed_date')
         search_fields = ('condition_name', 'notes', 'patient__username', 'patient__first_name', 'patient__last_name')
         date_hierarchy = 'diagnosed_date'
+    
+    admin_site.register(MedicalHistory, MedicalHistoryAdmin)
 except ImportError:
     pass
 
@@ -122,3 +122,7 @@ try:
         date_hierarchy = 'valid_from'
 except ImportError:
     pass
+
+# Register all models with custom admin site
+admin_site.register(Treatment, TreatmentAdmin)
+admin_site.register(Prescription, PrescriptionAdmin)

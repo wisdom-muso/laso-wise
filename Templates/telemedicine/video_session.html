@@ -183,16 +183,10 @@
                         </div>
                         
                         <!-- Remote video (other participant) -->
-                        <video id="remoteVideo" class="remote-video" autoplay playsinline muted>
-                            <source src="{% static 'videos/sample-video-call.mp4' %}" type="video/mp4">
-                            Your browser does not support the video tag.
-                        </video>
+                        <video id="remoteVideo" class="remote-video" autoplay playsinline></video>
                         
                         <!-- Local video (your camera) -->
-                        <video id="localVideo" class="local-video" autoplay playsinline muted>
-                            <source src="{% static 'videos/sample-local-video.mp4' %}" type="video/mp4">
-                            Your browser does not support the video tag.
-                        </video>
+                        <video id="localVideo" class="local-video" autoplay playsinline muted></video>
                         
                         <!-- Video controls -->
                         <div class="video-controls">
@@ -335,13 +329,22 @@
 
 {% block extra_js %}
 <script>
-// Video session management
+// WebRTC Video session management
 let localStream = null;
 let remoteStream = null;
 let peerConnection = null;
 let isAudioEnabled = true;
 let isVideoEnabled = true;
 let sessionStartTime = new Date('{{ session.start_time|date:"c" }}');
+let socket = null;
+
+// WebRTC configuration
+const rtcConfig = {
+    iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:stun1.l.google.com:19302' }
+    ]
+};
 
 // Initialize video session
 document.addEventListener('DOMContentLoaded', function() {
@@ -350,23 +353,158 @@ document.addEventListener('DOMContentLoaded', function() {
     setupEventListeners();
 });
 
-function initializeVideoSession() {
-    // Simulate connection process
-    setTimeout(() => {
-        document.getElementById('connectionStatus').textContent = 'Connected';
+async function initializeVideoSession() {
+    try {
+        document.getElementById('connectionStatus').textContent = 'Initializing camera...';
+        
+        // Get user media (camera and microphone)
+        localStream = await navigator.mediaDevices.getUserMedia({
+            video: { width: 1280, height: 720 },
+            audio: true
+        });
+        
+        // Display local video
+        const localVideo = document.getElementById('localVideo');
+        localVideo.srcObject = localStream;
+        
+        // Initialize WebRTC peer connection
+        peerConnection = new RTCPeerConnection(rtcConfig);
+        
+        // Add local stream to peer connection
+        localStream.getTracks().forEach(track => {
+            peerConnection.addTrack(track, localStream);
+        });
+        
+        // Handle remote stream
+        peerConnection.ontrack = (event) => {
+            const remoteVideo = document.getElementById('remoteVideo');
+            remoteVideo.srcObject = event.streams[0];
+            remoteStream = event.streams[0];
+        };
+        
+        // Handle ICE candidates
+        peerConnection.onicecandidate = (event) => {
+            if (event.candidate) {
+                // Send ICE candidate to remote peer via signaling server
+                sendSignal('ice-candidate', event.candidate);
+            }
+        };
+        
+        // Update connection status
+        document.getElementById('connectionStatus').textContent = 'Ready for connection';
         document.getElementById('connectionStatus').className = 'connection-status connected';
         
-        // Start demo videos
-        const remoteVideo = document.getElementById('remoteVideo');
-        const localVideo = document.getElementById('localVideo');
-        
-        // Play demo videos to simulate video call
-        remoteVideo.play().catch(e => console.log('Remote video play failed:', e));
-        localVideo.play().catch(e => console.log('Local video play failed:', e));
-        
         // Add system message to chat
-        addChatMessage('system', 'Video connection established successfully.', new Date());
-    }, 2000);
+        addChatMessage('system', 'Camera and microphone initialized. Ready for video call.', new Date());
+        
+        // For demo purposes, simulate a connection after 3 seconds
+        setTimeout(() => {
+            simulateRemoteConnection();
+        }, 3000);
+        
+    } catch (error) {
+        console.error('Error initializing video session:', error);
+        document.getElementById('connectionStatus').textContent = 'Camera access denied';
+        document.getElementById('connectionStatus').className = 'connection-status disconnected';
+        addChatMessage('system', 'Failed to access camera/microphone. Please check permissions.', new Date());
+    }
+}
+
+function simulateRemoteConnection() {
+    // For demo purposes, create a fake remote stream
+    const canvas = document.createElement('canvas');
+    canvas.width = 640;
+    canvas.height = 480;
+    const ctx = canvas.getContext('2d');
+    
+    // Draw a simple animation
+    let frame = 0;
+    function drawFrame() {
+        ctx.fillStyle = '#2c3e50';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        ctx.fillStyle = '#3498db';
+        ctx.font = '24px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('Remote Participant', canvas.width/2, canvas.height/2 - 20);
+        ctx.fillText(`Demo Video Call`, canvas.width/2, canvas.height/2 + 20);
+        
+        // Animated circle
+        ctx.beginPath();
+        ctx.arc(canvas.width/2, canvas.height/2 + 60, 20 + Math.sin(frame * 0.1) * 5, 0, 2 * Math.PI);
+        ctx.fillStyle = '#e74c3c';
+        ctx.fill();
+        
+        frame++;
+        requestAnimationFrame(drawFrame);
+    }
+    drawFrame();
+    
+    const fakeStream = canvas.captureStream(30);
+    const remoteVideo = document.getElementById('remoteVideo');
+    remoteVideo.srcObject = fakeStream;
+    
+    addChatMessage('system', 'Connected to remote participant (demo mode)', new Date());
+}
+
+// WebRTC signaling functions
+function sendSignal(type, data) {
+    // Send signaling data to the server
+    fetch(`/telemedicine/webrtc-signal/{{ session.id }}/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify({
+            type: type,
+            data: data,
+            session_id: '{{ session.id }}'
+        })
+    }).catch(error => {
+        console.error('Signaling error:', error);
+    });
+}
+
+// Create offer for WebRTC connection
+async function createOffer() {
+    try {
+        const offer = await peerConnection.createOffer();
+        await peerConnection.setLocalDescription(offer);
+        sendSignal('offer', offer);
+    } catch (error) {
+        console.error('Error creating offer:', error);
+    }
+}
+
+// Handle incoming offer
+async function handleOffer(offer) {
+    try {
+        await peerConnection.setRemoteDescription(offer);
+        const answer = await peerConnection.createAnswer();
+        await peerConnection.setLocalDescription(answer);
+        sendSignal('answer', answer);
+    } catch (error) {
+        console.error('Error handling offer:', error);
+    }
+}
+
+// Handle incoming answer
+async function handleAnswer(answer) {
+    try {
+        await peerConnection.setRemoteDescription(answer);
+    } catch (error) {
+        console.error('Error handling answer:', error);
+    }
+}
+
+// Handle incoming ICE candidate
+async function handleIceCandidate(candidate) {
+    try {
+        await peerConnection.addIceCandidate(candidate);
+    } catch (error) {
+        console.error('Error handling ICE candidate:', error);
+    }
 }
 
 function setupEventListeners() {
@@ -394,7 +532,14 @@ function setupEventListeners() {
 }
 
 function toggleAudio() {
-    isAudioEnabled = !isAudioEnabled;
+    if (localStream) {
+        const audioTracks = localStream.getAudioTracks();
+        audioTracks.forEach(track => {
+            track.enabled = !track.enabled;
+        });
+        isAudioEnabled = !isAudioEnabled;
+    }
+    
     const btn = document.getElementById('audioBtn');
     const icon = btn.querySelector('i');
     
@@ -412,7 +557,14 @@ function toggleAudio() {
 }
 
 function toggleVideo() {
-    isVideoEnabled = !isVideoEnabled;
+    if (localStream) {
+        const videoTracks = localStream.getVideoTracks();
+        videoTracks.forEach(track => {
+            track.enabled = !track.enabled;
+        });
+        isVideoEnabled = !isVideoEnabled;
+    }
+    
     const btn = document.getElementById('videoBtn');
     const icon = btn.querySelector('i');
     const localVideo = document.getElementById('localVideo');
@@ -421,13 +573,11 @@ function toggleVideo() {
         btn.classList.remove('off');
         icon.className = 'fas fa-video';
         btn.title = 'Turn Off Video';
-        localVideo.style.display = 'block';
         addChatMessage('system', 'Video enabled', new Date());
     } else {
         btn.classList.add('off');
         icon.className = 'fas fa-video-slash';
         btn.title = 'Turn On Video';
-        localVideo.style.display = 'none';
         addChatMessage('system', 'Video disabled', new Date());
     }
 }

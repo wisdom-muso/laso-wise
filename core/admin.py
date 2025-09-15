@@ -1,71 +1,81 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.utils.translation import gettext_lazy as _
+from django.urls import path
+from django.shortcuts import redirect
 from users.models import User
 from .models_theme import UserThemePreference
 from .models_statistics import DoctorPerformanceMetric
 from .models_communication import CommunicationNotification, Message, EmailTemplate
 from .models_notifications import Notification, NotificationType, NotificationTemplate, NotificationLog
 from .models_sessions import LoginSession
+from .admin_dashboard import admin_dashboard
 
 # Import AI admin configurations
 from .admin_ai import AIConfigurationAdmin, AIConversationAdmin, AIPromptTemplateAdmin
 
-@admin.register(CommunicationNotification)
+# Custom Admin Site with Dashboard
+class LasoAdminSite(admin.AdminSite):
+    site_header = 'LASO Healthcare Administration'
+    site_title = 'LASO Admin'
+    index_title = 'Healthcare System Dashboard'
+    
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path('', admin_dashboard, name='admin_dashboard'),
+        ]
+        return custom_urls + urls
+
+# Create custom admin site instance
+admin_site = LasoAdminSite(name='laso_admin')
+
 class CommunicationNotificationAdmin(admin.ModelAdmin):
     list_display = ('user', 'notification_type', 'title', 'is_read', 'created_at')
     list_filter = ('notification_type', 'is_read', 'created_at')
     search_fields = ('user__username', 'user__email', 'title', 'message')
     date_hierarchy = 'created_at'
 
-@admin.register(Message)
 class MessageAdmin(admin.ModelAdmin):
     list_display = ('sender', 'receiver', 'subject', 'is_read', 'created_at')
     list_filter = ('is_read', 'created_at')
     search_fields = ('sender__username', 'receiver__username', 'subject', 'content')
     date_hierarchy = 'created_at'
 
-@admin.register(EmailTemplate)
 class EmailTemplateAdmin(admin.ModelAdmin):
     list_display = ('name', 'template_type', 'subject', 'is_active')
     list_filter = ('template_type', 'is_active', 'created_at')
     search_fields = ('name', 'subject', 'content')
     date_hierarchy = 'created_at'
 
-@admin.register(Notification)
 class NotificationAdmin(admin.ModelAdmin):
     list_display = ('recipient', 'notification_type', 'title', 'is_read', 'created_at')
     list_filter = ('notification_type', 'is_read', 'priority', 'created_at')
     search_fields = ('recipient__username', 'recipient__email', 'title', 'message')
     date_hierarchy = 'created_at'
 
-@admin.register(NotificationTemplate)
 class NotificationTemplateAdmin(admin.ModelAdmin):
     list_display = ('notification_type', 'is_active')
     list_filter = ('notification_type', 'is_active')
     search_fields = ('title_template', 'message_template')
 
-@admin.register(NotificationLog)
 class NotificationLogAdmin(admin.ModelAdmin):
     list_display = ('notification', 'delivery_method', 'status', 'sent_at')
     list_filter = ('delivery_method', 'status', 'sent_at')
     search_fields = ('notification__title', 'error_message')
     date_hierarchy = 'sent_at'
 
-@admin.register(DoctorPerformanceMetric)
 class DoctorPerformanceMetricAdmin(admin.ModelAdmin):
     list_display = ('doctor', 'date', 'appointments_count', 'treatments_count', 'average_rating')
     list_filter = ('date',)
     search_fields = ('doctor__username', 'doctor__first_name', 'doctor__last_name')
     date_hierarchy = 'date'
 
-@admin.register(UserThemePreference)
 class UserThemePreferenceAdmin(admin.ModelAdmin):
     list_display = ('user', 'theme', 'sidebar_mode', 'updated_at')
     list_filter = ('theme', 'sidebar_mode')
     search_fields = ('user__username', 'user__email')
 
-@admin.register(LoginSession)
 class LoginSessionAdmin(admin.ModelAdmin):
     list_display = ('user', 'login_time', 'logout_time', 'duration_display', 'ip_address', 'is_active')
     list_filter = ('is_active', 'login_time', 'user__user_type')
@@ -75,3 +85,15 @@ class LoginSessionAdmin(admin.ModelAdmin):
     
     def get_queryset(self, request):
         return super().get_queryset(request).select_related('user')
+
+# Register all models with the custom admin site
+admin_site.register(User, UserAdmin)
+admin_site.register(CommunicationNotification, CommunicationNotificationAdmin)
+admin_site.register(Message, MessageAdmin)
+admin_site.register(EmailTemplate, EmailTemplateAdmin)
+admin_site.register(Notification, NotificationAdmin)
+admin_site.register(NotificationTemplate, NotificationTemplateAdmin)
+admin_site.register(NotificationLog, NotificationLogAdmin)
+admin_site.register(DoctorPerformanceMetric, DoctorPerformanceMetricAdmin)
+admin_site.register(UserThemePreference, UserThemePreferenceAdmin)
+admin_site.register(LoginSession, LoginSessionAdmin)
