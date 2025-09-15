@@ -78,6 +78,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'corsheaders',
     'django_celery_beat',  # Celery Beat scheduler
+    'channels',  # WebSocket support for real-time communication
     # Our applications
     'users',
     'appointments',
@@ -574,3 +575,30 @@ if not DEBUG:
         "http://65.108.91.110",
         "https://65.108.91.110",  # If you add SSL later
     ]
+
+# Channels Configuration for WebRTC
+ASGI_APPLICATION = 'laso.asgi.application'
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('redis', 6379)] if not DEBUG else [('127.0.0.1', 6379)],
+        },
+    },
+}
+
+# WebRTC Configuration
+WEBRTC_CONFIG = {
+    'iceServers': [
+        {'urls': 'stun:stun.l.google.com:19302'},
+        {'urls': 'stun:stun1.l.google.com:19302'},
+        {'urls': 'stun:stun2.l.google.com:19302'},
+        # Add TURN servers for production:
+        # {
+        #     'urls': 'turn:your-turn-server.com:3478',
+        #     'username': 'your-username',
+        #     'credential': 'your-password'
+        # }
+    ]
+}
