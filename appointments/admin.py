@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 from .models import Appointment
-from core.admin import admin_site
+# Using default admin site
 
 class AppointmentAdmin(admin.ModelAdmin):
     list_display = ('patient', 'doctor', 'date', 'time', 'status')
@@ -19,7 +19,7 @@ class AppointmentAdmin(admin.ModelAdmin):
     )
 
 # Register with custom admin site
-admin_site.register(Appointment, AppointmentAdmin)
+admin.site.register(Appointment, AppointmentAdmin)
 
 # Admin registrations for doctor availability systems
 try:
@@ -37,7 +37,7 @@ try:
         date_hierarchy = 'start_date'
     
     # Register with custom admin site
-    admin_site.register(DoctorAvailability, DoctorAvailabilityAdmin)
-    admin_site.register(DoctorTimeOff, DoctorTimeOffAdmin)
+    admin.site.register(DoctorAvailability, DoctorAvailabilityAdmin)
+    admin.site.register(DoctorTimeOff, DoctorTimeOffAdmin)
 except ImportError:
     pass

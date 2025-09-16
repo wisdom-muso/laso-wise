@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 from .models import Treatment, Prescription
-from core.admin import admin_site
+# Using default admin site
 
 class PrescriptionInline(admin.TabularInline):
     model = Prescription
@@ -52,7 +52,7 @@ try:
         search_fields = ('condition_name', 'notes', 'patient__username', 'patient__first_name', 'patient__last_name')
         date_hierarchy = 'diagnosed_date'
     
-    admin_site.register(MedicalHistory, MedicalHistoryAdmin)
+    admin.site.register(MedicalHistory, MedicalHistoryAdmin)
 except ImportError:
     pass
 
@@ -124,5 +124,5 @@ except ImportError:
     pass
 
 # Register all models with custom admin site
-admin_site.register(Treatment, TreatmentAdmin)
-admin_site.register(Prescription, PrescriptionAdmin)
+admin.site.register(Treatment, TreatmentAdmin)
+admin.site.register(Prescription, PrescriptionAdmin)

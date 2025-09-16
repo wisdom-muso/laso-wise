@@ -29,11 +29,9 @@ from core.admin_login import AdminLoginView
 from core.views_theme import toggle_theme, get_theme_preference
 from core.health_check import health_check, readiness_check, liveness_check
 from core import views_debug
-from core.admin import admin_site
-
 urlpatterns = [
     path('admin/login/', AdminLoginView.as_view(), name='admin_login'),
-    path('admin/', admin_site.urls),
+    path('admin/', admin.site.urls),
     
     # Home page - redirect to login if not authenticated, otherwise to dashboard
     path('', HomeRedirectView.as_view(), name='home'),

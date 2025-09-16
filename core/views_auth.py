@@ -23,10 +23,8 @@ class CustomLoginView(DjangoLoginView):
         Route users based on their role:
         - Admin users -> /admin/
         - Patients -> /dashboard/
-        - Doctors -> /doctor-dashboard/
+        - Doctors -> /dashboard/
         """
-        user = self.request.user
-        
         # First check if there's a 'next' parameter
         next_url = self.request.GET.get('next') or self.request.POST.get('next')
         
@@ -36,30 +34,29 @@ class CustomLoginView(DjangoLoginView):
             if url_has_allowed_host_and_scheme(next_url, allowed_hosts={self.request.get_host()}):
                 return next_url
         
+        # Get the user from the form if available, otherwise from request
+        user = getattr(self, '_user', None) or self.request.user
+        
         # Route based on user role
-        if user.is_staff or user.is_superuser:
+        if user.is_authenticated and (user.is_staff or user.is_superuser):
             # Admin users go to admin panel
             return '/admin/'
-        elif hasattr(user, 'user_type'):
-            # All users (doctors, patients, etc.) go to the main dashboard
-            # The dashboard view handles role-based content display
-            return reverse_lazy('dashboard')
         else:
-            # Default fallback
+            # All other users go to the main dashboard
+            # The dashboard view handles role-based content display
             return reverse_lazy('dashboard')
     
     def form_valid(self, form):
         """
         Security check complete. Log the user in and redirect to success URL.
         """
-        # Debug logging
-        user = form.get_user()
-        print(f"DEBUG: Login successful for user: {user.username}, type: {user.user_type}")
+        # Store user for get_success_url method
+        self._user = form.get_user()
+        
+        # Add success message before calling super()
+        messages.success(self.request, _('Welcome back! You have been successfully logged in.'))
         
         response = super().form_valid(form)
-        
-        # Add success message
-        messages.success(self.request, _('Welcome back! You have been successfully logged in.'))
         
         return response
     
@@ -67,16 +64,7 @@ class CustomLoginView(DjangoLoginView):
         """
         If the form is invalid, add error message and render the form again.
         """
-        # Add specific error messages for debugging
-        error_messages = []
-        for field, errors in form.errors.items():
-            for error in errors:
-                error_messages.append(f"{field}: {error}")
-        
-        if error_messages:
-            messages.error(self.request, f"Login failed: {', '.join(error_messages)}")
-        else:
-            messages.error(self.request, _('Login failed. Please check your username and password.'))
+        messages.error(self.request, _('Login failed. Please check your username and password.'))
         
         return super().form_invalid(form)
 

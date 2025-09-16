@@ -35,6 +35,9 @@ class AdminLoginView(LoginView):
         """
         user = form.get_user()
         
+        # Debug logging
+        print(f"DEBUG: Admin login attempt for user: {user.username}, is_staff: {user.is_staff}, is_superuser: {user.is_superuser}")
+        
         # Check if user has admin access
         if not (user.is_staff or user.is_superuser):
             form.add_error(None, 'You do not have permission to access the admin panel.')

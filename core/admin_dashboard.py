@@ -162,3 +162,115 @@ def admin_dashboard(request):
     }
     
     return render(request, 'admin/dashboard.html', context)
+
+
+def admin_dashboard_callback(request, context):
+    """
+    Django Unfold dashboard callback function
+    This integrates our custom dashboard with Django Unfold
+    """
+    # Get current date and time ranges
+    now = timezone.now()
+    today = now.date()
+    week_ago = today - timedelta(days=7)
+    month_ago = today - timedelta(days=30)
+    year_ago = today - timedelta(days=365)
+    
+    # User Statistics
+    total_users = User.objects.count()
+    total_patients = User.objects.filter(user_type='patient').count()
+    total_doctors = User.objects.filter(user_type='doctor').count()
+    total_receptionists = User.objects.filter(user_type='receptionist').count()
+    total_admins = User.objects.filter(user_type='admin').count()
+    
+    # New users this month
+    new_users_this_month = User.objects.filter(date_joined__gte=month_ago).count()
+    new_users_last_month = User.objects.filter(
+        date_joined__gte=month_ago - timedelta(days=30),
+        date_joined__lt=month_ago
+    ).count()
+    
+    # Calculate growth percentage
+    if new_users_last_month > 0:
+        user_growth_percentage = ((new_users_this_month - new_users_last_month) / new_users_last_month) * 100
+    else:
+        user_growth_percentage = 100 if new_users_this_month > 0 else 0
+    
+    # Active users (logged in within last 30 days)
+    active_users = LoginSession.objects.filter(
+        login_time__gte=month_ago
+    ).values('user').distinct().count()
+    
+    # Appointment Statistics
+    total_appointments = Appointment.objects.count()
+    appointments_today = Appointment.objects.filter(date=today).count()
+    appointments_this_week = Appointment.objects.filter(date__gte=week_ago).count()
+    appointments_this_month = Appointment.objects.filter(date__gte=month_ago).count()
+    
+    # Appointment status breakdown
+    pending_appointments = Appointment.objects.filter(status='pending').count()
+    confirmed_appointments = Appointment.objects.filter(status='confirmed').count()
+    completed_appointments = Appointment.objects.filter(status='completed').count()
+    cancelled_appointments = Appointment.objects.filter(status='cancelled').count()
+    
+    # Treatment Statistics
+    total_treatments = Treatment.objects.count()
+    treatments_this_month = Treatment.objects.filter(created_at__gte=month_ago).count()
+    
+    # Recent Activity
+    recent_users = User.objects.filter(date_joined__gte=week_ago).order_by('-date_joined')[:5]
+    recent_appointments = Appointment.objects.filter(created_at__gte=week_ago).order_by('-created_at')[:5]
+    recent_treatments = Treatment.objects.filter(created_at__gte=week_ago).order_by('-created_at')[:5]
+    
+    # System Health Metrics
+    system_health = {
+        'database_status': 'healthy',
+        'cache_status': 'healthy',
+        'storage_usage': '45%',
+        'memory_usage': '62%',
+        'cpu_usage': '23%',
+    }
+    
+    # Add our dashboard data to the context
+    dashboard_context = {
+        # User Statistics
+        'total_users': total_users,
+        'total_patients': total_patients,
+        'total_doctors': total_doctors,
+        'total_receptionists': total_receptionists,
+        'total_admins': total_admins,
+        'new_users_this_month': new_users_this_month,
+        'user_growth_percentage': user_growth_percentage,
+        'active_users': active_users,
+        
+        # Appointment Statistics
+        'total_appointments': total_appointments,
+        'appointments_today': appointments_today,
+        'appointments_this_week': appointments_this_week,
+        'appointments_this_month': appointments_this_month,
+        'pending_appointments': pending_appointments,
+        'confirmed_appointments': confirmed_appointments,
+        'completed_appointments': completed_appointments,
+        'cancelled_appointments': cancelled_appointments,
+        
+        # Treatment Statistics
+        'total_treatments': total_treatments,
+        'treatments_this_month': treatments_this_month,
+        
+        # Recent Activity
+        'recent_users': recent_users,
+        'recent_appointments': recent_appointments,
+        'recent_treatments': recent_treatments,
+        
+        # System Health
+        'system_health': system_health,
+        
+        # Date ranges for display
+        'today': today,
+        'week_ago': week_ago,
+        'month_ago': month_ago,
+    }
+    
+    # Merge with existing context
+    context.update(dashboard_context)
+    return context

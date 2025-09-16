@@ -14,21 +14,7 @@ from .admin_dashboard import admin_dashboard
 # Import AI admin configurations
 from .admin_ai import AIConfigurationAdmin, AIConversationAdmin, AIPromptTemplateAdmin
 
-# Custom Admin Site with Dashboard
-class LasoAdminSite(admin.AdminSite):
-    site_header = 'LASO Healthcare Administration'
-    site_title = 'LASO Admin'
-    index_title = 'Healthcare System Dashboard'
-    
-    def get_urls(self):
-        urls = super().get_urls()
-        custom_urls = [
-            path('', admin_dashboard, name='admin_dashboard'),
-        ]
-        return custom_urls + urls
-
-# Create custom admin site instance
-admin_site = LasoAdminSite(name='laso_admin')
+# Using Django's default admin site with Unfold integration
 
 class CommunicationNotificationAdmin(admin.ModelAdmin):
     list_display = ('user', 'notification_type', 'title', 'is_read', 'created_at')
@@ -86,14 +72,14 @@ class LoginSessionAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         return super().get_queryset(request).select_related('user')
 
-# Register all models with the custom admin site
-admin_site.register(User, UserAdmin)
-admin_site.register(CommunicationNotification, CommunicationNotificationAdmin)
-admin_site.register(Message, MessageAdmin)
-admin_site.register(EmailTemplate, EmailTemplateAdmin)
-admin_site.register(Notification, NotificationAdmin)
-admin_site.register(NotificationTemplate, NotificationTemplateAdmin)
-admin_site.register(NotificationLog, NotificationLogAdmin)
-admin_site.register(DoctorPerformanceMetric, DoctorPerformanceMetricAdmin)
-admin_site.register(UserThemePreference, UserThemePreferenceAdmin)
-admin_site.register(LoginSession, LoginSessionAdmin)
+# Register all models with the default admin site
+# Note: User is already registered in users/admin.py
+admin.site.register(CommunicationNotification, CommunicationNotificationAdmin)
+admin.site.register(Message, MessageAdmin)
+admin.site.register(EmailTemplate, EmailTemplateAdmin)
+admin.site.register(Notification, NotificationAdmin)
+admin.site.register(NotificationTemplate, NotificationTemplateAdmin)
+admin.site.register(NotificationLog, NotificationLogAdmin)
+admin.site.register(DoctorPerformanceMetric, DoctorPerformanceMetricAdmin)
+admin.site.register(UserThemePreference, UserThemePreferenceAdmin)
+admin.site.register(LoginSession, LoginSessionAdmin)

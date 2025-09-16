@@ -204,9 +204,13 @@ class PatientRegistrationView(CreateView):
     success_url = reverse_lazy('login')
     
     def form_valid(self, form):
+        messages.success(self.request, _('Patient registration completed successfully. You can now log in with your credentials.'))
         response = super().form_valid(form)
-        messages.success(self.request, _('Patient registration completed successfully.'))
         return response
+    
+    def form_invalid(self, form):
+        messages.error(self.request, _('Registration Failed. Please check the form for errors and try again.'))
+        return super().form_invalid(form)
 
 # Appointment Views
 class AppointmentListView(LoginRequiredMixin, ListView):

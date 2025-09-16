@@ -54,6 +54,8 @@ CSRF_TRUSTED_ORIGINS = [
     'https://work-2-rpqxmrerpfzteyap.prod-runtime.all-hands.dev',
     'https://work-1-zpgsapvljvomliot.prod-runtime.all-hands.dev',
     'https://work-2-zpgsapvljvomliot.prod-runtime.all-hands.dev',
+    'https://work-1-kbfmamisweqyqrai.prod-runtime.all-hands.dev',
+    'https://work-2-kbfmamisweqyqrai.prod-runtime.all-hands.dev',
     'http://localhost:12000',
     'http://localhost:12001',
     'http://127.0.0.1:12000',
@@ -243,7 +245,7 @@ UNFOLD = {
     "SITE_HEADER": "Laso Healthcare - Clinical Management System",
     "SITE_URL": "/",
     "SITE_ICON": None,
-    "DASHBOARD_CALLBACK": None,
+    "DASHBOARD_CALLBACK": "core.admin_dashboard.admin_dashboard_callback",
     "STYLES": [
         "css/admin_custom.css",
         "css/sidebar_teal.css",

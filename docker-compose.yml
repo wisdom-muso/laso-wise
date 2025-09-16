@@ -34,7 +34,7 @@ services:
     networks:
       - laso_network
     healthcheck:
-      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-redis_password}", "--raw", "incr", "ping"]
       interval: 10s
       timeout: 3s
       retries: 5
@@ -143,8 +143,8 @@ services:
     container_name: laso_nginx
     restart: unless-stopped
     ports:
-      - "8081:80"
-      - "8444:443"
+      - "80:80"
+      - "443:443"
     volumes:
       - static_volume:/var/www/static:ro
       - media_volume:/var/www/media:ro

@@ -13,6 +13,7 @@ services:
     environment:
       - DEBUG=True
       - ALLOWED_HOSTS=*
+      - USE_SQLITE=True  # Use SQLite for development
       - EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend
       - ENABLE_AI_FEATURES=False  # Disable AI for faster development
     volumes:
@@ -21,7 +22,7 @@ services:
       - /app/staticfiles  # Exclude staticfiles to prevent conflicts
     command: python manage.py runserver 0.0.0.0:8000
     ports:
-      - "8000:8000"
+      - "3000:8000"
     stdin_open: true
     tty: true
 

@@ -26,7 +26,7 @@ services:
       - logs_volume:/app/logs
       - ./db.sqlite3:/app/db.sqlite3  # Mount SQLite database
     ports:
-      - "8000:8000"
+      - "3000:8000"
     networks:
       - laso_network
     healthcheck:
