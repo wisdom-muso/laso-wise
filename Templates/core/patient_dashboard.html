@@ -1,0 +1,410 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Patient Dashboard - Laso Healthcare{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Patient Dashboard Specific Styles */
+    .patient-dashboard .card {
+        border: none;
+        box-shadow: 0 0.5rem 1.5rem 0.5rem rgba(0, 0, 0, 0.075);
+        border-radius: 0.75rem;
+    }
+    
+    .patient-dashboard .card-header {
+        background: transparent;
+        border-bottom: 1px solid #e4e6ef;
+        padding: 1.5rem 1.5rem 1rem 1.5rem;
+    }
+    
+    .patient-dashboard .card-body {
+        padding: 1.5rem;
+    }
+    
+    .patient-dashboard .info-card {
+        background: linear-gradient(135deg, var(--teal-50), var(--teal-100));
+        border: 1px solid var(--teal-200);
+    }
+    
+    .patient-dashboard .info-card .info-icon {
+        color: var(--teal-500);
+    }
+    
+    .patient-dashboard .table th {
+        color: var(--teal-700);
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+    }
+    
+    .patient-dashboard .btn-primary {
+        background-color: var(--teal-500);
+        border-color: var(--teal-500);
+    }
+    
+    .patient-dashboard .btn-primary:hover {
+        background-color: var(--teal-600);
+        border-color: var(--teal-600);
+    }
+    
+    .patient-dashboard .text-primary {
+        color: var(--teal-500) !important;
+    }
+    
+    .patient-dashboard .badge-light-primary {
+        background-color: rgba(20, 184, 166, 0.1);
+        color: var(--teal-700);
+    }
+    
+    .patient-dashboard .badge-light-success {
+        background-color: rgba(34, 197, 94, 0.1);
+        color: #15803d;
+    }
+    
+    .patient-dashboard .badge-light-danger {
+        background-color: rgba(239, 68, 68, 0.1);
+        color: #dc2626;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="patient-dashboard">
+    <div class="row g-5 g-xl-10 mb-5 mb-xl-10">
+        <div class="col-12">
+            <!-- Patient Profile Card -->
+            <div class="card mb-5 mb-xl-10">
+                <div class="card-body pt-9 pb-9">
+                    <div class="d-flex flex-wrap flex-sm-nowrap mb-6">
+                        <div class="d-flex flex-center flex-shrink-0 bg-light rounded w-100px h-100px w-lg-150px h-lg-150px me-7 mb-4">
+                            {% if user.profile_picture %}
+                                <img src="{{ user.profile_picture.url }}" alt="{{ user.get_full_name }}" class="w-100 h-100 rounded" style="object-fit: cover;">
+                            {% else %}
+                                <i class="ki-outline ki-user fs-5x text-primary"></i>
+                            {% endif %}
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between align-items-start flex-wrap mb-2">
+                                <div class="d-flex flex-column">
+                                    <div class="d-flex align-items-center mb-1">
+                                        <a href="{% url 'core:patient-detail' user.id %}" class="text-gray-900 text-hover-primary fs-2 fw-bold me-3">{{ user.get_full_name }}</a>
+                                    </div>
+                                    <div class="d-flex flex-wrap fw-semibold mb-4 fs-5 text-gray-500">{{ user.get_user_type_display }}</div>
+                                </div>
+                            </div>
+                            <div class="d-flex flex-wrap justify-content-start">
+                                <div class="d-flex flex-wrap">
+                                    <!-- Join Date -->
+                                    <div class="info-card border border-gray-300 border-dashed rounded min-w-125px py-3 px-4 me-6 mb-3">
+                                        <div class="d-flex align-items-center">
+                                            <i class="ki-outline ki-calendar fs-1 me-2 info-icon"></i>
+                                            <div class="fs-4 fw-bold">{{ user.date_joined|date:"d M Y" }}</div>
+                                        </div>
+                                        <div class="fw-semibold fs-6 text-gray-500">Join Date</div>
+                                    </div>
+                                    
+                                    <!-- Birth Date -->
+                                    {% if user.date_of_birth %}
+                                    <div class="info-card border border-gray-300 border-dashed rounded min-w-125px py-3 px-4 me-6 mb-3">
+                                        <div class="d-flex align-items-center">
+                                            <i class="ki-outline ki-profile-circle fs-1 me-2 info-icon"></i>
+                                            <div class="fs-4 fw-bold">{{ user.date_of_birth|date:"d M Y" }}</div>
+                                        </div>
+                                        <div class="fw-semibold fs-6 text-gray-500">Date of Birth</div>
+                                    </div>
+                                    {% endif %}
+                                    
+                                    <!-- Blood Type -->
+                                    {% if user.blood_type %}
+                                    <div class="info-card border border-gray-300 border-dashed rounded min-w-125px py-3 px-4 me-6 mb-3">
+                                        <div class="d-flex align-items-center">
+                                            <i class="ki-outline ki-heart fs-1 me-2 text-danger"></i>
+                                            <div class="fs-4 fw-bold">{{ user.blood_type }}</div>
+                                        </div>
+                                        <div class="fw-semibold fs-6 text-gray-500">Blood Type</div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="separator mb-5"></div>
+                    
+                    <!-- Upcoming Appointments -->
+                    <div class="card mb-5 mb-xl-10">
+                        <div class="card-header border-0">
+                            <div class="card-title m-0">
+                                <h3 class="fw-bold m-0 text-primary">
+                                    <i class="ki-outline ki-calendar-add me-2"></i>
+                                    Upcoming Appointments
+                                </h3>
+                            </div>
+                            <div class="card-toolbar">
+                                <a href="{% url 'core:appointment-list' %}" class="btn btn-sm btn-primary">
+                                    <i class="ki-outline ki-calendar me-1"></i>
+                                    All Appointments
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <div class="card-body pt-0">
+                            {% if upcoming_appointments %}
+                            <div class="table-responsive">
+                                <table class="table table-row-dashed table-row-gray-300 align-middle gs-0 gy-4">
+                                    <thead>
+                                        <tr class="fw-bold text-muted">
+                                            <th class="min-w-150px">Doctor</th>
+                                            <th class="min-w-140px">Date</th>
+                                            <th class="min-w-120px">Time</th>
+                                            <th class="min-w-100px">Status</th>
+                                            <th class="min-w-100px text-end">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for appointment in upcoming_appointments %}
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="symbol symbol-45px me-5">
+                                                        <div class="symbol-label bg-light-primary">
+                                                            <i class="ki-outline ki-abstract-26 fs-3 text-primary"></i>
+                                                        </div>
+                                                    </div>
+                                                    <div class="d-flex justify-content-start flex-column">
+                                                        <a href="#" class="text-gray-900 fw-bold text-hover-primary fs-6">{{ appointment.doctor.get_full_name }}</a>
+                                                        <span class="text-muted fw-semibold d-block fs-7">
+                                                            {% if appointment.doctor.specialization %}
+                                                                {{ appointment.doctor.specialization }}
+                                                            {% else %}
+                                                                General Practitioner
+                                                            {% endif %}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="text-gray-900 fw-semibold d-block fs-6">{{ appointment.date|date:"M d, Y" }}</span>
+                                            </td>
+                                            <td>
+                                                <span class="text-gray-900 fw-semibold d-block fs-6">{{ appointment.time|time:"g:i A" }}</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge badge-light-{% if appointment.status == 'planned' %}primary{% elif appointment.status == 'completed' %}success{% else %}danger{% endif %}">
+                                                    {% if appointment.status == 'planned' %}
+                                                        Scheduled
+                                                    {% elif appointment.status == 'completed' %}
+                                                        Completed
+                                                    {% elif appointment.status == 'cancelled' %}
+                                                        Cancelled
+                                                    {% else %}
+                                                        {{ appointment.get_status_display }}
+                                                    {% endif %}
+                                                </span>
+                                            </td>
+                                            <td class="text-end">
+                                                <a href="{% url 'core:appointment-detail' appointment.id %}" class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm me-1" title="View Details">
+                                                    <i class="ki-outline ki-eye fs-2"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% else %}
+                            <div class="text-center py-10">
+                                <div class="symbol symbol-100px mx-auto mb-5">
+                                    <div class="symbol-label bg-light-primary">
+                                        <i class="ki-outline ki-calendar-tick fs-4x text-primary"></i>
+                                    </div>
+                                </div>
+                                <h5 class="text-gray-900 fw-bold mb-2">No Upcoming Appointments</h5>
+                                <div class="text-muted fw-semibold fs-6 mb-5">You don't have any upcoming appointments scheduled.</div>
+                                <a href="{% url 'core:appointment-create' %}" class="btn btn-primary">
+                                    <i class="ki-outline ki-plus me-1"></i>
+                                    Schedule New Appointment
+                                </a>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Recent Treatments -->
+                    <div class="card mb-5 mb-xl-10">
+                        <div class="card-header border-0">
+                            <div class="card-title m-0">
+                                <h3 class="fw-bold m-0 text-primary">
+                                    <i class="ki-outline ki-document me-2"></i>
+                                    Recent Treatments
+                                </h3>
+                            </div>
+                            <div class="card-toolbar">
+                                <a href="{% url 'core:patient-detail' user.id %}" class="btn btn-sm btn-light-primary">
+                                    <i class="ki-outline ki-notepad-bookmark me-1"></i>
+                                    View Medical History
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <div class="card-body pt-0">
+                            {% if recent_treatments %}
+                            <div class="table-responsive">
+                                <table class="table table-row-dashed table-row-gray-300 align-middle gs-0 gy-4">
+                                    <thead>
+                                        <tr class="fw-bold text-muted">
+                                            <th class="min-w-150px">Doctor</th>
+                                            <th class="min-w-140px">Date</th>
+                                            <th class="min-w-120px">Diagnosis</th>
+                                            <th class="min-w-100px text-end">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for treatment in recent_treatments %}
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="symbol symbol-45px me-5">
+                                                        <div class="symbol-label bg-light-success">
+                                                            <i class="ki-outline ki-abstract-26 fs-3 text-success"></i>
+                                                        </div>
+                                                    </div>
+                                                    <div class="d-flex justify-content-start flex-column">
+                                                        <a href="#" class="text-gray-900 fw-bold text-hover-primary fs-6">{{ treatment.appointment.doctor.get_full_name }}</a>
+                                                        <span class="text-muted fw-semibold d-block fs-7">
+                                                            {% if treatment.appointment.doctor.specialization %}
+                                                                {{ treatment.appointment.doctor.specialization }}
+                                                            {% else %}
+                                                                General Practitioner
+                                                            {% endif %}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="text-gray-900 fw-semibold d-block fs-6">{{ treatment.appointment.date|date:"M d, Y" }}</span>
+                                            </td>
+                                            <td>
+                                                <span class="text-gray-900 fw-semibold d-block fs-6">
+                                                    {% if treatment.diagnosis %}
+                                                        {{ treatment.diagnosis|truncatechars:50 }}
+                                                    {% else %}
+                                                        General Consultation
+                                                    {% endif %}
+                                                </span>
+                                            </td>
+                                            <td class="text-end">
+                                                <a href="{% url 'core:treatment-detail' treatment.id %}" class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm me-1" title="View Treatment Details">
+                                                    <i class="ki-outline ki-eye fs-2"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% else %}
+                            <div class="text-center py-10">
+                                <div class="symbol symbol-100px mx-auto mb-5">
+                                    <div class="symbol-label bg-light-success">
+                                        <i class="ki-outline ki-document fs-4x text-success"></i>
+                                    </div>
+                                </div>
+                                <h5 class="text-gray-900 fw-bold mb-2">No Treatment History</h5>
+                                <div class="text-muted fw-semibold fs-6 mb-5">You don't have any treatment records yet.</div>
+                                <p class="text-muted fs-7">Your treatment history will appear here after your appointments are completed.</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Actions -->
+                    <div class="row g-6 g-xl-9 mb-6">
+                        <div class="col-md-6 col-xl-4">
+                            <div class="card card-flush h-xl-100">
+                                <div class="card-header pt-5">
+                                    <div class="card-title d-flex flex-column">
+                                        <span class="fs-2hx fw-bold text-dark me-2 lh-1 ls-n2">
+                                            <i class="ki-outline ki-calendar-add text-primary fs-2x me-2"></i>
+                                        </span>
+                                        <span class="text-gray-500 pt-1 fw-semibold fs-6">Quick Actions</span>
+                                    </div>
+                                </div>
+                                <div class="card-body pt-2 pb-4 d-flex flex-column justify-content-center">
+                                    <div class="d-flex flex-column gap-3">
+                                        <a href="{% url 'core:appointment-create' %}" class="btn btn-primary btn-sm">
+                                            <i class="ki-outline ki-plus me-1"></i>
+                                            Book New Appointment
+                                        </a>
+                                        <a href="{% url 'core:doctor-list' %}" class="btn btn-light-primary btn-sm">
+                                            <i class="ki-outline ki-abstract-26 me-1"></i>
+                                            Find Doctors
+                                        </a>
+                                        <a href="{% url 'core:patient-detail' user.id %}" class="btn btn-light-primary btn-sm">
+                                            <i class="ki-outline ki-profile-user me-1"></i>
+                                            View My Profile
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 col-xl-4">
+                            <div class="card card-flush h-xl-100">
+                                <div class="card-header pt-5">
+                                    <div class="card-title d-flex flex-column">
+                                        <span class="fs-2hx fw-bold text-dark me-2 lh-1 ls-n2">
+                                            <i class="ki-outline ki-notepad-bookmark text-success fs-2x me-2"></i>
+                                        </span>
+                                        <span class="text-gray-500 pt-1 fw-semibold fs-6">Health Records</span>
+                                    </div>
+                                </div>
+                                <div class="card-body pt-2 pb-4 d-flex flex-column justify-content-center">
+                                    <div class="d-flex flex-column gap-3">
+                                        <a href="#" class="btn btn-success btn-sm">
+                                            <i class="fas fa-pills me-1"></i>
+                                            My Medications
+                                        </a>
+                                        <a href="{% url 'report-list' %}" class="btn btn-light-success btn-sm">
+                                            <i class="fas fa-file-medical-alt me-1"></i>
+                                            Medical Reports
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 col-xl-4">
+                            <div class="card card-flush h-xl-100">
+                                <div class="card-header pt-5">
+                                    <div class="card-title d-flex flex-column">
+                                        <span class="fs-2hx fw-bold text-dark me-2 lh-1 ls-n2">
+                                            <i class="fas fa-video text-info fs-2x me-2"></i>
+                                        </span>
+                                        <span class="text-gray-500 pt-1 fw-semibold fs-6">Telemedicine</span>
+                                    </div>
+                                </div>
+                                <div class="card-body pt-2 pb-4 d-flex flex-column justify-content-center">
+                                    <div class="d-flex flex-column gap-3">
+                                        <a href="{% url 'telemedicine:list' %}" class="btn btn-info btn-sm">
+                                            <i class="fas fa-video me-1"></i>
+                                            Video Consultation
+                                        </a>
+                                        <a href="{% url 'core:ai_assistant' %}" class="btn btn-light-info btn-sm">
+                                            <i class="fas fa-brain me-1"></i>
+                                            AI Health Assistant
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

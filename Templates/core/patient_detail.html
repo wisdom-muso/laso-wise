@@ -1,0 +1,262 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Patient: {{ patient.get_full_name }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="h3 mb-0">{{ patient.get_full_name }}</h1>
+            <p class="text-muted">Patient Information</p>
+        </div>
+        <div class="col-auto">
+            {% if user.is_doctor or user.is_receptionist or user.is_admin_user %}
+            <a href="{% url 'core:appointment-create' %}?patient={{ patient.id }}" class="btn btn-primary">
+                <i class="fas fa-calendar-plus"></i> Create Appointment
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Patient Information Card -->
+        <div class="col-md-4 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-header">
+                    <h3 class="card-title">Personal Information</h3>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3 text-center">
+                        <div class="symbol symbol-100px symbol-circle mb-3">
+                            <span class="symbol-label bg-light-primary text-primary fs-1">
+                                <i class="ki-outline ki-profile-user fs-1"></i>
+                            </span>
+                        </div>
+                        <h4>{{ patient.get_full_name }}</h4>
+                        <p class="text-muted mb-0">Patient</p>
+                    </div>
+                    
+                    <div class="separator my-3"></div>
+                    
+                    <div class="d-flex flex-column">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="flex-shrink-0">
+                                <i class="ki-outline ki-sms fs-4 me-2"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <span class="text-muted">Email:</span>
+                                <span class="fw-bold d-block">{{ patient.email }}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="flex-shrink-0">
+                                <i class="ki-outline ki-phone fs-4 me-2"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <span class="text-muted">Phone:</span>
+                                <span class="fw-bold d-block">{{ patient.phone_number|default:"Not specified" }}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="flex-shrink-0">
+                                <i class="ki-outline ki-calendar-8 fs-4 me-2"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <span class="text-muted">Date of Birth:</span>
+                                <span class="fw-bold d-block">{{ patient.date_of_birth|date:"d.m.Y"|default:"Not specified" }}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="flex-shrink-0">
+                                <i class="ki-outline ki-geolocation fs-4 me-2"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <span class="text-muted">Address:</span>
+                                <span class="fw-bold d-block">{{ patient.address|default:"Not specified" }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Patient Appointments -->
+        <div class="col-md-8 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="card-title">Appointments</h3>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Doctor</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if appointments %}
+                                    {% for appointment in appointments %}
+                                        <tr>
+                                            <td>{{ appointment.date|date:"d.m.Y" }}</td>
+                                            <td>{{ appointment.time|time:"H:i" }}</td>
+                                            <td>{{ appointment.doctor.get_full_name }}</td>
+                                            <td>
+                                                {% if appointment.status == 'planned' %}
+                                                    <span class="badge bg-primary">Scheduled</span>
+                                                {% elif appointment.status == 'completed' %}
+                                                    <span class="badge bg-success">Completed</span>
+                                                {% elif appointment.status == 'cancelled' %}
+                                                    <span class="badge bg-danger">Cancelled</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <a href="{% url 'core:appointment-detail' appointment.id %}" class="btn btn-sm btn-info">
+                                                    <i class="fas fa-eye"></i> View
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="5" class="text-center">No appointments found.</td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Patient Treatments -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h3 class="card-title">Treatment History</h3>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Doctor</th>
+                                    <th>Diagnosis</th>
+                                    <th>Treatment</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if treatments %}
+                                    {% for treatment in treatments %}
+                                        <tr>
+                                            <td>{{ treatment.created_at|date:"d.m.Y" }}</td>
+                                            <td>{{ treatment.appointment.doctor.get_full_name }}</td>
+                                            <td>{{ treatment.diagnosis|truncatechars:30 }}</td>
+                                            <td>{{ treatment.treatment_plan|truncatechars:30 }}</td>
+                                            <td>
+                                                <a href="{% url 'core:treatment-detail' treatment.id %}" class="btn btn-sm btn-info">
+                                                    <i class="fas fa-eye"></i> View
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="5" class="text-center">No treatment history found.</td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Sağlık Geçmişi ve Ek Hizmetler -->
+    <div class="row mt-4">
+        <div class="col-12 col-md-4 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-light">
+                    <h3 class="card-title">Medical History</h3>
+                </div>
+                <div class="card-body">
+                    <p>Patient's medical history, chronic diseases, allergies and past surgeries.</p>
+                    <a href="{% url 'core:medical-history-list' patient.id %}" class="btn btn-primary">
+                        <i class="ki-outline ki-notepad-bookmark fs-2"></i> View Medical History
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-12 col-md-4 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-light">
+                    <h3 class="card-title">Medications</h3>
+                </div>
+                <div class="card-body">
+                    <p>Medications prescribed to the patient and usage information.</p>
+                    <a href="{% url 'patient_medications' patient.id %}" class="btn btn-success">
+                        <i class="fas fa-pills"></i> View Medications
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-12 col-md-4 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-light">
+                    <h3 class="card-title">Lab Tests</h3>
+                </div>
+                <div class="card-body">
+                    <p>Patient's laboratory test results and analyses.</p>
+                    <a href="{% url 'lab-test-list' patient_id=patient.id %}" class="btn btn-info">
+                        <i class="fas fa-flask"></i> View Lab Results
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-2">
+        <div class="col-12 col-md-4 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-light">
+                    <h3 class="card-title">Medical Images</h3>
+                </div>
+                <div class="card-body">
+                    <p>Patient's medical imaging records such as X-ray, MRI, CT.</p>
+                    <a href="{% url 'medical-image-list' patient_id=patient.id %}" class="btn btn-primary">
+                        <i class="fas fa-x-ray"></i> View Medical Images
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-12 col-md-4 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-light">
+                    <h3 class="card-title">Medical Reports</h3>
+                </div>
+                <div class="card-body">
+                    <p>All medical reports and documents belonging to the patient.</p>
+                    <a href="{% url 'report-list' patient_id=patient.id %}" class="btn btn-warning">
+                        <i class="fas fa-file-medical-alt"></i> View Reports
+                    </a>
+                </div>
+            </div>
+        </div>
+</div>
+{% endblock %} 

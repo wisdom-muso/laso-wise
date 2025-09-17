@@ -1,0 +1,629 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Admin Dashboard - LASO Healthcare{% endblock %}
+
+{% block extrahead %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<style>
+    :root {
+        --primary-color: #14b8a6;
+        --secondary-color: #0ea5e9;
+        --success-color: #10b981;
+        --warning-color: #f59e0b;
+        --danger-color: #ef4444;
+        --info-color: #3b82f6;
+        --light-bg: #f8fafc;
+        --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        --border-radius: 12px;
+    }
+
+    .dashboard-container {
+        padding: 20px;
+        background: var(--light-bg);
+        min-height: 100vh;
+    }
+
+    .dashboard-header {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        padding: 30px;
+        border-radius: var(--border-radius);
+        margin-bottom: 30px;
+        box-shadow: var(--card-shadow);
+    }
+
+    .dashboard-header h1 {
+        margin: 0;
+        font-size: 2.5rem;
+        font-weight: 700;
+    }
+
+    .dashboard-header p {
+        margin: 10px 0 0 0;
+        opacity: 0.9;
+        font-size: 1.1rem;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .stat-card {
+        background: white;
+        padding: 25px;
+        border-radius: var(--border-radius);
+        box-shadow: var(--card-shadow);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        border-left: 4px solid var(--primary-color);
+    }
+
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-card.patients { border-left-color: var(--success-color); }
+    .stat-card.doctors { border-left-color: var(--info-color); }
+    .stat-card.appointments { border-left-color: var(--warning-color); }
+    .stat-card.treatments { border-left-color: var(--danger-color); }
+
+    .stat-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: white;
+    }
+
+    .stat-icon.patients { background: var(--success-color); }
+    .stat-icon.doctors { background: var(--info-color); }
+    .stat-icon.appointments { background: var(--warning-color); }
+    .stat-icon.treatments { background: var(--danger-color); }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin: 0;
+    }
+
+    .stat-label {
+        color: #6b7280;
+        font-size: 0.9rem;
+        margin: 5px 0;
+    }
+
+    .stat-change {
+        display: flex;
+        align-items: center;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .stat-change.positive {
+        color: var(--success-color);
+    }
+
+    .stat-change.negative {
+        color: var(--danger-color);
+    }
+
+    .charts-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .chart-card {
+        background: white;
+        padding: 25px;
+        border-radius: var(--border-radius);
+        box-shadow: var(--card-shadow);
+    }
+
+    .chart-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #f1f5f9;
+    }
+
+    .chart-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #1f2937;
+        margin: 0;
+    }
+
+    .chart-container {
+        position: relative;
+        height: 300px;
+    }
+
+    .activity-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .activity-card {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--card-shadow);
+        overflow: hidden;
+    }
+
+    .activity-header {
+        background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+        padding: 20px;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .activity-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #1f2937;
+        margin: 0;
+    }
+
+    .activity-list {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+    .activity-item {
+        padding: 15px 20px;
+        border-bottom: 1px solid #f1f5f9;
+        display: flex;
+        align-items: center;
+        transition: background-color 0.2s ease;
+    }
+
+    .activity-item:hover {
+        background-color: #f8fafc;
+    }
+
+    .activity-item:last-child {
+        border-bottom: none;
+    }
+
+    .activity-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--primary-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        margin-right: 15px;
+    }
+
+    .activity-content {
+        flex: 1;
+    }
+
+    .activity-name {
+        font-weight: 600;
+        color: #1f2937;
+        margin: 0 0 5px 0;
+    }
+
+    .activity-meta {
+        font-size: 0.85rem;
+        color: #6b7280;
+        margin: 0;
+    }
+
+    .system-health {
+        background: white;
+        padding: 25px;
+        border-radius: var(--border-radius);
+        box-shadow: var(--card-shadow);
+    }
+
+    .health-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 0;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .health-item:last-child {
+        border-bottom: none;
+    }
+
+    .health-status {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .health-status.healthy {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .health-status.warning {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .progress-bar {
+        width: 100px;
+        height: 8px;
+        background: #e5e7eb;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: var(--primary-color);
+        transition: width 0.3s ease;
+    }
+
+    @media (max-width: 768px) {
+        .charts-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .activity-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+        <h1><i class="fas fa-tachometer-alt"></i> Admin Dashboard</h1>
+        <p>Welcome back! Here's what's happening with your healthcare system today.</p>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="stats-grid">
+        <div class="stat-card patients">
+            <div class="stat-header">
+                <div>
+                    <h2 class="stat-number">{{ total_patients|intcomma }}</h2>
+                    <p class="stat-label">Total Patients</p>
+                    <div class="stat-change positive">
+                        <i class="fas fa-arrow-up"></i>
+                        <span>+{{ new_users_this_month }} this month</span>
+                    </div>
+                </div>
+                <div class="stat-icon patients">
+                    <i class="fas fa-user-injured"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card doctors">
+            <div class="stat-header">
+                <div>
+                    <h2 class="stat-number">{{ total_doctors|intcomma }}</h2>
+                    <p class="stat-label">Total Doctors</p>
+                    <div class="stat-change">
+                        <i class="fas fa-users"></i>
+                        <span>{{ total_receptionists }} receptionists</span>
+                    </div>
+                </div>
+                <div class="stat-icon doctors">
+                    <i class="fas fa-user-md"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card appointments">
+            <div class="stat-header">
+                <div>
+                    <h2 class="stat-number">{{ total_appointments|intcomma }}</h2>
+                    <p class="stat-label">Total Appointments</p>
+                    <div class="stat-change">
+                        <i class="fas fa-calendar-day"></i>
+                        <span>{{ appointments_today }} today</span>
+                    </div>
+                </div>
+                <div class="stat-icon appointments">
+                    <i class="fas fa-calendar-check"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card treatments">
+            <div class="stat-header">
+                <div>
+                    <h2 class="stat-number">{{ total_treatments|intcomma }}</h2>
+                    <p class="stat-label">Total Treatments</p>
+                    <div class="stat-change positive">
+                        <i class="fas fa-arrow-up"></i>
+                        <span>{{ treatments_this_month }} this month</span>
+                    </div>
+                </div>
+                <div class="stat-icon treatments">
+                    <i class="fas fa-stethoscope"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="charts-grid">
+        <div class="chart-card">
+            <div class="chart-header">
+                <h3 class="chart-title">User Registration Trend</h3>
+                <div class="stat-change {% if user_growth_percentage > 0 %}positive{% else %}negative{% endif %}">
+                    <i class="fas fa-arrow-{% if user_growth_percentage > 0 %}up{% else %}down{% endif %}"></i>
+                    <span>{{ user_growth_percentage }}% vs last month</span>
+                </div>
+            </div>
+            <div class="chart-container">
+                <canvas id="userTrendChart"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-card">
+            <div class="chart-header">
+                <h3 class="chart-title">User Distribution</h3>
+                <div class="stat-change">
+                    <i class="fas fa-users"></i>
+                    <span>{{ engagement_rate }}% active</span>
+                </div>
+            </div>
+            <div class="chart-container">
+                <canvas id="userTypeChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Activity and System Health -->
+    <div class="activity-grid">
+        <div class="activity-card">
+            <div class="activity-header">
+                <h3 class="activity-title"><i class="fas fa-user-plus"></i> Recent Users</h3>
+            </div>
+            <div class="activity-list">
+                {% for user in recent_users %}
+                <div class="activity-item">
+                    <div class="activity-avatar">
+                        {{ user.first_name|first|default:user.username|first|upper }}
+                    </div>
+                    <div class="activity-content">
+                        <p class="activity-name">{{ user.get_full_name|default:user.username }}</p>
+                        <p class="activity-meta">
+                            {{ user.get_user_type_display }} • Joined {{ user.date_joined|timesince }} ago
+                        </p>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="activity-item">
+                    <p>No recent users</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="activity-card">
+            <div class="activity-header">
+                <h3 class="activity-title"><i class="fas fa-calendar-alt"></i> Recent Appointments</h3>
+            </div>
+            <div class="activity-list">
+                {% for appointment in recent_appointments %}
+                <div class="activity-item">
+                    <div class="activity-avatar">
+                        {{ appointment.patient.first_name|first|default:appointment.patient.username|first|upper }}
+                    </div>
+                    <div class="activity-content">
+                        <p class="activity-name">{{ appointment.patient.get_full_name|default:appointment.patient.username }}</p>
+                        <p class="activity-meta">
+                            with Dr. {{ appointment.doctor.get_full_name|default:appointment.doctor.username }} • {{ appointment.date }}
+                        </p>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="activity-item">
+                    <p>No recent appointments</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="system-health">
+            <div class="chart-header">
+                <h3 class="chart-title"><i class="fas fa-heartbeat"></i> System Health</h3>
+            </div>
+            <div class="health-item">
+                <span>Database</span>
+                <span class="health-status healthy">{{ system_health.database_status }}</span>
+            </div>
+            <div class="health-item">
+                <span>Redis Cache</span>
+                <span class="health-status healthy">{{ system_health.redis_status }}</span>
+            </div>
+            <div class="health-item">
+                <span>Background Tasks</span>
+                <span class="health-status healthy">{{ system_health.celery_status }}</span>
+            </div>
+            <div class="health-item">
+                <span>Disk Usage</span>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: {{ system_health.disk_usage }}%"></div>
+                </div>
+            </div>
+            <div class="health-item">
+                <span>Memory Usage</span>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: {{ system_health.memory_usage }}%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Daily Active Users Chart -->
+    <div class="chart-card">
+        <div class="chart-header">
+            <h3 class="chart-title">Daily Active Users (Last 30 Days)</h3>
+            <div class="stat-change">
+                <i class="fas fa-chart-line"></i>
+                <span>{{ active_users }} active users</span>
+            </div>
+        </div>
+        <div class="chart-container">
+            <canvas id="dailyActiveChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<script>
+// Chart.js configuration
+Chart.defaults.font.family = 'Inter, sans-serif';
+Chart.defaults.color = '#6b7280';
+
+// User Trend Chart
+const userTrendCtx = document.getElementById('userTrendChart').getContext('2d');
+const userTrendData = {{ user_trend_data|safe }};
+
+new Chart(userTrendCtx, {
+    type: 'line',
+    data: {
+        labels: userTrendData.map(item => item.month),
+        datasets: [{
+            label: 'New Users',
+            data: userTrendData.map(item => item.users),
+            borderColor: '#14b8a6',
+            backgroundColor: 'rgba(20, 184, 166, 0.1)',
+            borderWidth: 3,
+            fill: true,
+            tension: 0.4,
+            pointBackgroundColor: '#14b8a6',
+            pointBorderColor: '#ffffff',
+            pointBorderWidth: 2,
+            pointRadius: 6,
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: false
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                grid: {
+                    color: '#f1f5f9'
+                }
+            },
+            x: {
+                grid: {
+                    display: false
+                }
+            }
+        }
+    }
+});
+
+// User Type Distribution Chart
+const userTypeCtx = document.getElementById('userTypeChart').getContext('2d');
+const userTypeData = {{ user_type_data|safe }};
+
+new Chart(userTypeCtx, {
+    type: 'doughnut',
+    data: {
+        labels: userTypeData.map(item => item.type),
+        datasets: [{
+            data: userTypeData.map(item => item.count),
+            backgroundColor: userTypeData.map(item => item.color),
+            borderWidth: 0,
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: {
+                    padding: 20,
+                    usePointStyle: true,
+                }
+            }
+        }
+    }
+});
+
+// Daily Active Users Chart
+const dailyActiveCtx = document.getElementById('dailyActiveChart').getContext('2d');
+const dailyActiveData = {{ daily_active_data|safe }};
+
+new Chart(dailyActiveCtx, {
+    type: 'bar',
+    data: {
+        labels: dailyActiveData.map(item => item.date),
+        datasets: [{
+            label: 'Active Users',
+            data: dailyActiveData.map(item => item.active_users),
+            backgroundColor: 'rgba(59, 130, 246, 0.8)',
+            borderColor: '#3b82f6',
+            borderWidth: 1,
+            borderRadius: 4,
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: false
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                grid: {
+                    color: '#f1f5f9'
+                }
+            },
+            x: {
+                grid: {
+                    display: false
+                }
+            }
+        }
+    }
+});
+</script>
+{% endblock %}
