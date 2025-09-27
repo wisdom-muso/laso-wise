@@ -51,6 +51,7 @@ services:
       - DEBUG=${DEBUG:-False}
       - SECRET_KEY=${SECRET_KEY}
       - ALLOWED_HOSTS=${ALLOWED_HOSTS:-localhost,127.0.0.1,65.108.91.110,host.docker.internal,*}
+      - CSRF_TRUSTED_ORIGINS=${CSRF_TRUSTED_ORIGINS:-}
       - USE_SQLITE=${USE_SQLITE:-False}
       - DATABASE_URL=postgresql://${POSTGRES_USER:-laso_user}:${POSTGRES_PASSWORD:-laso_password}@db:5432/${POSTGRES_DB:-laso_healthcare}
       - LOG_TO_FILE=${LOG_TO_FILE:-False}

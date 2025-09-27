@@ -42,27 +42,24 @@ if not DEBUG:
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,65.108.91.110,host.docker.internal,*', cast=Csv())
 
-# CSRF trusted origins for secure forms
-CSRF_TRUSTED_ORIGINS = [
-    'https://work-1-fwwedwqyyluorgsx.prod-runtime.all-hands.dev',
-    'https://work-2-fwwedwqyyluorgsx.prod-runtime.all-hands.dev',
-    'https://work-1-piihhelknqfzruzd.prod-runtime.all-hands.dev',
-    'https://work-2-piihhelknqfzruzd.prod-runtime.all-hands.dev',
-    'https://work-1-oaiiljcdqikvohfq.prod-runtime.all-hands.dev',
-    'https://work-2-oaiiljcdqikvohfq.prod-runtime.all-hands.dev',
-    'https://work-1-rpqxmrerpfzteyap.prod-runtime.all-hands.dev',
-    'https://work-2-rpqxmrerpfzteyap.prod-runtime.all-hands.dev',
-    'https://work-1-zpgsapvljvomliot.prod-runtime.all-hands.dev',
-    'https://work-2-zpgsapvljvomliot.prod-runtime.all-hands.dev',
-    'https://work-1-kbfmamisweqyqrai.prod-runtime.all-hands.dev',
-    'https://work-2-kbfmamisweqyqrai.prod-runtime.all-hands.dev',
-    'http://localhost:12000',
-    'http://localhost:12001',
-    'http://127.0.0.1:12000',
-    'http://127.0.0.1:12001',
-    'http://65.108.91.110',
-    'https://65.108.91.110',
-]
+# CSRF trusted origins for secure forms - configurable via environment
+CSRF_TRUSTED_ORIGINS_ENV = config('CSRF_TRUSTED_ORIGINS', default='', cast=str)
+if CSRF_TRUSTED_ORIGINS_ENV:
+    CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in CSRF_TRUSTED_ORIGINS_ENV.split(',') if origin.strip()]
+else:
+    # Default CSRF trusted origins for development and common scenarios
+    CSRF_TRUSTED_ORIGINS = [
+        'http://localhost:3000',
+        'http://localhost:8000',
+        'http://127.0.0.1:3000',
+        'http://127.0.0.1:8000',
+        'http://65.108.91.110',
+        'https://65.108.91.110',
+        'http://65.108.91.110:3000',
+        'https://65.108.91.110:3000',
+        'http://65.108.91.110:80',
+        'https://65.108.91.110:443',
+    ]
 
 # Application definition
 
