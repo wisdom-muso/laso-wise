@@ -18,7 +18,7 @@ import uuid
 import time
 from datetime import datetime
 
-from .models import TeleMedicineConsultation, TeleMedicineMessage, TeleMedicineSettings, TelemedicineAppointment, VideoSession, TelemedDocument, TelemedPrescription, TelemedNote
+from .models import TeleMedicineConsultation, TeleMedicineMessage, TeleMedicineSettings, TelemedicineAppointment, VideoSession, TelemedDocument, TelemedPrescription, TelemedNote, DoctorPatientMessage, MessageThread
 from appointments.models import Appointment
 from core.models_notifications import Notification, NotificationType
 from .forms import TelemedicineAppointmentForm, TelemedDocumentForm, TelemedPrescriptionForm, TelemedNoteForm, AppointmentSearchForm
@@ -836,6 +836,337 @@ def webrtc_signal(request, session_id):
         # For example, a WebSocket server or Redis pub/sub can be used
         print(f"Received signal for session {session_id}: {data}")
         return JsonResponse({'status': 'ok'})
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+# Direct Messaging Views
+
+class DoctorMessagingDashboardView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+    """
+    Doctor messaging dashboard
+    """
+    template_name = 'telemedicine/doctor_messaging_dashboard.html'
+    
+    def test_func(self):
+        return self.request.user.is_doctor()
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        doctor = self.request.user
+        
+        # Get message threads
+        threads = MessageThread.objects.filter(
+            doctor=doctor,
+            is_active=True
+        ).select_related('patient').prefetch_related('doctor_message_threads')
+        
+        # Get patients for new conversations
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        patients = User.objects.filter(user_type='patient').exclude(
+            id__in=threads.values_list('patient_id', flat=True)
+        )
+        
+        # Get unread message count
+        total_unread = sum(thread.doctor_unread_count for thread in threads)
+        
+        context.update({
+            'threads': threads,
+            'patients': patients,
+            'total_unread': total_unread,
+            'active_consultations': TeleMedicineConsultation.objects.filter(
+                appointment__doctor=doctor,
+                status='in_progress'
+            ).count()
+        })
+        
+        return context
+
+
+class PatientMessagingDashboardView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+    """
+    Patient messaging dashboard
+    """
+    template_name = 'telemedicine/patient_messaging_dashboard.html'
+    
+    def test_func(self):
+        return self.request.user.is_patient()
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        patient = self.request.user
+        
+        # Get message threads
+        threads = MessageThread.objects.filter(
+            patient=patient,
+            is_active=True
+        ).select_related('doctor')
+        
+        # Get unread message count
+        total_unread = sum(thread.patient_unread_count for thread in threads)
+        
+        context.update({
+            'threads': threads,
+            'total_unread': total_unread,
+            'active_consultations': TeleMedicineConsultation.objects.filter(
+                appointment__patient=patient,
+                status='in_progress'
+            ).count()
+        })
+        
+        return context
+
+
+class MessageThreadDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
+    """
+    Message thread detail view
+    """
+    model = MessageThread
+    template_name = 'telemedicine/message_thread_detail.html'
+    context_object_name = 'thread'
+    
+    def test_func(self):
+        thread = self.get_object()
+        user = self.request.user
+        return user in [thread.doctor, thread.patient]
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        thread = self.get_object()
+        user = self.request.user
+        
+        # Get messages
+        messages = DoctorPatientMessage.objects.filter(
+            doctor=thread.doctor,
+            patient=thread.patient
+        ).order_by('created_at')
+        
+        # Mark messages as read
+        unread_messages = messages.filter(is_read=False).exclude(sender=user)
+        for message in unread_messages:
+            message.mark_as_read()
+        
+        # Update thread unread count
+        thread.update_unread_count(user)
+        
+        # Get other participant
+        other_user = thread.patient if user == thread.doctor else thread.doctor
+        
+        context.update({
+            'messages': messages,
+            'other_user': other_user,
+            'can_start_call': True,
+        })
+        
+        return context
+
+
+@login_required
+@require_http_methods(["POST"])
+def send_direct_message(request):
+    """
+    Send a direct message via AJAX
+    """
+    try:
+        data = json.loads(request.body)
+        recipient_id = data.get('recipient_id')
+        content = data.get('content', '').strip()
+        message_type = data.get('message_type', 'text')
+        is_urgent = data.get('is_urgent', False)
+        
+        if not content or not recipient_id:
+            return JsonResponse({'error': 'Missing content or recipient'}, status=400)
+        
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        recipient = get_object_or_404(User, id=recipient_id)
+        
+        # Determine doctor and patient
+        if request.user.is_doctor():
+            doctor = request.user
+            patient = recipient
+        else:
+            doctor = recipient
+            patient = request.user
+        
+        # Create or get message thread
+        thread, created = MessageThread.objects.get_or_create(
+            doctor=doctor,
+            patient=patient
+        )
+        
+        # Create message
+        message = DoctorPatientMessage.objects.create(
+            doctor=doctor,
+            patient=patient,
+            sender=request.user,
+            message_type=message_type,
+            content=content,
+            is_urgent=is_urgent
+        )
+        
+        # Update thread
+        thread.last_message_at = timezone.now()
+        thread.update_unread_count(recipient)
+        thread.save()
+        
+        return JsonResponse({
+            'status': 'success',
+            'message': {
+                'id': message.id,
+                'content': message.content,
+                'message_type': message.message_type,
+                'is_urgent': message.is_urgent,
+                'created_at': message.created_at.isoformat(),
+                'sender_name': message.sender.get_full_name(),
+            }
+        })
+        
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@login_required
+def get_message_threads(request):
+    """
+    Get message threads for the current user
+    """
+    user = request.user
+    
+    if user.is_doctor():
+        threads = MessageThread.objects.filter(
+            doctor=user,
+            is_active=True
+        ).select_related('patient')
+        unread_field = 'doctor_unread_count'
+    elif user.is_patient():
+        threads = MessageThread.objects.filter(
+            patient=user,
+            is_active=True
+        ).select_related('doctor')
+        unread_field = 'patient_unread_count'
+    else:
+        return JsonResponse({'error': 'Unauthorized'}, status=403)
+    
+    threads_data = []
+    for thread in threads:
+        other_user = thread.patient if user.is_doctor() else thread.doctor
+        last_message = thread.get_last_message()
+        
+        threads_data.append({
+            'id': thread.id,
+            'other_user': {
+                'id': other_user.id,
+                'name': other_user.get_full_name(),
+                'user_type': other_user.user_type,
+            },
+            'last_message': {
+                'content': last_message.content if last_message else '',
+                'created_at': last_message.created_at.isoformat() if last_message else '',
+                'sender_name': last_message.sender.get_full_name() if last_message else '',
+            } if last_message else None,
+            'unread_count': getattr(thread, unread_field),
+            'last_message_at': thread.last_message_at.isoformat(),
+        })
+    
+    return JsonResponse({'threads': threads_data})
+
+
+@login_required
+def get_thread_messages(request, thread_id):
+    """
+    Get messages for a specific thread
+    """
+    thread = get_object_or_404(MessageThread, id=thread_id)
+    user = request.user
+    
+    # Check permission
+    if user not in [thread.doctor, thread.patient]:
+        return JsonResponse({'error': 'Unauthorized'}, status=403)
+    
+    messages = DoctorPatientMessage.objects.filter(
+        doctor=thread.doctor,
+        patient=thread.patient
+    ).order_by('created_at')
+    
+    messages_data = []
+    for message in messages:
+        messages_data.append({
+            'id': message.id,
+            'content': message.content,
+            'message_type': message.message_type,
+            'is_urgent': message.is_urgent,
+            'is_read': message.is_read,
+            'created_at': message.created_at.isoformat(),
+            'sender': {
+                'id': message.sender.id,
+                'name': message.sender.get_full_name(),
+                'is_current_user': message.sender == user,
+            },
+            'call_session_id': str(message.call_session_id) if message.call_session_id else None,
+            'call_status': message.call_status,
+        })
+    
+    return JsonResponse({'messages': messages_data})
+
+
+@login_required
+@require_http_methods(["POST"])
+def start_direct_call(request):
+    """
+    Start a direct video/audio call
+    """
+    try:
+        data = json.loads(request.body)
+        recipient_id = data.get('recipient_id')
+        call_type = data.get('call_type', 'video')  # 'video' or 'audio'
+        
+        if not recipient_id:
+            return JsonResponse({'error': 'Missing recipient'}, status=400)
+        
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        recipient = get_object_or_404(User, id=recipient_id)
+        
+        # Create consultation for the call
+        if request.user.is_doctor():
+            doctor = request.user
+            patient = recipient
+        else:
+            doctor = recipient
+            patient = request.user
+        
+        # Create a temporary appointment for the call
+        appointment = Appointment.objects.create(
+            patient=patient,
+            doctor=doctor,
+            date=timezone.now().date(),
+            time=timezone.now().time(),
+            description=f'Direct {call_type} call',
+            status='planned'
+        )
+        
+        # Create consultation
+        consultation = TeleMedicineConsultation.objects.create(
+            appointment=appointment,
+            consultation_type=call_type,
+            status='waiting',
+            scheduled_start_time=timezone.now(),
+            platform='internal'
+        )
+        
+        return JsonResponse({
+            'status': 'success',
+            'consultation_id': consultation.id,
+            'meeting_id': str(consultation.meeting_id),
+            'join_url': f'/telemedicine/session/{consultation.meeting_id}/join/'
+        })
+        
     except json.JSONDecodeError:
         return JsonResponse({'error': 'Invalid JSON'}, status=400)
     except Exception as e:

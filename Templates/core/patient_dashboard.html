@@ -133,6 +133,123 @@
                     
                     <div class="separator mb-5"></div>
                     
+                    <!-- Telemedicine Section -->
+                    <div class="card mb-5 mb-xl-10">
+                        <div class="card-header border-0">
+                            <div class="card-title m-0">
+                                <h3 class="fw-bold m-0 text-primary">
+                                    <i class="fas fa-video me-2"></i>
+                                    Telemedicine
+                                </h3>
+                            </div>
+                            <div class="card-toolbar">
+                                <a href="{% url 'telemedicine:patient-messages' %}" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-comments me-1"></i>
+                                    My Messages
+                                    {% comment %}
+                                    {% if unread_messages_count > 0 %}
+                                    <span class="badge badge-light-danger ms-2">{{ unread_messages_count }}</span>
+                                    {% endif %}
+                                    {% endcomment %}
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <div class="card-body pt-0">
+                            <div class="row g-6 g-xl-9">
+                                <!-- Messages -->
+                                <div class="col-md-6 col-xl-4">
+                                    <div class="card card-flush h-md-50 mb-5 mb-xl-10 info-card">
+                                        <div class="card-header pt-5">
+                                            <div class="card-title d-flex flex-column">
+                                                <div class="d-flex align-items-center">
+                                                    <span class="fs-4 fw-semibold text-gray-500 me-1 align-self-start">
+                                                        <i class="fas fa-envelope info-icon fs-2 me-2"></i>
+                                                    </span>
+                                                    <span class="fs-2hx fw-bold text-gray-900 me-2 lh-1 ls-n2">
+                                                        {% comment %}{{ unread_messages_count|default:0 }}{% endcomment %}0
+                                                    </span>
+                                                </div>
+                                                <span class="text-gray-500 pt-1 fw-semibold fs-6">Unread Messages</span>
+                                            </div>
+                                        </div>
+                                        <div class="card-body pt-2 pb-4">
+                                            <div class="d-flex flex-column">
+                                                <div class="d-flex fw-semibold align-items-center mb-3">
+                                                    <div class="bullet w-8px h-3px rounded-2 bg-success me-3"></div>
+                                                    <div class="text-gray-500 flex-1 fs-6">Active Conversations</div>
+                                                    <div class="fw-bolder text-gray-700 text-xxl-end">
+                                                        {% comment %}{{ active_conversations_count|default:0 }}{% endcomment %}0
+                                                    </div>
+                                                </div>
+                                                <a href="{% url 'telemedicine:patient-messages' %}" class="btn btn-sm btn-light-primary">
+                                                    <i class="fas fa-comments me-2"></i>View Messages
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Consultations -->
+                                <div class="col-md-6 col-xl-4">
+                                    <div class="card card-flush h-md-50 mb-5 mb-xl-10 info-card">
+                                        <div class="card-header pt-5">
+                                            <div class="card-title d-flex flex-column">
+                                                <div class="d-flex align-items-center">
+                                                    <span class="fs-4 fw-semibold text-gray-500 me-1 align-self-start">
+                                                        <i class="fas fa-video info-icon fs-2 me-2"></i>
+                                                    </span>
+                                                    <span class="fs-2hx fw-bold text-gray-900 me-2 lh-1 ls-n2">
+                                                        {% comment %}{{ upcoming_consultations_count|default:0 }}{% endcomment %}0
+                                                    </span>
+                                                </div>
+                                                <span class="text-gray-500 pt-1 fw-semibold fs-6">Upcoming Consultations</span>
+                                            </div>
+                                        </div>
+                                        <div class="card-body pt-2 pb-4">
+                                            <div class="d-flex flex-column">
+                                                <div class="d-flex fw-semibold align-items-center mb-3">
+                                                    <div class="bullet w-8px h-3px rounded-2 bg-primary me-3"></div>
+                                                    <div class="text-gray-500 flex-1 fs-6">This Week</div>
+                                                    <div class="fw-bolder text-gray-700 text-xxl-end">
+                                                        {% comment %}{{ week_consultations_count|default:0 }}{% endcomment %}0
+                                                    </div>
+                                                </div>
+                                                <a href="{% url 'telemedicine:list' %}" class="btn btn-sm btn-light-success">
+                                                    <i class="fas fa-video me-2"></i>View Consultations
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Health Status -->
+                                <div class="col-md-6 col-xl-4">
+                                    <div class="card card-flush h-md-50 mb-xl-10 info-card">
+                                        <div class="card-header pt-5">
+                                            <div class="card-title d-flex flex-column">
+                                                <span class="text-gray-500 pt-1 fw-semibold fs-6">Quick Actions</span>
+                                            </div>
+                                        </div>
+                                        <div class="card-body pt-2 pb-4">
+                                            <div class="d-flex flex-column">
+                                                <a href="{% url 'telemedicine:patient-messages' %}" class="btn btn-light-primary btn-sm mb-3">
+                                                    <i class="fas fa-comments me-2"></i>Message Doctor
+                                                </a>
+                                                <a href="{% url 'telemedicine:schedule' %}" class="btn btn-light-success btn-sm mb-3">
+                                                    <i class="fas fa-calendar-plus me-2"></i>Book Consultation
+                                                </a>
+                                                <a href="{% url 'telemedicine:list' %}" class="btn btn-light-info btn-sm">
+                                                    <i class="fas fa-history me-2"></i>My History
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <!-- Upcoming Appointments -->
                     <div class="card mb-5 mb-xl-10">
                         <div class="card-header border-0">

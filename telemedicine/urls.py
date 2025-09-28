@@ -33,4 +33,13 @@ urlpatterns = [
     path('appointment/<int:appointment_id>/upload-document/', views.upload_telemed_document, name='upload-document'),
     path('appointment/<int:appointment_id>/create-prescription/', views.create_telemed_prescription, name='create-prescription'),
     path('appointment/<int:appointment_id>/create-note/', views.create_telemed_note, name='create-note'),
+    
+    # Direct messaging URLs
+    path('messages/', views.DoctorMessagingDashboardView.as_view(), name='doctor-messages'),
+    path('patient-messages/', views.PatientMessagingDashboardView.as_view(), name='patient-messages'),
+    path('thread/<int:pk>/', views.MessageThreadDetailView.as_view(), name='message-thread'),
+    path('api/send-message/', views.send_direct_message, name='send-direct-message'),
+    path('api/threads/', views.get_message_threads, name='get-message-threads'),
+    path('api/thread/<int:thread_id>/messages/', views.get_thread_messages, name='get-thread-messages'),
+    path('api/start-call/', views.start_direct_call, name='start-direct-call'),
 ]

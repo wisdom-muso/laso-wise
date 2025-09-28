@@ -1,0 +1,727 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% translate "My Messages" %}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .messaging-container {
+        height: calc(100vh - 200px);
+        min-height: 600px;
+    }
+    
+    .thread-list {
+        height: 100%;
+        overflow-y: auto;
+        border-right: 1px solid #e5e5e5;
+    }
+    
+    .thread-item {
+        padding: 15px;
+        border-bottom: 1px solid #f0f0f0;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+    
+    .thread-item:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .thread-item.active {
+        background-color: #e3f2fd;
+        border-left: 4px solid #2196f3;
+    }
+    
+    .thread-item.unread {
+        background-color: #fff3e0;
+        font-weight: bold;
+    }
+    
+    .chat-container {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .chat-header {
+        padding: 15px;
+        border-bottom: 1px solid #e5e5e5;
+        background-color: #f8f9fa;
+    }
+    
+    .chat-messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 15px;
+        background-color: #fafafa;
+    }
+    
+    .message {
+        margin-bottom: 15px;
+        display: flex;
+    }
+    
+    .message.own {
+        justify-content: flex-end;
+    }
+    
+    .message-bubble {
+        max-width: 70%;
+        padding: 10px 15px;
+        border-radius: 18px;
+        word-wrap: break-word;
+    }
+    
+    .message.own .message-bubble {
+        background-color: #2196f3;
+        color: white;
+    }
+    
+    .message:not(.own) .message-bubble {
+        background-color: white;
+        border: 1px solid #e5e5e5;
+    }
+    
+    .message-time {
+        font-size: 0.8em;
+        opacity: 0.7;
+        margin-top: 5px;
+    }
+    
+    .message.urgent .message-bubble {
+        border-left: 4px solid #f44336;
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(244, 67, 54, 0.7); }
+        70% { box-shadow: 0 0 0 10px rgba(244, 67, 54, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(244, 67, 54, 0); }
+    }
+    
+    .chat-input {
+        padding: 15px;
+        border-top: 1px solid #e5e5e5;
+        background-color: white;
+    }
+    
+    .typing-indicator {
+        padding: 10px 15px;
+        font-style: italic;
+        color: #666;
+        font-size: 0.9em;
+    }
+    
+    .unread-badge {
+        background-color: #f44336;
+        color: white;
+        border-radius: 50%;
+        padding: 2px 6px;
+        font-size: 0.8em;
+        margin-left: 10px;
+    }
+    
+    .doctor-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .doctor-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: #2196f3;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+    }
+    
+    .online-indicator {
+        width: 10px;
+        height: 10px;
+        background-color: #4caf50;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 5px;
+    }
+    
+    .offline-indicator {
+        width: 10px;
+        height: 10px;
+        background-color: #ccc;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 5px;
+    }
+    
+    .call-notification {
+        background-color: #e8f5e8;
+        border: 1px solid #4caf50;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 15px;
+        text-align: center;
+    }
+    
+    .call-notification.missed {
+        background-color: #ffebee;
+        border-color: #f44336;
+    }
+    
+    .emergency-banner {
+        background-color: #ffebee;
+        border-left: 4px solid #f44336;
+        padding: 10px 15px;
+        margin-bottom: 15px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2><i class="fas fa-comments"></i> {% translate "My Messages" %}</h2>
+                <div class="d-flex align-items-center gap-3">
+                    <span class="badge badge-primary">
+                        {% translate "Unread:" %} <span id="total-unread">{{ total_unread }}</span>
+                    </span>
+                    {% if active_consultations > 0 %}
+                    <span class="badge badge-success">
+                        {% translate "Active Consultations:" %} {{ active_consultations }}
+                    </span>
+                    {% endif %}
+                    <a href="{% url 'telemedicine:list' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-video"></i> {% translate "My Consultations" %}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% if total_unread > 0 %}
+    <div class="emergency-banner">
+        <i class="fas fa-exclamation-triangle"></i>
+        <strong>{% translate "You have unread messages from your doctors" %}</strong>
+    </div>
+    {% endif %}
+    
+    <div class="row messaging-container">
+        <!-- Thread List -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">{% translate "My Doctors" %}</h5>
+                </div>
+                
+                <div class="thread-list" id="thread-list">
+                    {% for thread in threads %}
+                    <div class="thread-item {% if thread.patient_unread_count > 0 %}unread{% endif %}" 
+                         data-thread-id="{{ thread.id }}" data-doctor-id="{{ thread.doctor.id }}">
+                        <div class="doctor-info">
+                            <div class="doctor-avatar">
+                                {{ thread.doctor.first_name|first }}{{ thread.doctor.last_name|first }}
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <strong>Dr. {{ thread.doctor.get_full_name }}</strong>
+                                    {% if thread.patient_unread_count > 0 %}
+                                    <span class="unread-badge">{{ thread.patient_unread_count }}</span>
+                                    {% endif %}
+                                </div>
+                                {% if thread.doctor.specialization %}
+                                <div class="text-muted small">{{ thread.doctor.specialization }}</div>
+                                {% endif %}
+                                {% with last_message=thread.get_last_message %}
+                                {% if last_message %}
+                                <div class="text-muted small">
+                                    {{ last_message.content|truncatechars:50 }}
+                                </div>
+                                <div class="text-muted small">
+                                    {{ last_message.created_at|timesince }} ago
+                                </div>
+                                {% endif %}
+                                {% endwith %}
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="text-center text-muted p-4">
+                        <i class="fas fa-user-md fa-3x mb-3"></i>
+                        <p>{% translate "No conversations yet" %}</p>
+                        <p class="small">{% translate "Your doctors will appear here when they message you" %}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Chat Area -->
+        <div class="col-md-8">
+            <div class="card h-100">
+                <div id="chat-container" class="chat-container" style="display: none;">
+                    <div class="chat-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="doctor-info">
+                                <div class="doctor-avatar" id="doctor-avatar"></div>
+                                <div>
+                                    <h5 class="mb-0" id="chat-doctor-name"></h5>
+                                    <small class="text-muted" id="doctor-specialization"></small>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <span class="online-indicator" id="doctor-status"></span>
+                                <small class="text-muted">{% translate "Available" %}</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-messages" id="chat-messages">
+                        <!-- Messages will be loaded here -->
+                    </div>
+                    
+                    <div class="typing-indicator" id="typing-indicator" style="display: none;">
+                        <span id="typing-user"></span> {% translate "is typing..." %}
+                    </div>
+                    
+                    <div class="chat-input">
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="message-input" 
+                                   placeholder="{% translate 'Type your message to the doctor...' %}">
+                            <button class="btn btn-primary" type="button" id="send-btn">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                        <small class="text-muted mt-1">
+                            {% translate "Your messages are secure and private" %}
+                        </small>
+                    </div>
+                </div>
+                
+                <div id="no-chat-selected" class="d-flex align-items-center justify-content-center h-100">
+                    <div class="text-center text-muted">
+                        <i class="fas fa-user-md fa-4x mb-3"></i>
+                        <h4>{% translate "Select a doctor" %}</h4>
+                        <p>{% translate "Choose a doctor from the list to view your conversation" %}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Incoming Call Modal -->
+<div class="modal fade" id="incomingCallModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{% translate "Incoming Call" %}</h5>
+            </div>
+            <div class="modal-body text-center">
+                <div class="doctor-avatar mb-3" id="caller-avatar" style="width: 80px; height: 80px; font-size: 2em; margin: 0 auto;"></div>
+                <h4 id="caller-name"></h4>
+                <p id="call-type-text"></p>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    {% translate "Your doctor is calling you for a consultation" %}
+                </div>
+            </div>
+            <div class="modal-footer justify-content-center">
+                <button type="button" class="btn btn-danger" id="decline-call-btn">
+                    <i class="fas fa-phone-slash"></i> {% translate "Decline" %}
+                </button>
+                <button type="button" class="btn btn-success" id="accept-call-btn">
+                    <i class="fas fa-phone"></i> {% translate "Accept" %}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Emergency Message Alert -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="urgentMessageToast" class="toast" role="alert">
+        <div class="toast-header bg-danger text-white">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <strong class="me-auto">{% translate "Urgent Message" %}</strong>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+        </div>
+        <div class="toast-body" id="urgent-message-content">
+            <!-- Urgent message content -->
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// WebSocket connection for real-time messaging
+let messageSocket = null;
+let currentThreadId = null;
+let currentDoctorId = null;
+let typingTimer = null;
+
+// Initialize WebSocket connection
+function initializeWebSocket() {
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = `${protocol}//${window.location.host}/ws/messages/`;
+    
+    messageSocket = new WebSocket(wsUrl);
+    
+    messageSocket.onopen = function(e) {
+        console.log('WebSocket connection established');
+    };
+    
+    messageSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        handleWebSocketMessage(data);
+    };
+    
+    messageSocket.onclose = function(e) {
+        console.log('WebSocket connection closed');
+        // Attempt to reconnect after 3 seconds
+        setTimeout(initializeWebSocket, 3000);
+    };
+    
+    messageSocket.onerror = function(e) {
+        console.error('WebSocket error:', e);
+    };
+}
+
+// Handle WebSocket messages
+function handleWebSocketMessage(data) {
+    switch(data.type) {
+        case 'new_message':
+            handleNewMessage(data);
+            break;
+        case 'message_sent':
+            handleMessageSent(data);
+            break;
+        case 'incoming_call':
+            handleIncomingCall(data);
+            break;
+        case 'call_response':
+            handleCallResponse(data);
+            break;
+        case 'typing_indicator':
+            handleTypingIndicator(data);
+            break;
+    }
+}
+
+// Handle new incoming message
+function handleNewMessage(data) {
+    const message = data.message;
+    
+    // Show urgent message toast if urgent
+    if (message.is_urgent) {
+        showUrgentMessageToast(message, data.sender_name);
+    }
+    
+    // Update thread list
+    updateThreadInList(message.sender_id, message);
+    
+    // If this is the active chat, add message to chat
+    if (currentDoctorId == message.sender_id) {
+        addMessageToChat(message, false);
+        scrollToBottom();
+    }
+    
+    // Update unread count
+    updateUnreadCount();
+    
+    // Play notification sound (optional)
+    playNotificationSound();
+}
+
+// Handle message sent confirmation
+function handleMessageSent(data) {
+    const message = data.message;
+    
+    // Add message to current chat
+    if (currentDoctorId == message.recipient_id) {
+        addMessageToChat(message, true);
+        scrollToBottom();
+    }
+    
+    // Clear input
+    document.getElementById('message-input').value = '';
+    
+    // Update thread list
+    updateThreadInList(message.recipient_id, message);
+}
+
+// Handle incoming call
+function handleIncomingCall(data) {
+    document.getElementById('caller-name').textContent = `Dr. ${data.caller_name}`;
+    document.getElementById('call-type-text').textContent = 
+        data.call_type === 'video' ? 'Video Call' : 'Audio Call';
+    
+    // Set caller avatar
+    const callerAvatar = document.getElementById('caller-avatar');
+    const names = data.caller_name.split(' ');
+    callerAvatar.textContent = names[0][0] + (names[1] ? names[1][0] : '');
+    
+    const modal = new bootstrap.Modal(document.getElementById('incomingCallModal'));
+    modal.show();
+    
+    // Store call data for response
+    document.getElementById('accept-call-btn').dataset.callSessionId = data.call_session_id;
+    document.getElementById('accept-call-btn').dataset.callerId = data.caller_id;
+    document.getElementById('decline-call-btn').dataset.callSessionId = data.call_session_id;
+    document.getElementById('decline-call-btn').dataset.callerId = data.caller_id;
+    
+    // Play ringtone (optional)
+    playRingtone();
+}
+
+// Handle call response
+function handleCallResponse(data) {
+    if (data.response === 'accepted') {
+        // Redirect to consultation room
+        window.location.href = `/telemedicine/session/${data.call_session_id}/join/`;
+    } else {
+        alert('Call was declined');
+    }
+}
+
+// Handle typing indicator
+function handleTypingIndicator(data) {
+    if (currentDoctorId == data.user_id) {
+        const indicator = document.getElementById('typing-indicator');
+        const userSpan = document.getElementById('typing-user');
+        
+        if (data.is_typing) {
+            userSpan.textContent = `Dr. ${data.user_name}`;
+            indicator.style.display = 'block';
+        } else {
+            indicator.style.display = 'none';
+        }
+    }
+}
+
+// Send message
+function sendMessage() {
+    const input = document.getElementById('message-input');
+    const content = input.value.trim();
+    
+    if (!content || !currentDoctorId) return;
+    
+    const messageData = {
+        type: 'send_message',
+        recipient_id: currentDoctorId,
+        content: content,
+        message_type: 'text',
+        is_urgent: false
+    };
+    
+    messageSocket.send(JSON.stringify(messageData));
+}
+
+// Add message to chat display
+function addMessageToChat(message, isOwn) {
+    const messagesContainer = document.getElementById('chat-messages');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${isOwn ? 'own' : ''}${message.is_urgent ? ' urgent' : ''}`;
+    
+    const bubbleDiv = document.createElement('div');
+    bubbleDiv.className = 'message-bubble';
+    bubbleDiv.textContent = message.content;
+    
+    const timeDiv = document.createElement('div');
+    timeDiv.className = 'message-time';
+    timeDiv.textContent = new Date(message.created_at).toLocaleTimeString();
+    
+    messageDiv.appendChild(bubbleDiv);
+    messageDiv.appendChild(timeDiv);
+    messagesContainer.appendChild(messageDiv);
+}
+
+// Load thread messages
+function loadThreadMessages(threadId) {
+    fetch(`/telemedicine/api/thread/${threadId}/messages/`)
+        .then(response => response.json())
+        .then(data => {
+            const messagesContainer = document.getElementById('chat-messages');
+            messagesContainer.innerHTML = '';
+            
+            data.messages.forEach(message => {
+                addMessageToChat(message, message.sender.is_current_user);
+            });
+            
+            scrollToBottom();
+        })
+        .catch(error => console.error('Error loading messages:', error));
+}
+
+// Scroll to bottom of chat
+function scrollToBottom() {
+    const messagesContainer = document.getElementById('chat-messages');
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+// Show urgent message toast
+function showUrgentMessageToast(message, senderName) {
+    const toastElement = document.getElementById('urgentMessageToast');
+    const contentElement = document.getElementById('urgent-message-content');
+    
+    contentElement.innerHTML = `
+        <strong>Dr. ${senderName}:</strong><br>
+        ${message.content}
+    `;
+    
+    const toast = new bootstrap.Toast(toastElement, {
+        autohide: false
+    });
+    toast.show();
+}
+
+// Play notification sound
+function playNotificationSound() {
+    // Create audio element for notification
+    const audio = new Audio('/static/sounds/notification.mp3');
+    audio.volume = 0.5;
+    audio.play().catch(e => console.log('Could not play notification sound'));
+}
+
+// Play ringtone
+function playRingtone() {
+    // Create audio element for ringtone
+    const audio = new Audio('/static/sounds/ringtone.mp3');
+    audio.volume = 0.7;
+    audio.loop = true;
+    audio.play().catch(e => console.log('Could not play ringtone'));
+    
+    // Stop ringtone after 30 seconds
+    setTimeout(() => audio.pause(), 30000);
+}
+
+// Update thread in list
+function updateThreadInList(userId, message) {
+    // This would update the thread list with new message info
+    // Implementation depends on your specific UI needs
+}
+
+// Update unread count
+function updateUnreadCount() {
+    // Fetch updated unread count and update display
+    fetch('/telemedicine/api/threads/')
+        .then(response => response.json())
+        .then(data => {
+            const totalUnread = data.threads.reduce((sum, thread) => sum + thread.unread_count, 0);
+            document.getElementById('total-unread').textContent = totalUnread;
+        });
+}
+
+// Initialize page
+document.addEventListener('DOMContentLoaded', function() {
+    initializeWebSocket();
+    
+    // Thread selection
+    document.querySelectorAll('.thread-item').forEach(item => {
+        item.addEventListener('click', function() {
+            const threadId = this.dataset.threadId;
+            const doctorId = this.dataset.doctorId;
+            const doctorName = this.querySelector('strong').textContent;
+            const specialization = this.querySelector('.text-muted.small')?.textContent || '';
+            
+            // Update active thread
+            document.querySelectorAll('.thread-item').forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Set current thread
+            currentThreadId = threadId;
+            currentDoctorId = doctorId;
+            
+            // Show chat container
+            document.getElementById('no-chat-selected').style.display = 'none';
+            document.getElementById('chat-container').style.display = 'flex';
+            
+            // Update chat header
+            document.getElementById('chat-doctor-name').textContent = doctorName;
+            document.getElementById('doctor-specialization').textContent = specialization;
+            
+            // Update doctor avatar
+            const names = doctorName.replace('Dr. ', '').split(' ');
+            document.getElementById('doctor-avatar').textContent = names[0][0] + (names[1] ? names[1][0] : '');
+            
+            // Load messages
+            loadThreadMessages(threadId);
+        });
+    });
+    
+    // Send message on Enter
+    document.getElementById('message-input').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            sendMessage();
+        }
+    });
+    
+    // Send message button
+    document.getElementById('send-btn').addEventListener('click', sendMessage);
+    
+    // Call response buttons
+    document.getElementById('accept-call-btn').addEventListener('click', function() {
+        const callSessionId = this.dataset.callSessionId;
+        const callerId = this.dataset.callerId;
+        
+        const responseData = {
+            type: 'call_response',
+            call_session_id: callSessionId,
+            caller_id: callerId,
+            response: 'accepted'
+        };
+        
+        messageSocket.send(JSON.stringify(responseData));
+        
+        bootstrap.Modal.getInstance(document.getElementById('incomingCallModal')).hide();
+    });
+    
+    document.getElementById('decline-call-btn').addEventListener('click', function() {
+        const callSessionId = this.dataset.callSessionId;
+        const callerId = this.dataset.callerId;
+        
+        const responseData = {
+            type: 'call_response',
+            call_session_id: callSessionId,
+            caller_id: callerId,
+            response: 'declined'
+        };
+        
+        messageSocket.send(JSON.stringify(responseData));
+        
+        bootstrap.Modal.getInstance(document.getElementById('incomingCallModal')).hide();
+    });
+    
+    // Typing indicator
+    let typingTimer;
+    document.getElementById('message-input').addEventListener('input', function() {
+        if (currentDoctorId) {
+            // Send typing start
+            messageSocket.send(JSON.stringify({
+                type: 'typing',
+                recipient_id: currentDoctorId,
+                is_typing: true
+            }));
+            
+            // Clear previous timer
+            clearTimeout(typingTimer);
+            
+            // Set timer to stop typing indicator
+            typingTimer = setTimeout(() => {
+                messageSocket.send(JSON.stringify({
+                    type: 'typing',
+                    recipient_id: currentDoctorId,
+                    is_typing: false
+                }));
+            }, 1000);
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -779,3 +779,205 @@ class TeleMedicineSettings(models.Model):
     def __str__(self):
         return f"{self.user} Settings"
 
+
+class DoctorPatientMessage(models.Model):
+    """
+    Direct messaging between doctors and patients outside of consultations
+    """
+    doctor = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='sent_patient_messages',
+        verbose_name=_('Doctor'),
+        limit_choices_to={'user_type': 'doctor'}
+    )
+    
+    patient = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='received_doctor_messages',
+        verbose_name=_('Patient'),
+        limit_choices_to={'user_type': 'patient'}
+    )
+    
+    sender = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='sent_direct_messages',
+        verbose_name=_('Sender')
+    )
+    
+    message_type = models.CharField(
+        max_length=20,
+        choices=[
+            ('text', _('Text Message')),
+            ('file', _('File Attachment')),
+            ('image', _('Image')),
+            ('voice', _('Voice Message')),
+            ('video_call_request', _('Video Call Request')),
+            ('audio_call_request', _('Audio Call Request')),
+            ('system', _('System Message')),
+        ],
+        default='text',
+        verbose_name=_('Message Type')
+    )
+    
+    content = models.TextField(
+        verbose_name=_('Message Content')
+    )
+    
+    file_attachment = models.FileField(
+        upload_to='telemedicine/messages/',
+        blank=True,
+        null=True,
+        verbose_name=_('File Attachment')
+    )
+    
+    is_read = models.BooleanField(
+        default=False,
+        verbose_name=_('Is Read')
+    )
+    
+    is_urgent = models.BooleanField(
+        default=False,
+        verbose_name=_('Urgent Message')
+    )
+    
+    read_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name=_('Read At')
+    )
+    
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name=_('Created At')
+    )
+    
+    # For call requests
+    call_session_id = models.UUIDField(
+        null=True,
+        blank=True,
+        verbose_name=_('Call Session ID')
+    )
+    
+    call_status = models.CharField(
+        max_length=20,
+        choices=[
+            ('pending', _('Pending')),
+            ('accepted', _('Accepted')),
+            ('declined', _('Declined')),
+            ('missed', _('Missed')),
+            ('completed', _('Completed')),
+        ],
+        blank=True,
+        null=True,
+        verbose_name=_('Call Status')
+    )
+    
+    class Meta:
+        verbose_name = _('Doctor-Patient Message')
+        verbose_name_plural = _('Doctor-Patient Messages')
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['doctor', 'patient', '-created_at']),
+            models.Index(fields=['is_read', '-created_at']),
+        ]
+    
+    def __str__(self):
+        return f"{self.sender.get_full_name()} to {self.get_recipient().get_full_name()}: {self.content[:50]}"
+    
+    def get_recipient(self):
+        """Get the recipient of the message"""
+        if self.sender == self.doctor:
+            return self.patient
+        return self.doctor
+    
+    def mark_as_read(self):
+        """Mark message as read"""
+        if not self.is_read:
+            self.is_read = True
+            self.read_at = timezone.now()
+            self.save(update_fields=['is_read', 'read_at'])
+
+
+class MessageThread(models.Model):
+    """
+    Message thread between a doctor and patient
+    """
+    doctor = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='doctor_message_threads',
+        verbose_name=_('Doctor'),
+        limit_choices_to={'user_type': 'doctor'}
+    )
+    
+    patient = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='patient_message_threads',
+        verbose_name=_('Patient'),
+        limit_choices_to={'user_type': 'patient'}
+    )
+    
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name=_('Created At')
+    )
+    
+    last_message_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name=_('Last Message At')
+    )
+    
+    is_active = models.BooleanField(
+        default=True,
+        verbose_name=_('Is Active')
+    )
+    
+    # Unread message counts
+    doctor_unread_count = models.PositiveIntegerField(
+        default=0,
+        verbose_name=_('Doctor Unread Count')
+    )
+    
+    patient_unread_count = models.PositiveIntegerField(
+        default=0,
+        verbose_name=_('Patient Unread Count')
+    )
+    
+    class Meta:
+        verbose_name = _('Message Thread')
+        verbose_name_plural = _('Message Threads')
+        unique_together = ['doctor', 'patient']
+        ordering = ['-last_message_at']
+    
+    def __str__(self):
+        return f"Thread: Dr. {self.doctor.get_full_name()} - {self.patient.get_full_name()}"
+    
+    def get_last_message(self):
+        """Get the last message in this thread"""
+        return DoctorPatientMessage.objects.filter(
+            doctor=self.doctor,
+            patient=self.patient
+        ).first()
+    
+    def update_unread_count(self, user):
+        """Update unread count for a user"""
+        if user == self.doctor:
+            self.doctor_unread_count = DoctorPatientMessage.objects.filter(
+                doctor=self.doctor,
+                patient=self.patient,
+                sender=self.patient,
+                is_read=False
+            ).count()
+        else:
+            self.patient_unread_count = DoctorPatientMessage.objects.filter(
+                doctor=self.doctor,
+                patient=self.patient,
+                sender=self.doctor,
+                is_read=False
+            ).count()
+        self.save()
+
