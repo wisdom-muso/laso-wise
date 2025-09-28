@@ -861,7 +861,7 @@ class DoctorMessagingDashboardView(LoginRequiredMixin, UserPassesTestMixin, Temp
         threads = MessageThread.objects.filter(
             doctor=doctor,
             is_active=True
-        ).select_related('patient').prefetch_related('doctor_message_threads')
+        ).select_related('patient')
         
         # Get patients for new conversations
         from django.contrib.auth import get_user_model

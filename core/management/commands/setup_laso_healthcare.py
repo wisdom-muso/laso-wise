@@ -7,7 +7,7 @@ import random
 
 from core.models_notifications import NotificationType, NotificationTemplate
 from core.models_i18n import Language, MedicalTerminology
-from telemedicine.models import TeleconsultationSettings
+from telemedicine.models import TeleMedicineSettings
 
 User = get_user_model()
 
@@ -83,7 +83,7 @@ class Command(BaseCommand):
                 first_name='Admin',
                 last_name='User',
                 user_type='admin',
-                phone='555-0000'
+                phone_number='555-0000'
             )
             self.stdout.write(self.style.SUCCESS(f'✅ Admin user created: admin/admin123'))
         else:
@@ -297,7 +297,7 @@ class Command(BaseCommand):
                 )
                 
                 # Create telemedicine settings for doctors
-                TeleconsultationSettings.objects.create(
+                TeleMedicineSettings.objects.create(
                     user=doctor,
                     enable_video=True,
                     enable_audio=True,
@@ -344,7 +344,7 @@ class Command(BaseCommand):
                 )
                 
                 # Create telemedicine settings for patients
-                TeleconsultationSettings.objects.create(
+                TeleMedicineSettings.objects.create(
                     user=patient,
                     enable_video=True,
                     enable_audio=True,
@@ -362,7 +362,7 @@ class Command(BaseCommand):
                 first_name='Alice',
                 last_name='Brown',
                 user_type='receptionist',
-                phone_number': '555-3001'
+                phone_number='555-3001'
             )
             self.stdout.write(f'  ✅ Created receptionist: {receptionist.get_full_name()}')
 

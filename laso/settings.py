@@ -64,6 +64,8 @@ CSRF_TRUSTED_ORIGINS = [
     'http://127.0.0.1:12001',
     'http://65.108.91.110',
     'https://65.108.91.110',
+    'https://work-1-bcyndhgpdochzfjf.prod-runtime.all-hands.dev',
+    'https://work-2-bcyndhgpdochzfjf.prod-runtime.all-hands.dev',
 ]
 
 # Application definition
