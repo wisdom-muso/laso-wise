@@ -48,6 +48,8 @@ CSRF_TRUSTED_ORIGINS = [
     'https://work-2-fwwedwqyyluorgsx.prod-runtime.all-hands.dev',
     'https://work-1-piihhelknqfzruzd.prod-runtime.all-hands.dev',
     'https://work-2-piihhelknqfzruzd.prod-runtime.all-hands.dev',
+    'https://work-1-rbqmuuwwxbalnjhs.prod-runtime.all-hands.dev',
+    'https://work-2-rbqmuuwwxbalnjhs.prod-runtime.all-hands.dev',
     'https://work-1-oaiiljcdqikvohfq.prod-runtime.all-hands.dev',
     'https://work-2-oaiiljcdqikvohfq.prod-runtime.all-hands.dev',
     'https://work-1-rpqxmrerpfzteyap.prod-runtime.all-hands.dev',

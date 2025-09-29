@@ -72,8 +72,10 @@ class TeleMedicineConsultationDetailView(LoginRequiredMixin, UserPassesTestMixin
     Telemedicine consultation detail
     """
     model = TeleMedicineConsultation
-    template_name = 'telemedicine/consultation_detail.html'
+    template_name = 'telemedicine/consultation_room_webrtc.html'
     context_object_name = 'consultation'
+    slug_field = 'meeting_id'
+    slug_url_kwarg = 'session_id'
     
     def test_func(self):
         consultation = self.get_object()
