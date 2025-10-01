@@ -44,30 +44,16 @@ ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,65.108.91.1
 
 # CSRF trusted origins for secure forms
 CSRF_TRUSTED_ORIGINS = [
-    'https://work-1-fwwedwqyyluorgsx.prod-runtime.all-hands.dev',
-    'https://work-2-fwwedwqyyluorgsx.prod-runtime.all-hands.dev',
-    'https://work-1-piihhelknqfzruzd.prod-runtime.all-hands.dev',
-    'https://work-2-piihhelknqfzruzd.prod-runtime.all-hands.dev',
-    'https://work-1-rbqmuuwwxbalnjhs.prod-runtime.all-hands.dev',
-    'https://work-2-rbqmuuwwxbalnjhs.prod-runtime.all-hands.dev',
-    'https://work-1-oaiiljcdqikvohfq.prod-runtime.all-hands.dev',
-    'https://work-2-oaiiljcdqikvohfq.prod-runtime.all-hands.dev',
-    'https://work-1-rpqxmrerpfzteyap.prod-runtime.all-hands.dev',
-    'https://work-2-rpqxmrerpfzteyap.prod-runtime.all-hands.dev',
-    'https://work-1-zpgsapvljvomliot.prod-runtime.all-hands.dev',
-    'https://work-2-zpgsapvljvomliot.prod-runtime.all-hands.dev',
-    'https://work-1-kbfmamisweqyqrai.prod-runtime.all-hands.dev',
-    'https://work-2-kbfmamisweqyqrai.prod-runtime.all-hands.dev',
-    'https://work-1-pztsgirxskmwfrus.prod-runtime.all-hands.dev',
-    'https://work-2-pztsgirxskmwfrus.prod-runtime.all-hands.dev',
+    'https://work-1-umvisjjquzesqvgd.prod-runtime.all-hands.dev',
+    'https://work-2-umvisjjquzesqvgd.prod-runtime.all-hands.dev',
     'http://localhost:12000',
     'http://localhost:12001',
     'http://127.0.0.1:12000',
     'http://127.0.0.1:12001',
     'http://65.108.91.110',
     'https://65.108.91.110',
-    'https://work-1-bcyndhgpdochzfjf.prod-runtime.all-hands.dev',
-    'https://work-2-bcyndhgpdochzfjf.prod-runtime.all-hands.dev',
+    'http://0.0.0.0:12000',
+    'http://0.0.0.0:12001',
 ]
 
 # Application definition

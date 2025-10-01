@@ -46,6 +46,10 @@ urlpatterns = [
     # Authentication
     path('login/', CustomLoginView.as_view(), name='login'),
     path('logout/', logout_view, name='logout'),
+    path('register/', include([
+        path('', RedirectView.as_view(pattern_name='core:patient-register', permanent=True), name='register'),
+        path('patient/', RedirectView.as_view(pattern_name='core:patient-register', permanent=True), name='patient-register'),
+    ])),
     
     # Theme settings
     path('theme/toggle/', toggle_theme, name='toggle-theme'),

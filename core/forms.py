@@ -93,6 +93,18 @@ class PatientRegistrationForm(UserCreationForm):
         self.fields['password1'].widget.attrs.update({'class': 'form-control', 'placeholder': _('Password')})
         self.fields['password2'].widget.attrs.update({'class': 'form-control', 'placeholder': _('Confirm Password')})
         
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if email and User.objects.filter(email=email).exists():
+            raise forms.ValidationError(_('A user with this email already exists.'))
+        return email
+    
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        if username and User.objects.filter(username=username).exists():
+            raise forms.ValidationError(_('A user with this username already exists.'))
+        return username
+    
     def save(self, commit=True):
         user = super().save(commit=False)
         user.user_type = 'patient'

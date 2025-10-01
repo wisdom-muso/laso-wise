@@ -1,6 +1,7 @@
 {% extends 'core/base.html' %}
 {% load static %}
 {% load i18n %}
+{% csrf_token %}
 
 {% block title %}{% translate "Doctor Messaging Dashboard" %}{% endblock %}
 
@@ -383,7 +384,7 @@
                     <h2><i class="fas fa-comments"></i> {% translate "Patient Messages" %}</h2>
                     <span class="security-badge">
                         <i class="fas fa-shield-alt"></i>
-                        {% translate "HIPAA Compliant" %}
+                        {% translate "Secure" %}
                     </span>
                 </div>
                 <div class="d-flex align-items-center gap-3">
@@ -577,6 +578,22 @@
 
 {% block extra_js %}
 <script>
+// CSRF token helper function
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
 // WebSocket connection for real-time messaging
 let messageSocket = null;
 let currentThreadId = null;
@@ -878,22 +895,38 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        // Send initial message
+        // Send initial message via HTTP API
         const messageData = {
-            type: 'send_message',
             recipient_id: patientId,
             content: message,
             message_type: 'text',
             is_urgent: false
         };
         
-        messageSocket.send(JSON.stringify(messageData));
-        
-        // Close modal
-        bootstrap.Modal.getInstance(document.getElementById('newConversationModal')).hide();
-        
-        // Refresh page to show new thread
-        setTimeout(() => location.reload(), 1000);
+        fetch('/telemedicine/api/send-message/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify(messageData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                // Close modal
+                bootstrap.Modal.getInstance(document.getElementById('newConversationModal')).hide();
+                
+                // Refresh page to show new thread
+                setTimeout(() => location.reload(), 500);
+            } else {
+                alert('Error sending message: ' + (data.error || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error sending message');
+        });
     });
     
     // Call response buttons

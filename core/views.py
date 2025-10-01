@@ -209,7 +209,22 @@ class PatientRegistrationView(CreateView):
         return response
     
     def form_invalid(self, form):
-        messages.error(self.request, _('Registration Failed. Please check the form for errors and try again.'))
+        # Create detailed error message
+        error_messages = []
+        for field, errors in form.errors.items():
+            if field == '__all__':
+                error_messages.extend(errors)
+            else:
+                field_label = form.fields[field].label or field.replace('_', ' ').title()
+                for error in errors:
+                    error_messages.append(f"{field_label}: {error}")
+        
+        if error_messages:
+            detailed_error = "Registration failed with the following errors: " + "; ".join(error_messages)
+            messages.error(self.request, detailed_error)
+        else:
+            messages.error(self.request, _('Registration Failed. Please check the form for errors and try again.'))
+        
         return super().form_invalid(form)
 
 # Appointment Views

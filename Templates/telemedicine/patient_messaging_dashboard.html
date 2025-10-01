@@ -1,6 +1,7 @@
 {% extends 'core/base.html' %}
 {% load static %}
 {% load i18n %}
+{% csrf_token %}
 
 {% block title %}{% translate "My Messages" %}{% endblock %}
 
@@ -539,7 +540,7 @@
                         </div>
                         <div class="privacy-notice">
                             <i class="fas fa-shield-alt me-1"></i>
-                            {% translate "Your messages are encrypted and HIPAA compliant. Only you and your doctor can see them." %}
+                            {% translate "Your messages are encrypted and secure. Only you and your doctor can see them." %}
                         </div>
                     </div>
                 </div>
@@ -746,6 +747,22 @@ function handleTypingIndicator(data) {
     }
 }
 
+// Get CSRF token from cookie
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
 // Send message
 function sendMessage() {
     const input = document.getElementById('message-input');
@@ -754,14 +771,38 @@ function sendMessage() {
     if (!content || !currentDoctorId) return;
     
     const messageData = {
-        type: 'send_message',
         recipient_id: currentDoctorId,
         content: content,
         message_type: 'text',
         is_urgent: false
     };
     
-    messageSocket.send(JSON.stringify(messageData));
+    // Use HTTP API instead of WebSocket
+    fetch('/telemedicine/api/send-message/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify(messageData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            input.value = '';
+            // Reload the page to show the new message
+            setTimeout(() => {
+                window.location.reload();
+            }, 500);
+        } else {
+            console.error('Failed to send message:', data.error);
+            alert('Failed to send message. Please try again.');
+        }
+    })
+    .catch(error => {
+        console.error('Error sending message:', error);
+        alert('Failed to send message. Please try again.');
+    });
 }
 
 // Add message to chat display
