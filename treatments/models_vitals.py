@@ -273,6 +273,71 @@ class VitalSign(models.Model):
         else:
             return 'low'
     
+    def get_risk_percentage(self):
+        """Calculate risk percentage based on vital signs"""
+        risk_level = self.calculate_risk_level()
+        
+        # Base percentages for each risk level
+        risk_percentages = {
+            'low': 15,
+            'normal': 25,
+            'elevated': 45,
+            'high': 70,
+            'critical': 90
+        }
+        
+        base_percentage = risk_percentages.get(risk_level, 25)
+        
+        # Add some variation based on specific values
+        variation = 0
+        
+        # Blood pressure variation
+        if self.systolic_bp > 140:
+            variation += 10
+        elif self.systolic_bp > 130:
+            variation += 5
+        
+        # Heart rate variation
+        if self.heart_rate > 100:
+            variation += 5
+        elif self.heart_rate < 60:
+            variation += 3
+        
+        # Cholesterol variation
+        if self.cholesterol_total and self.cholesterol_total > 240:
+            variation += 8
+        elif self.cholesterol_total and self.cholesterol_total > 200:
+            variation += 3
+        
+        final_percentage = min(95, base_percentage + variation)
+        return final_percentage
+    
+    def get_health_assessment_message(self):
+        """Get detailed health assessment message based on vitals"""
+        risk_level = self.calculate_risk_level()
+        
+        messages = {
+            'low': "Your blood pressure and cholesterol levels are within normal range. Continue with your current lifestyle and medication.",
+            'normal': "Your vital signs are generally good. Consider maintaining regular exercise and a balanced diet for optimal health.",
+            'elevated': "Some of your vital signs show elevated levels. Consider lifestyle modifications and consult with your healthcare provider.",
+            'high': "Several vital signs indicate increased health risks. Please schedule a consultation with your doctor for proper evaluation.",
+            'critical': "Your vital signs show critical levels that require immediate medical attention. Please contact your healthcare provider immediately."
+        }
+        
+        return messages.get(risk_level, "Please consult with your healthcare provider for a comprehensive health assessment.")
+    
+    def get_risk_trend(self):
+        """Get risk trend indicator (up, down, stable)"""
+        # For now, return a default trend - this could be enhanced with historical data
+        risk_level = self.calculate_risk_level()
+        
+        if risk_level in ['low', 'normal']:
+            return 'down'  # Positive trend
+        elif risk_level == 'elevated':
+            return 'stable'
+        else:
+            return 'up'  # Concerning trend
+    
     def save(self, *args, **kwargs):
         """Override save to automatically calculate risk level"""
         self.overall_risk_level = self.calculate_risk_level()

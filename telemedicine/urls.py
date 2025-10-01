@@ -1,4 +1,5 @@
 from django.urls import path
+from django.views.generic import RedirectView
 from . import views
 
 app_name = 'telemedicine'
@@ -36,7 +37,7 @@ urlpatterns = [
     
     # Direct messaging URLs
     path('messages/', views.DoctorMessagingDashboardView.as_view(), name='doctor-messages'),
-    path('patient-messages/', views.PatientMessagingDashboardView.as_view(), name='patient-messages'),
+    path('patient-messages/', RedirectView.as_view(pattern_name='dashboard', permanent=True), name='patient-messages'),
     path('thread/<int:pk>/', views.MessageThreadDetailView.as_view(), name='message-thread'),
     path('api/send-message/', views.send_direct_message, name='send-direct-message'),
     path('api/threads/', views.get_message_threads, name='get-message-threads'),

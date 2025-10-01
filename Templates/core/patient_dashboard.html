@@ -167,7 +167,7 @@
                                                         <i class="fas fa-envelope info-icon fs-2 me-2"></i>
                                                     </span>
                                                     <span class="fs-2hx fw-bold text-gray-900 me-2 lh-1 ls-n2">
-                                                        {% comment %}{{ unread_messages_count|default:0 }}{% endcomment %}0
+                                                        {{ total_unread_messages|default:0 }}
                                                     </span>
                                                 </div>
                                                 <span class="text-gray-500 pt-1 fw-semibold fs-6">Unread Messages</span>
@@ -179,7 +179,7 @@
                                                     <div class="bullet w-8px h-3px rounded-2 bg-success me-3"></div>
                                                     <div class="text-gray-500 flex-1 fs-6">Active Conversations</div>
                                                     <div class="fw-bolder text-gray-700 text-xxl-end">
-                                                        {% comment %}{{ active_conversations_count|default:0 }}{% endcomment %}0
+                                                        {{ message_threads.count|default:0 }}
                                                     </div>
                                                 </div>
                                                 <a href="{% url 'telemedicine:patient-messages' %}" class="btn btn-sm btn-light-primary">
@@ -200,7 +200,7 @@
                                                         <i class="fas fa-video info-icon fs-2 me-2"></i>
                                                     </span>
                                                     <span class="fs-2hx fw-bold text-gray-900 me-2 lh-1 ls-n2">
-                                                        {% comment %}{{ upcoming_consultations_count|default:0 }}{% endcomment %}0
+                                                        {{ active_consultations|default:0 }}
                                                     </span>
                                                 </div>
                                                 <span class="text-gray-500 pt-1 fw-semibold fs-6">Upcoming Consultations</span>
@@ -212,7 +212,7 @@
                                                     <div class="bullet w-8px h-3px rounded-2 bg-primary me-3"></div>
                                                     <div class="text-gray-500 flex-1 fs-6">This Week</div>
                                                     <div class="fw-bolder text-gray-700 text-xxl-end">
-                                                        {% comment %}{{ week_consultations_count|default:0 }}{% endcomment %}0
+                                                        {{ active_consultations|default:0 }}
                                                     </div>
                                                 </div>
                                                 <a href="{% url 'telemedicine:list' %}" class="btn btn-sm btn-light-success">
@@ -249,6 +249,163 @@
                             </div>
                         </div>
                     </div>
+                    
+                    <!-- Vitals Section -->
+                    {% if latest_vital %}
+                    <div class="card mb-5 mb-xl-10">
+                        <div class="card-header border-0">
+                            <div class="card-title m-0">
+                                <h3 class="fw-bold m-0 text-primary">
+                                    <i class="fas fa-heartbeat me-2"></i>
+                                    My Health Vitals
+                                </h3>
+                            </div>
+                            <div class="card-toolbar">
+                                <a href="{% url 'vitals:list' %}" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-chart-line me-1"></i>
+                                    View All Vitals
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <div class="card-body pt-0">
+                            <!-- Latest Health Assessment - Matching uploaded design -->
+                            <div class="card mb-6" style="background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 12px; position: relative;">
+                                <div class="card-body p-6">
+                                    <!-- Header with shield icon and title -->
+                                    <div class="d-flex align-items-center justify-content-between mb-4">
+                                        <div class="d-flex align-items-center">
+                                            <div class="me-3">
+                                                <i class="fas fa-shield-alt" style="font-size: 2.5rem; color: #20c997;"></i>
+                                            </div>
+                                            <div>
+                                                <h4 class="mb-1 fw-bold text-dark">Latest Health Assessment</h4>
+                                                <p class="text-muted mb-0 fs-6">
+                                                    {{ vitals_enhanced_data.assessment_date|default:latest_vital.recorded_at|date:"F j, Y" }} • Cardiovascular Risk Assessment
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex align-items-center">
+                                            <!-- Low Risk Badge -->
+                                            <span class="badge me-3" style="background-color: #d1e7dd; color: #0f5132; padding: 8px 16px; border-radius: 20px; font-size: 14px; font-weight: 600;">
+                                                {% if vitals_enhanced_data.risk_level == 'low' %}Low Risk{% else %}{{ vitals_enhanced_data.risk_level|title }} Risk{% endif %}
+                                            </span>
+                                            <!-- Percentage with arrow -->
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-arrow-up me-2" style="color: #20c997; font-size: 1.2rem; transform: rotate(-45deg);"></i>
+                                                <span style="font-size: 2rem; font-weight: 700; color: #20c997;">{{ vitals_enhanced_data.risk_percentage|default:"23" }}%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Health Assessment Message -->
+                                    <p class="text-dark mb-4 fs-6" style="line-height: 1.6;">
+                                        {{ vitals_enhanced_data.health_assessment_message|default:"Your blood pressure and cholesterol levels are within normal range. Continue with your current lifestyle and medication." }}
+                                    </p>
+                                    
+                                    <!-- Your Current Vitals Header -->
+                                    <h5 class="text-dark fw-bold mb-4">Your Current Vitals</h5>
+                                </div>
+                            </div>
+                            
+                            <!-- Current Vitals Grid -->
+                            <div class="row g-6 g-xl-9">
+                                <!-- Blood Pressure -->
+                                <div class="col-md-6 col-xl-3">
+                                    <div class="card card-flush h-md-50 mb-5 mb-xl-10 info-card">
+                                        <div class="card-header pt-5">
+                                            <div class="card-title d-flex flex-column">
+                                                <div class="d-flex align-items-center">
+                                                    <span class="fs-4 fw-semibold text-gray-500 me-1 align-self-start">
+                                                        <i class="fas fa-heartbeat text-primary fs-2 me-2"></i>
+                                                    </span>
+                                                    <span class="fs-2hx fw-bold text-gray-900 me-2 lh-1 ls-n2">
+                                                        {{ latest_vital.blood_pressure_display }}
+                                                    </span>
+                                                </div>
+                                                <span class="text-gray-500 pt-1 fw-semibold fs-6">Blood Pressure (mmHg)</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Heart Rate -->
+                                <div class="col-md-6 col-xl-3">
+                                    <div class="card card-flush h-md-50 mb-5 mb-xl-10 info-card">
+                                        <div class="card-header pt-5">
+                                            <div class="card-title d-flex flex-column">
+                                                <div class="d-flex align-items-center">
+                                                    <span class="fs-4 fw-semibold text-gray-500 me-1 align-self-start">
+                                                        <i class="fas fa-heart text-danger fs-2 me-2"></i>
+                                                    </span>
+                                                    <span class="fs-2hx fw-bold text-gray-900 me-2 lh-1 ls-n2">
+                                                        {{ latest_vital.heart_rate }}
+                                                    </span>
+                                                </div>
+                                                <span class="text-gray-500 pt-1 fw-semibold fs-6">Heart Rate (bpm)</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Cholesterol -->
+                                {% if latest_vital.cholesterol_total %}
+                                <div class="col-md-6 col-xl-3">
+                                    <div class="card card-flush h-md-50 mb-5 mb-xl-10 info-card">
+                                        <div class="card-header pt-5">
+                                            <div class="card-title d-flex flex-column">
+                                                <div class="d-flex align-items-center">
+                                                    <span class="fs-4 fw-semibold text-gray-500 me-1 align-self-start">
+                                                        <i class="fas fa-tint text-purple fs-2 me-2"></i>
+                                                    </span>
+                                                    <span class="fs-2hx fw-bold text-gray-900 me-2 lh-1 ls-n2">
+                                                        {{ latest_vital.cholesterol_total }}
+                                                    </span>
+                                                </div>
+                                                <span class="text-gray-500 pt-1 fw-semibold fs-6">Cholesterol (mg/dL)</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                
+                                <!-- Blood Glucose -->
+                                {% if latest_vital.blood_glucose %}
+                                <div class="col-md-6 col-xl-3">
+                                    <div class="card card-flush h-md-50 mb-5 mb-xl-10 info-card">
+                                        <div class="card-header pt-5">
+                                            <div class="card-title d-flex flex-column">
+                                                <div class="d-flex align-items-center">
+                                                    <span class="fs-4 fw-semibold text-gray-500 me-1 align-self-start">
+                                                        <i class="fas fa-bolt text-success fs-2 me-2"></i>
+                                                    </span>
+                                                    <span class="fs-2hx fw-bold text-gray-900 me-2 lh-1 ls-n2">
+                                                        {{ latest_vital.blood_glucose }}
+                                                    </span>
+                                                </div>
+                                                <span class="text-gray-500 pt-1 fw-semibold fs-6">Blood Glucose (mg/dL)</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Active Alerts -->
+                            {% if active_alerts %}
+                            <div class="alert alert-warning">
+                                <h6><i class="fas fa-exclamation-triangle me-2"></i>Active Health Alerts</h6>
+                                {% for alert in active_alerts %}
+                                <div class="mb-2">
+                                    <strong>{{ alert.get_alert_type_display }}:</strong> {{ alert.message }}
+                                    <small class="text-muted">({{ alert.created_at|timesince }} ago)</small>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
                     
                     <!-- Upcoming Appointments -->
                     <div class="card mb-5 mb-xl-10">

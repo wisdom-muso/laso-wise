@@ -48,6 +48,8 @@ CSRF_TRUSTED_ORIGINS = [
     'https://work-2-umvisjjquzesqvgd.prod-runtime.all-hands.dev',
     'https://work-1-qeqkgzmqkfgvugnm.prod-runtime.all-hands.dev',
     'https://work-2-qeqkgzmqkfgvugnm.prod-runtime.all-hands.dev',
+    'https://work-1-gxnncyfvalqqtzrm.prod-runtime.all-hands.dev',
+    'https://work-2-gxnncyfvalqqtzrm.prod-runtime.all-hands.dev',
     'http://localhost:12000',
     'http://localhost:12001',
     'http://127.0.0.1:12000',

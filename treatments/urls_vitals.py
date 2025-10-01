@@ -2,6 +2,7 @@
 URL patterns for Vital Signs Management
 """
 from django.urls import path, include
+from django.views.generic import RedirectView
 from rest_framework.routers import DefaultRouter
 from . import views_vitals
 
@@ -19,9 +20,9 @@ urlpatterns = [
     path('add/', views_vitals.VitalSignCreateView.as_view(), name='create'),
     path('<int:pk>/edit/', views_vitals.VitalSignUpdateView.as_view(), name='update'),
     
-    # Dashboard URLs
-    path('dashboard/', views_vitals.patient_vitals_dashboard, name='dashboard'),
-    path('dashboard/<int:patient_id>/', views_vitals.patient_vitals_dashboard, name='patient_dashboard'),
+    # Dashboard URLs - redirect to main dashboard
+    path('dashboard/', RedirectView.as_view(pattern_name='dashboard', permanent=True), name='dashboard'),
+    path('dashboard/<int:patient_id>/', RedirectView.as_view(pattern_name='dashboard', permanent=True), name='patient_dashboard'),
     
     # API URLs
     path('api/latest/<int:patient_id>/', views_vitals.vitals_api_latest, name='api_latest'),

@@ -6,11 +6,12 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib import messages
 from django.views.generic import CreateView, UpdateView, ListView, DetailView, DeleteView, TemplateView
 from django.utils.translation import gettext_lazy as _
-from django.db.models import Q
+from django.db.models import Q, Avg, Max, Min
 from django.utils import timezone
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
+from datetime import timedelta
 import json
 
 from .forms import (
@@ -20,6 +21,8 @@ from .forms import (
 )
 from appointments.models import Appointment
 from treatments.models import Treatment, Prescription
+from treatments.models_vitals import VitalSign, VitalSignAlert
+from telemedicine.models import MessageThread, DoctorPatientMessage, TeleMedicineConsultation
 from .analytics import DashboardAnalytics
 
 User = get_user_model()
@@ -54,9 +57,77 @@ def dashboard(request):
             appointment__in=Appointment.objects.filter(patient=user)
         ).order_by('-created_at')[:5]
         
+        # Vitals data
+        latest_vital = VitalSign.objects.filter(patient=user).first()
+        thirty_days_ago = timezone.now() - timedelta(days=30)
+        recent_vitals = VitalSign.objects.filter(
+            patient=user,
+            recorded_at__gte=thirty_days_ago
+        ).order_by('-recorded_at')[:10]
+        
+        # Calculate vitals statistics
+        vitals_stats = recent_vitals.aggregate(
+            avg_systolic=Avg('systolic_bp'),
+            avg_diastolic=Avg('diastolic_bp'),
+            avg_heart_rate=Avg('heart_rate'),
+            max_systolic=Max('systolic_bp'),
+            min_systolic=Min('systolic_bp'),
+        )
+        
+        # Get active vitals alerts
+        active_alerts = VitalSignAlert.objects.filter(
+            vital_sign__patient=user,
+            status='active'
+        ).order_by('-created_at')
+        
+        # Prepare chart data for vitals
+        chart_data = {
+            'dates': [v.recorded_at.strftime('%Y-%m-%d') for v in recent_vitals],
+            'systolic': [v.systolic_bp for v in recent_vitals],
+            'diastolic': [v.diastolic_bp for v in recent_vitals],
+            'heart_rate': [v.heart_rate for v in recent_vitals],
+        }
+        
+        # Enhanced vitals data for the new design
+        vitals_enhanced_data = {}
+        if latest_vital:
+            vitals_enhanced_data = {
+                'risk_percentage': latest_vital.get_risk_percentage(),
+                'health_assessment_message': latest_vital.get_health_assessment_message(),
+                'risk_trend': latest_vital.get_risk_trend(),
+                'risk_level': latest_vital.calculate_risk_level(),
+                'assessment_date': latest_vital.recorded_at.strftime('%B %d, %Y'),
+            }
+        
+        # Messaging data
+        message_threads = MessageThread.objects.filter(
+            patient=user,
+            is_active=True
+        ).select_related('doctor')
+        
+        # Get unread message count
+        total_unread_messages = sum(thread.patient_unread_count for thread in message_threads)
+        
+        # Active consultations
+        active_consultations = TeleMedicineConsultation.objects.filter(
+            appointment__patient=user,
+            status='in_progress'
+        ).count()
+        
         context.update({
             'upcoming_appointments': upcoming_appointments,
             'recent_treatments': recent_treatments,
+            # Vitals data
+            'latest_vital': latest_vital,
+            'recent_vitals': recent_vitals,
+            'vitals_stats': vitals_stats,
+            'active_alerts': active_alerts,
+            'chart_data': chart_data,
+            'vitals_enhanced_data': vitals_enhanced_data,
+            # Messaging data
+            'message_threads': message_threads,
+            'total_unread_messages': total_unread_messages,
+            'active_consultations': active_consultations,
         })
         return render(request, 'core/patient_dashboard.html', context)
     
@@ -93,7 +164,6 @@ def dashboard(request):
         ).count()
         
         # Weekly appointment statistics
-        from datetime import timedelta
         week_start = timezone.now().date() - timedelta(days=timezone.now().weekday())
         weekly_appointments = []
         
