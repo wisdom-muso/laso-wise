@@ -1,0 +1,532 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}{% if is_own_dashboard %}My Vitals{% else %}{{ patient.get_full_name }} - Vitals{% endif %} - Laso Healthcare{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Vitals Dashboard Specific Styles */
+    .vitals-dashboard .card {
+        border: none;
+        box-shadow: 0 0.5rem 1.5rem 0.5rem rgba(0, 0, 0, 0.075);
+        border-radius: 0.75rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .vitals-dashboard .card-header {
+        background: transparent;
+        border-bottom: 1px solid #e4e6ef;
+        padding: 1.5rem 1.5rem 1rem 1.5rem;
+    }
+    
+    .vitals-dashboard .card-body {
+        padding: 1.5rem;
+    }
+    
+    /* Health Assessment Card */
+    .health-assessment-card {
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        border: 1px solid #dee2e6;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .health-assessment-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: var(--bs-success);
+    }
+    
+    .risk-badge {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        padding: 0.5rem 1rem;
+        border-radius: 2rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+    
+    .risk-low { background-color: #d1e7dd; color: #0f5132; }
+    .risk-normal { background-color: #d1e7dd; color: #0f5132; }
+    .risk-elevated { background-color: #fff3cd; color: #664d03; }
+    .risk-high { background-color: #f8d7da; color: #721c24; }
+    .risk-critical { background-color: #f8d7da; color: #721c24; }
+    
+    .risk-percentage {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--bs-success);
+        margin-bottom: 0;
+    }
+    
+    /* Vitals Grid */
+    .vitals-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+    
+    .vital-card {
+        background: white;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        text-align: center;
+        position: relative;
+        border: 1px solid #e4e6ef;
+    }
+    
+    .vital-icon {
+        width: 3rem;
+        height: 3rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        font-size: 1.5rem;
+    }
+    
+    .vital-bp { background-color: rgba(54, 162, 235, 0.1); color: #3498db; }
+    .vital-hr { background-color: rgba(255, 99, 132, 0.1); color: #e74c3c; }
+    .vital-chol { background-color: rgba(153, 102, 255, 0.1); color: #9b59b6; }
+    .vital-glucose { background-color: rgba(75, 192, 192, 0.1); color: #1abc9c; }
+    
+    .vital-value {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+        line-height: 1;
+    }
+    
+    .vital-unit {
+        font-size: 0.875rem;
+        color: #6c757d;
+        font-weight: 500;
+    }
+    
+    .vital-label {
+        font-size: 0.875rem;
+        color: #495057;
+        font-weight: 600;
+        margin-top: 0.5rem;
+    }
+    
+    /* Chart Container */
+    .chart-container {
+        position: relative;
+        height: 300px;
+        margin-top: 1rem;
+    }
+    
+    /* Alerts */
+    .alert-item {
+        border-left: 4px solid;
+        padding: 1rem;
+        margin-bottom: 0.5rem;
+        border-radius: 0.25rem;
+    }
+    
+    .alert-high { border-left-color: #dc3545; background-color: rgba(220, 53, 69, 0.1); }
+    .alert-critical { border-left-color: #dc3545; background-color: rgba(220, 53, 69, 0.2); }
+    .alert-elevated { border-left-color: #ffc107; background-color: rgba(255, 193, 7, 0.1); }
+    
+    /* Stats Cards */
+    .stats-card {
+        text-align: center;
+        padding: 1rem;
+    }
+    
+    .stats-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--bs-primary);
+    }
+    
+    .stats-label {
+        font-size: 0.875rem;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .vitals-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+        
+        .vital-card {
+            padding: 1rem;
+        }
+        
+        .vital-value {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="vitals-dashboard">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-1">
+                {% if is_own_dashboard %}
+                    My Health Dashboard
+                {% else %}
+                    {{ patient.get_full_name }} - Vitals Dashboard
+                {% endif %}
+            </h1>
+            <p class="text-muted mb-0">
+                {% if latest_vital %}
+                    Last updated: {{ latest_vital.recorded_at|naturaltime }}
+                {% else %}
+                    No vitals recorded yet
+                {% endif %}
+            </p>
+        </div>
+        
+        {% if not is_own_dashboard and user.is_doctor or user.is_admin_user %}
+        <div>
+            <a href="{% url 'vitals:create' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Record Vitals
+            </a>
+        </div>
+        {% endif %}
+    </div>
+    
+    {% if latest_vital %}
+    <!-- Latest Health Assessment -->
+    <div class="card health-assessment-card">
+        <div class="card-body">
+            <div class="risk-badge risk-{{ latest_vital.overall_risk_level }}">
+                {{ latest_vital.get_overall_risk_level_display }}
+            </div>
+            
+            <div class="d-flex align-items-center mb-3">
+                <div class="me-3">
+                    <i class="fas fa-shield-alt text-primary" style="font-size: 2rem;"></i>
+                </div>
+                <div>
+                    <h4 class="mb-1">Latest Health Assessment</h4>
+                    <p class="text-muted mb-0">
+                        {{ latest_vital.recorded_at|date:"F j, Y" }} • Cardiovascular Risk Assessment
+                    </p>
+                </div>
+            </div>
+            
+            {% if latest_vital.cardiovascular_risk_score %}
+            <div class="mb-3">
+                <div class="risk-percentage">{{ latest_vital.cardiovascular_risk_score }}%</div>
+            </div>
+            {% endif %}
+            
+            <p class="mb-0">
+                {% if latest_vital.overall_risk_level == 'low' %}
+                    Your blood pressure and vital signs are within normal range. Continue with your current lifestyle and medication.
+                {% elif latest_vital.overall_risk_level == 'normal' %}
+                    Your vital signs are generally good. Keep monitoring and maintain healthy habits.
+                {% elif latest_vital.overall_risk_level == 'elevated' %}
+                    Some of your vital signs are elevated. Please consult with your doctor about lifestyle modifications.
+                {% elif latest_vital.overall_risk_level == 'high' %}
+                    Your vital signs indicate increased cardiovascular risk. Please schedule a follow-up appointment.
+                {% else %}
+                    Critical vital signs detected. Please seek immediate medical attention.
+                {% endif %}
+            </p>
+        </div>
+    </div>
+    
+    <!-- Current Vitals Grid -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Your Current Vitals</h5>
+        </div>
+        <div class="card-body">
+            <div class="vitals-grid">
+                <!-- Blood Pressure -->
+                <div class="vital-card">
+                    <div class="vital-icon vital-bp">
+                        <i class="fas fa-heartbeat"></i>
+                    </div>
+                    <div class="vital-value">{{ latest_vital.blood_pressure_display }}</div>
+                    <div class="vital-unit">mmHg</div>
+                    <div class="vital-label">Blood Pressure</div>
+                </div>
+                
+                <!-- Heart Rate -->
+                <div class="vital-card">
+                    <div class="vital-icon vital-hr">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <div class="vital-value">{{ latest_vital.heart_rate }}</div>
+                    <div class="vital-unit">bpm</div>
+                    <div class="vital-label">Heart Rate</div>
+                </div>
+                
+                <!-- Cholesterol -->
+                {% if latest_vital.cholesterol_total %}
+                <div class="vital-card">
+                    <div class="vital-icon vital-chol">
+                        <i class="fas fa-tint"></i>
+                    </div>
+                    <div class="vital-value">{{ latest_vital.cholesterol_total }}</div>
+                    <div class="vital-unit">mg/dL</div>
+                    <div class="vital-label">Cholesterol</div>
+                </div>
+                {% endif %}
+                
+                <!-- Blood Glucose -->
+                {% if latest_vital.blood_glucose %}
+                <div class="vital-card">
+                    <div class="vital-icon vital-glucose">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <div class="vital-value">{{ latest_vital.blood_glucose }}</div>
+                    <div class="vital-unit">mg/dL</div>
+                    <div class="vital-label">Blood Glucose</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Active Alerts -->
+    {% if active_alerts %}
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                Active Health Alerts
+            </h5>
+        </div>
+        <div class="card-body">
+            {% for alert in active_alerts %}
+            <div class="alert-item alert-{{ alert.severity }}">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h6 class="mb-1">{{ alert.get_alert_type_display }}</h6>
+                        <p class="mb-0">{{ alert.message }}</p>
+                        <small class="text-muted">{{ alert.created_at|naturaltime }}</small>
+                    </div>
+                    <span class="badge bg-{{ alert.severity }}">{{ alert.get_severity_display }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Charts and Trends -->
+    {% if recent_vitals %}
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Vital Signs Trend (Last 30 Days)</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="vitalsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Statistics</h5>
+                </div>
+                <div class="card-body">
+                    {% if vitals_stats.avg_systolic %}
+                    <div class="stats-card">
+                        <div class="stats-value">{{ vitals_stats.avg_systolic|floatformat:0 }}</div>
+                        <div class="stats-label">Avg Systolic BP</div>
+                    </div>
+                    <hr>
+                    <div class="stats-card">
+                        <div class="stats-value">{{ vitals_stats.avg_diastolic|floatformat:0 }}</div>
+                        <div class="stats-label">Avg Diastolic BP</div>
+                    </div>
+                    <hr>
+                    <div class="stats-card">
+                        <div class="stats-value">{{ vitals_stats.avg_heart_rate|floatformat:0 }}</div>
+                        <div class="stats-label">Avg Heart Rate</div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Recent Vitals History -->
+    {% if recent_vitals %}
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Recent Measurements</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Blood Pressure</th>
+                            <th>Heart Rate</th>
+                            <th>Risk Level</th>
+                            <th>Recorded By</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for vital in recent_vitals %}
+                        <tr>
+                            <td>{{ vital.recorded_at|date:"M j, Y H:i" }}</td>
+                            <td>
+                                <span class="fw-bold">{{ vital.blood_pressure_display }}</span>
+                                <small class="text-muted">mmHg</small>
+                            </td>
+                            <td>
+                                <span class="fw-bold">{{ vital.heart_rate }}</span>
+                                <small class="text-muted">bpm</small>
+                            </td>
+                            <td>
+                                <span class="badge bg-{{ vital.overall_risk_level }}">
+                                    {{ vital.get_overall_risk_level_display }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if vital.recorded_by %}
+                                    {{ vital.recorded_by.get_full_name }}
+                                {% else %}
+                                    Self-recorded
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="text-center mt-3">
+                <a href="{% url 'vitals:list' %}" class="btn btn-outline-primary">
+                    View All Records
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- No Data State -->
+    {% if not latest_vital %}
+    <div class="card text-center">
+        <div class="card-body py-5">
+            <i class="fas fa-heartbeat text-muted mb-3" style="font-size: 4rem;"></i>
+            <h4>No Vital Signs Recorded</h4>
+            <p class="text-muted mb-4">
+                {% if is_own_dashboard %}
+                    Your vital signs will appear here once they are recorded by your healthcare provider.
+                {% else %}
+                    No vital signs have been recorded for this patient yet.
+                {% endif %}
+            </p>
+            {% if not is_own_dashboard and user.is_doctor or user.is_admin_user %}
+            <a href="{% url 'vitals:create' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Record First Vitals
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if recent_vitals %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Vitals Chart
+    const ctx = document.getElementById('vitalsChart').getContext('2d');
+    const chartData = {{ chart_data|safe }};
+    
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: chartData.dates.reverse(),
+            datasets: [
+                {
+                    label: 'Systolic BP',
+                    data: chartData.systolic.reverse(),
+                    borderColor: '#3498db',
+                    backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                    tension: 0.4,
+                    fill: false
+                },
+                {
+                    label: 'Diastolic BP',
+                    data: chartData.diastolic.reverse(),
+                    borderColor: '#e74c3c',
+                    backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                    tension: 0.4,
+                    fill: false
+                },
+                {
+                    label: 'Heart Rate',
+                    data: chartData.heart_rate.reverse(),
+                    borderColor: '#9b59b6',
+                    backgroundColor: 'rgba(155, 89, 182, 0.1)',
+                    tension: 0.4,
+                    fill: false,
+                    yAxisID: 'y1'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                }
+            },
+            scales: {
+                y: {
+                    type: 'linear',
+                    display: true,
+                    position: 'left',
+                    title: {
+                        display: true,
+                        text: 'Blood Pressure (mmHg)'
+                    }
+                },
+                y1: {
+                    type: 'linear',
+                    display: true,
+                    position: 'right',
+                    title: {
+                        display: true,
+                        text: 'Heart Rate (bpm)'
+                    },
+                    grid: {
+                        drawOnChartArea: false,
+                    },
+                }
+            }
+        }
+    });
+});
+</script>
+{% endif %}
+{% endblock %}

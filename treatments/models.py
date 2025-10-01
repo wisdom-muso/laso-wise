@@ -85,3 +85,4 @@ from .models_medical_history import MedicalHistory
 from .models_lab import LabTest, TestResult
 from .models_medications import Medication, MedicationInteraction
 from .models_imaging import MedicalImage, Report
+from .models_vitals import VitalSign, VitalSignAlert

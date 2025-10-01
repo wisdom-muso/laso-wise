@@ -1,0 +1,406 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}{% if object %}Edit Vitals{% else %}Record Vitals{% endif %} - Laso Healthcare{% endblock %}
+
+{% block extra_css %}
+<style>
+    .vitals-form .card {
+        border: none;
+        box-shadow: 0 0.5rem 1.5rem 0.5rem rgba(0, 0, 0, 0.075);
+        border-radius: 0.75rem;
+    }
+    
+    .form-section {
+        background: #f8f9fa;
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-section h6 {
+        color: var(--bs-primary);
+        font-weight: 600;
+        margin-bottom: 1rem;
+        border-bottom: 2px solid var(--bs-primary);
+        padding-bottom: 0.5rem;
+    }
+    
+    .required-field label::after {
+        content: ' *';
+        color: #dc3545;
+    }
+    
+    .form-help {
+        font-size: 0.875rem;
+        color: #6c757d;
+        margin-top: 0.25rem;
+    }
+    
+    .vital-preview {
+        background: linear-gradient(135deg, #e3f2fd, #f3e5f5);
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-top: 1rem;
+    }
+    
+    .vital-preview-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid rgba(0,0,0,0.1);
+    }
+    
+    .vital-preview-item:last-child {
+        border-bottom: none;
+    }
+    
+    .risk-indicator {
+        padding: 0.25rem 0.75rem;
+        border-radius: 1rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    
+    .risk-normal { background-color: #d1e7dd; color: #0f5132; }
+    .risk-elevated { background-color: #fff3cd; color: #664d03; }
+    .risk-high { background-color: #f8d7da; color: #721c24; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="vitals-form">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-1">
+                {% if object %}Edit Vital Signs{% else %}Record Vital Signs{% endif %}
+            </h1>
+            <p class="text-muted mb-0">
+                {% if object %}
+                    Recorded on {{ object.recorded_at|date:"F j, Y \a\t H:i" }}
+                {% else %}
+                    Enter patient vital signs and measurements
+                {% endif %}
+            </p>
+        </div>
+        <div>
+            <a href="{% url 'vitals:list' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Back to List
+            </a>
+        </div>
+    </div>
+    
+    <form method="post" id="vitalsForm">
+        {% csrf_token %}
+        
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-body">
+                        <!-- Patient Selection -->
+                        <div class="form-section">
+                            <h6><i class="fas fa-user me-2"></i>Patient Information</h6>
+                            <div class="row">
+                                <div class="col-md-6 required-field">
+                                    {{ form.patient.label_tag }}
+                                    {{ form.patient }}
+                                    {% if form.patient.errors %}
+                                        <div class="text-danger small">{{ form.patient.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Primary Vitals -->
+                        <div class="form-section">
+                            <h6><i class="fas fa-heartbeat me-2"></i>Primary Vital Signs</h6>
+                            <div class="row">
+                                <div class="col-md-4 required-field">
+                                    {{ form.systolic_bp.label_tag }}
+                                    {{ form.systolic_bp }}
+                                    <div class="form-help">{{ form.systolic_bp.help_text }}</div>
+                                    {% if form.systolic_bp.errors %}
+                                        <div class="text-danger small">{{ form.systolic_bp.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-4 required-field">
+                                    {{ form.diastolic_bp.label_tag }}
+                                    {{ form.diastolic_bp }}
+                                    <div class="form-help">{{ form.diastolic_bp.help_text }}</div>
+                                    {% if form.diastolic_bp.errors %}
+                                        <div class="text-danger small">{{ form.diastolic_bp.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-4 required-field">
+                                    {{ form.heart_rate.label_tag }}
+                                    {{ form.heart_rate }}
+                                    <div class="form-help">{{ form.heart_rate.help_text }}</div>
+                                    {% if form.heart_rate.errors %}
+                                        <div class="text-danger small">{{ form.heart_rate.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Additional Vitals -->
+                        <div class="form-section">
+                            <h6><i class="fas fa-thermometer-half me-2"></i>Additional Measurements</h6>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    {{ form.temperature.label_tag }}
+                                    {{ form.temperature }}
+                                    <div class="form-help">{{ form.temperature.help_text }}</div>
+                                    {% if form.temperature.errors %}
+                                        <div class="text-danger small">{{ form.temperature.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-4">
+                                    {{ form.respiratory_rate.label_tag }}
+                                    {{ form.respiratory_rate }}
+                                    <div class="form-help">{{ form.respiratory_rate.help_text }}</div>
+                                    {% if form.respiratory_rate.errors %}
+                                        <div class="text-danger small">{{ form.respiratory_rate.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-4">
+                                    {{ form.oxygen_saturation.label_tag }}
+                                    {{ form.oxygen_saturation }}
+                                    <div class="form-help">{{ form.oxygen_saturation.help_text }}</div>
+                                    {% if form.oxygen_saturation.errors %}
+                                        <div class="text-danger small">{{ form.oxygen_saturation.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    {{ form.weight.label_tag }}
+                                    {{ form.weight }}
+                                    {% if form.weight.errors %}
+                                        <div class="text-danger small">{{ form.weight.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form.height.label_tag }}
+                                    {{ form.height }}
+                                    {% if form.height.errors %}
+                                        <div class="text-danger small">{{ form.height.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Lab Values -->
+                        <div class="form-section">
+                            <h6><i class="fas fa-flask me-2"></i>Laboratory Values</h6>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    {{ form.cholesterol_total.label_tag }}
+                                    {{ form.cholesterol_total }}
+                                    <div class="form-help">{{ form.cholesterol_total.help_text }}</div>
+                                    {% if form.cholesterol_total.errors %}
+                                        <div class="text-danger small">{{ form.cholesterol_total.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-4">
+                                    {{ form.cholesterol_ldl.label_tag }}
+                                    {{ form.cholesterol_ldl }}
+                                    {% if form.cholesterol_ldl.errors %}
+                                        <div class="text-danger small">{{ form.cholesterol_ldl.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-4">
+                                    {{ form.cholesterol_hdl.label_tag }}
+                                    {{ form.cholesterol_hdl }}
+                                    {% if form.cholesterol_hdl.errors %}
+                                        <div class="text-danger small">{{ form.cholesterol_hdl.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    {{ form.blood_glucose.label_tag }}
+                                    {{ form.blood_glucose }}
+                                    <div class="form-help">{{ form.blood_glucose.help_text }}</div>
+                                    {% if form.blood_glucose.errors %}
+                                        <div class="text-danger small">{{ form.blood_glucose.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Notes -->
+                        <div class="form-section">
+                            <h6><i class="fas fa-sticky-note me-2"></i>Additional Information</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    {{ form.measurement_context.label_tag }}
+                                    {{ form.measurement_context }}
+                                    {% if form.measurement_context.errors %}
+                                        <div class="text-danger small">{{ form.measurement_context.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="mt-3">
+                                {{ form.notes.label_tag }}
+                                {{ form.notes }}
+                                {% if form.notes.errors %}
+                                    <div class="text-danger small">{{ form.notes.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Form Errors -->
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {{ form.non_field_errors }}
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Submit Buttons -->
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="{% url 'vitals:list' %}" class="btn btn-outline-secondary">
+                                Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i>
+                                {% if object %}Update Vitals{% else %}Record Vitals{% endif %}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Live Preview -->
+            <div class="col-lg-4">
+                <div class="card sticky-top" style="top: 2rem;">
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            <i class="fas fa-eye me-2"></i>Live Preview
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div id="vitalPreview" class="vital-preview">
+                            <div class="vital-preview-item">
+                                <span>Blood Pressure:</span>
+                                <span id="previewBP">--/-- mmHg</span>
+                            </div>
+                            <div class="vital-preview-item">
+                                <span>Heart Rate:</span>
+                                <span id="previewHR">-- bpm</span>
+                            </div>
+                            <div class="vital-preview-item">
+                                <span>BMI:</span>
+                                <span id="previewBMI">--</span>
+                            </div>
+                            <div class="vital-preview-item">
+                                <span>Risk Level:</span>
+                                <span id="previewRisk" class="risk-indicator risk-normal">Normal</span>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-3">
+                            <h6>Quick Reference</h6>
+                            <small class="text-muted">
+                                <strong>Blood Pressure Categories:</strong><br>
+                                • Normal: &lt;120/80 mmHg<br>
+                                • Elevated: 120-129/&lt;80 mmHg<br>
+                                • Stage 1: 130-139/80-89 mmHg<br>
+                                • Stage 2: ≥140/≥90 mmHg<br>
+                                • Crisis: &gt;180/&gt;120 mmHg
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Live preview functionality
+    const systolicInput = document.getElementById('id_systolic_bp');
+    const diastolicInput = document.getElementById('id_diastolic_bp');
+    const heartRateInput = document.getElementById('id_heart_rate');
+    const weightInput = document.getElementById('id_weight');
+    const heightInput = document.getElementById('id_height');
+    
+    function updatePreview() {
+        const systolic = parseInt(systolicInput.value) || 0;
+        const diastolic = parseInt(diastolicInput.value) || 0;
+        const heartRate = parseInt(heartRateInput.value) || 0;
+        const weight = parseFloat(weightInput.value) || 0;
+        const height = parseInt(heightInput.value) || 0;
+        
+        // Update blood pressure
+        const bpDisplay = systolic && diastolic ? `${systolic}/${diastolic} mmHg` : '--/-- mmHg';
+        document.getElementById('previewBP').textContent = bpDisplay;
+        
+        // Update heart rate
+        const hrDisplay = heartRate ? `${heartRate} bpm` : '-- bpm';
+        document.getElementById('previewHR').textContent = hrDisplay;
+        
+        // Calculate and update BMI
+        let bmiDisplay = '--';
+        if (weight && height) {
+            const heightM = height / 100;
+            const bmi = (weight / (heightM * heightM)).toFixed(1);
+            bmiDisplay = bmi;
+        }
+        document.getElementById('previewBMI').textContent = bmiDisplay;
+        
+        // Update risk level
+        let riskLevel = 'normal';
+        let riskText = 'Normal';
+        
+        if (systolic && diastolic) {
+            if (systolic >= 180 || diastolic >= 120) {
+                riskLevel = 'high';
+                riskText = 'Crisis';
+            } else if (systolic >= 140 || diastolic >= 90) {
+                riskLevel = 'high';
+                riskText = 'Stage 2';
+            } else if ((systolic >= 130 && systolic <= 139) || (diastolic >= 80 && diastolic <= 89)) {
+                riskLevel = 'elevated';
+                riskText = 'Stage 1';
+            } else if (systolic >= 120 && systolic <= 129 && diastolic < 80) {
+                riskLevel = 'elevated';
+                riskText = 'Elevated';
+            }
+        }
+        
+        const riskElement = document.getElementById('previewRisk');
+        riskElement.className = `risk-indicator risk-${riskLevel}`;
+        riskElement.textContent = riskText;
+    }
+    
+    // Add event listeners
+    [systolicInput, diastolicInput, heartRateInput, weightInput, heightInput].forEach(input => {
+        if (input) {
+            input.addEventListener('input', updatePreview);
+        }
+    });
+    
+    // Initial preview update
+    updatePreview();
+    
+    // Form validation
+    document.getElementById('vitalsForm').addEventListener('submit', function(e) {
+        const systolic = parseInt(systolicInput.value);
+        const diastolic = parseInt(diastolicInput.value);
+        
+        if (systolic && diastolic && systolic <= diastolic) {
+            e.preventDefault();
+            alert('Systolic blood pressure must be higher than diastolic blood pressure.');
+            systolicInput.focus();
+        }
+    });
+});
+</script>
+{% endblock %}

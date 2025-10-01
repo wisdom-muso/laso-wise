@@ -1,0 +1,452 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}{{ vital.patient.get_full_name }} - Vital Signs Detail - Laso Healthcare{% endblock %}
+
+{% block extra_css %}
+<style>
+    .vitals-detail .card {
+        border: none;
+        box-shadow: 0 0.5rem 1.5rem 0.5rem rgba(0, 0, 0, 0.075);
+        border-radius: 0.75rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .patient-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 0.75rem 0.75rem 0 0;
+    }
+    
+    .vital-metric {
+        text-align: center;
+        padding: 1.5rem;
+        border-radius: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .vital-metric-primary {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+    }
+    
+    .vital-metric-secondary {
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+    }
+    
+    .metric-value {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+    }
+    
+    .metric-label {
+        font-size: 0.875rem;
+        opacity: 0.8;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .metric-unit {
+        font-size: 1rem;
+        opacity: 0.9;
+    }
+    
+    .risk-assessment {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        border-radius: 0.75rem;
+        padding: 2rem;
+        text-align: center;
+    }
+    
+    .risk-score {
+        font-size: 3rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    
+    .risk-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 2rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        display: inline-block;
+        margin-top: 1rem;
+    }
+    
+    .risk-low { background-color: rgba(255,255,255,0.2); }
+    .risk-normal { background-color: rgba(255,255,255,0.2); }
+    .risk-elevated { background-color: rgba(255,255,255,0.3); }
+    .risk-high { background-color: rgba(255,255,255,0.4); }
+    .risk-critical { background-color: rgba(255,255,255,0.5); }
+    
+    .timeline-item {
+        border-left: 3px solid #e9ecef;
+        padding-left: 1.5rem;
+        margin-bottom: 1.5rem;
+        position: relative;
+    }
+    
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: -6px;
+        top: 0;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #007bff;
+    }
+    
+    .timeline-date {
+        font-size: 0.875rem;
+        color: #6c757d;
+        margin-bottom: 0.5rem;
+    }
+    
+    .timeline-content {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 0.5rem;
+    }
+    
+    .alert-item {
+        border-left: 4px solid;
+        padding: 1rem;
+        margin-bottom: 0.5rem;
+        border-radius: 0.25rem;
+    }
+    
+    .alert-high { border-left-color: #dc3545; background-color: rgba(220, 53, 69, 0.1); }
+    .alert-critical { border-left-color: #dc3545; background-color: rgba(220, 53, 69, 0.2); }
+    .alert-elevated { border-left-color: #ffc107; background-color: rgba(255, 193, 7, 0.1); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="vitals-detail">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-1">Vital Signs Detail</h1>
+            <p class="text-muted mb-0">Recorded on {{ vital.recorded_at|date:"F j, Y \a\t H:i" }}</p>
+        </div>
+        <div>
+            <a href="{% url 'vitals:list' %}" class="btn btn-outline-secondary me-2">
+                <i class="fas fa-arrow-left"></i> Back to List
+            </a>
+            {% if user.is_doctor or user.is_admin_user %}
+                {% if vital.recorded_by == user or user.is_admin_user %}
+                <a href="{% url 'vitals:update' vital.pk %}" class="btn btn-warning">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Patient Information -->
+    <div class="card">
+        <div class="card-header patient-header">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h4 class="mb-1">{{ vital.patient.get_full_name }}</h4>
+                    <p class="mb-0 opacity-75">
+                        Patient ID: {{ vital.patient.username }} • 
+                        {% if vital.patient.date_of_birth %}
+                            Age: {{ vital.patient.date_of_birth|timesince|truncatewords:1 }}
+                        {% endif %}
+                        {% if vital.patient.gender %}
+                            • {{ vital.patient.get_gender_display }}
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <div class="risk-badge risk-{{ vital.overall_risk_level }}">
+                        {{ vital.get_overall_risk_level_display }} Risk
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Primary Vitals -->
+    <div class="row">
+        <div class="col-md-4">
+            <div class="vital-metric vital-metric-primary">
+                <div class="metric-value">{{ vital.blood_pressure_display }}</div>
+                <div class="metric-unit">mmHg</div>
+                <div class="metric-label">Blood Pressure</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="vital-metric vital-metric-primary">
+                <div class="metric-value">{{ vital.heart_rate }}</div>
+                <div class="metric-unit">bpm</div>
+                <div class="metric-label">Heart Rate</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            {% if vital.bmi %}
+            <div class="vital-metric vital-metric-primary">
+                <div class="metric-value">{{ vital.bmi }}</div>
+                <div class="metric-unit">kg/m²</div>
+                <div class="metric-label">BMI</div>
+            </div>
+            {% else %}
+            <div class="vital-metric vital-metric-secondary">
+                <div class="metric-value text-muted">--</div>
+                <div class="metric-unit text-muted">kg/m²</div>
+                <div class="metric-label text-muted">BMI</div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Additional Measurements -->
+    {% if vital.temperature or vital.respiratory_rate or vital.oxygen_saturation %}
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Additional Measurements</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                {% if vital.temperature %}
+                <div class="col-md-4">
+                    <div class="vital-metric vital-metric-secondary">
+                        <div class="metric-value text-primary">{{ vital.temperature }}</div>
+                        <div class="metric-unit text-primary">°C</div>
+                        <div class="metric-label">Temperature</div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                {% if vital.respiratory_rate %}
+                <div class="col-md-4">
+                    <div class="vital-metric vital-metric-secondary">
+                        <div class="metric-value text-info">{{ vital.respiratory_rate }}</div>
+                        <div class="metric-unit text-info">breaths/min</div>
+                        <div class="metric-label">Respiratory Rate</div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                {% if vital.oxygen_saturation %}
+                <div class="col-md-4">
+                    <div class="vital-metric vital-metric-secondary">
+                        <div class="metric-value text-success">{{ vital.oxygen_saturation }}</div>
+                        <div class="metric-unit text-success">%</div>
+                        <div class="metric-label">Oxygen Saturation</div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Laboratory Values -->
+    {% if vital.cholesterol_total or vital.blood_glucose %}
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Laboratory Values</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                {% if vital.cholesterol_total %}
+                <div class="col-md-3">
+                    <div class="vital-metric vital-metric-secondary">
+                        <div class="metric-value text-purple">{{ vital.cholesterol_total }}</div>
+                        <div class="metric-unit text-purple">mg/dL</div>
+                        <div class="metric-label">Total Cholesterol</div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                {% if vital.cholesterol_ldl %}
+                <div class="col-md-3">
+                    <div class="vital-metric vital-metric-secondary">
+                        <div class="metric-value text-warning">{{ vital.cholesterol_ldl }}</div>
+                        <div class="metric-unit text-warning">mg/dL</div>
+                        <div class="metric-label">LDL Cholesterol</div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                {% if vital.cholesterol_hdl %}
+                <div class="col-md-3">
+                    <div class="vital-metric vital-metric-secondary">
+                        <div class="metric-value text-success">{{ vital.cholesterol_hdl }}</div>
+                        <div class="metric-unit text-success">mg/dL</div>
+                        <div class="metric-label">HDL Cholesterol</div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                {% if vital.blood_glucose %}
+                <div class="col-md-3">
+                    <div class="vital-metric vital-metric-secondary">
+                        <div class="metric-value text-teal">{{ vital.blood_glucose }}</div>
+                        <div class="metric-unit text-teal">mg/dL</div>
+                        <div class="metric-label">Blood Glucose</div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Risk Assessment -->
+    {% if vital.cardiovascular_risk_score %}
+    <div class="risk-assessment">
+        <h5 class="mb-3">Cardiovascular Risk Assessment</h5>
+        <div class="risk-score">{{ vital.cardiovascular_risk_score }}%</div>
+        <p class="mb-0">10-year cardiovascular risk</p>
+        <div class="risk-badge risk-{{ vital.overall_risk_level }}">
+            {{ vital.get_overall_risk_level_display }} Risk Level
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Alerts -->
+    {% if alerts %}
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                Generated Alerts
+            </h5>
+        </div>
+        <div class="card-body">
+            {% for alert in alerts %}
+            <div class="alert-item alert-{{ alert.severity }}">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h6 class="mb-1">{{ alert.get_alert_type_display }}</h6>
+                        <p class="mb-1">{{ alert.message }}</p>
+                        <small class="text-muted">
+                            Created {{ alert.created_at|naturaltime }}
+                            {% if alert.acknowledged_by %}
+                                • Acknowledged by {{ alert.acknowledged_by.get_full_name }}
+                            {% endif %}
+                        </small>
+                    </div>
+                    <span class="badge bg-{{ alert.severity }}">{{ alert.get_severity_display }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Additional Information -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Recording Information</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-borderless">
+                        <tr>
+                            <td><strong>Recorded By:</strong></td>
+                            <td>
+                                {% if vital.recorded_by %}
+                                    {{ vital.recorded_by.get_full_name }}
+                                    <small class="text-muted">({{ vital.recorded_by.get_user_type_display }})</small>
+                                {% else %}
+                                    Self-recorded
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Date & Time:</strong></td>
+                            <td>{{ vital.recorded_at|date:"F j, Y \a\t H:i" }}</td>
+                        </tr>
+                        {% if vital.measurement_context %}
+                        <tr>
+                            <td><strong>Context:</strong></td>
+                            <td>{{ vital.measurement_context }}</td>
+                        </tr>
+                        {% endif %}
+                        <tr>
+                            <td><strong>Last Updated:</strong></td>
+                            <td>{{ vital.updated_at|naturaltime }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            {% if vital.notes %}
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Clinical Notes</h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-0">{{ vital.notes|linebreaks }}</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Recent History -->
+    {% if recent_vitals %}
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Recent Vital Signs History</h5>
+        </div>
+        <div class="card-body">
+            <div class="timeline">
+                {% for recent_vital in recent_vitals %}
+                <div class="timeline-item">
+                    <div class="timeline-date">{{ recent_vital.recorded_at|date:"M j, Y H:i" }}</div>
+                    <div class="timeline-content">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <strong>BP:</strong> {{ recent_vital.blood_pressure_display }} mmHg
+                            </div>
+                            <div class="col-md-4">
+                                <strong>HR:</strong> {{ recent_vital.heart_rate }} bpm
+                            </div>
+                            <div class="col-md-4">
+                                <span class="badge bg-{{ recent_vital.overall_risk_level }}">
+                                    {{ recent_vital.get_overall_risk_level_display }}
+                                </span>
+                            </div>
+                        </div>
+                        {% if recent_vital.notes %}
+                        <div class="mt-2">
+                            <small class="text-muted">{{ recent_vital.notes|truncatewords:15 }}</small>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div class="text-center mt-3">
+                <a href="{% url 'vitals:patient_dashboard' vital.patient.pk %}" class="btn btn-outline-primary">
+                    View Full History
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add any interactive functionality here
+    console.log('Vital signs detail page loaded');
+});
+</script>
+{% endblock %}

@@ -1,0 +1,334 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Vital Signs - Laso Healthcare{% endblock %}
+
+{% block extra_css %}
+<style>
+    .vitals-list .card {
+        border: none;
+        box-shadow: 0 0.5rem 1.5rem 0.5rem rgba(0, 0, 0, 0.075);
+        border-radius: 0.75rem;
+    }
+    
+    .filter-card {
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        border: 1px solid #dee2e6;
+    }
+    
+    .stats-card {
+        text-align: center;
+        padding: 1rem;
+    }
+    
+    .stats-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--bs-primary);
+    }
+    
+    .stats-label {
+        font-size: 0.875rem;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .risk-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 1rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    
+    .risk-low { background-color: #d1e7dd; color: #0f5132; }
+    .risk-normal { background-color: #d1e7dd; color: #0f5132; }
+    .risk-elevated { background-color: #fff3cd; color: #664d03; }
+    .risk-high { background-color: #f8d7da; color: #721c24; }
+    .risk-critical { background-color: #f8d7da; color: #721c24; }
+    
+    .vital-value {
+        font-weight: 600;
+        color: var(--bs-dark);
+    }
+    
+    .table-hover tbody tr:hover {
+        background-color: rgba(0, 123, 255, 0.05);
+    }
+    
+    .action-buttons .btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="vitals-list">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-1">Vital Signs Management</h1>
+            <p class="text-muted mb-0">Monitor and manage patient vital signs</p>
+        </div>
+        <div>
+            {% if user.is_doctor or user.is_admin_user %}
+            <a href="{% url 'vitals:create' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Record Vitals
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body stats-card">
+                    <div class="stats-value">{{ total_records }}</div>
+                    <div class="stats-label">Total Records</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body stats-card">
+                    <div class="stats-value text-danger">{{ high_risk_count }}</div>
+                    <div class="stats-label">High Risk</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body stats-card">
+                    <div class="stats-value text-success">{{ total_records|add:"-"|add:high_risk_count }}</div>
+                    <div class="stats-label">Normal/Low Risk</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body stats-card">
+                    <div class="stats-value text-info">
+                        {% if total_records > 0 %}
+                            {{ high_risk_count|floatformat:0 }}%
+                        {% else %}
+                            0%
+                        {% endif %}
+                    </div>
+                    <div class="stats-label">Risk Percentage</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Filters -->
+    <div class="card filter-card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    {{ filter_form.patient.label_tag }}
+                    {{ filter_form.patient }}
+                </div>
+                <div class="col-md-2">
+                    {{ filter_form.date_from.label_tag }}
+                    {{ filter_form.date_from }}
+                </div>
+                <div class="col-md-2">
+                    {{ filter_form.date_to.label_tag }}
+                    {{ filter_form.date_to }}
+                </div>
+                <div class="col-md-2">
+                    {{ filter_form.risk_level.label_tag }}
+                    {{ filter_form.risk_level }}
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary me-2">
+                        <i class="fas fa-search"></i> Filter
+                    </button>
+                    <a href="{% url 'vitals:list' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times"></i> Clear
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Vitals Table -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-heartbeat me-2"></i>
+                Vital Signs Records
+                {% if vitals %}
+                    <span class="badge bg-primary ms-2">{{ vitals|length }}</span>
+                {% endif %}
+            </h5>
+        </div>
+        <div class="card-body">
+            {% if vitals %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Patient</th>
+                            <th>Date & Time</th>
+                            <th>Blood Pressure</th>
+                            <th>Heart Rate</th>
+                            <th>Risk Level</th>
+                            <th>Recorded By</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for vital in vitals %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-sm bg-light rounded-circle d-flex align-items-center justify-content-center me-2">
+                                        <i class="fas fa-user text-muted"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold">{{ vital.patient.get_full_name }}</div>
+                                        <small class="text-muted">{{ vital.patient.username }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="vital-value">{{ vital.recorded_at|date:"M j, Y" }}</div>
+                                <small class="text-muted">{{ vital.recorded_at|time:"H:i" }}</small>
+                            </td>
+                            <td>
+                                <div class="vital-value">{{ vital.blood_pressure_display }}</div>
+                                <small class="text-muted">mmHg</small>
+                            </td>
+                            <td>
+                                <div class="vital-value">{{ vital.heart_rate }}</div>
+                                <small class="text-muted">bpm</small>
+                            </td>
+                            <td>
+                                <span class="risk-badge risk-{{ vital.overall_risk_level }}">
+                                    {{ vital.get_overall_risk_level_display }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if vital.recorded_by %}
+                                    <div class="fw-bold">{{ vital.recorded_by.get_full_name }}</div>
+                                    <small class="text-muted">{{ vital.recorded_by.get_user_type_display }}</small>
+                                {% else %}
+                                    <span class="text-muted">Self-recorded</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <a href="{% url 'vitals:detail' vital.pk %}" 
+                                       class="btn btn-outline-primary btn-sm" title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    {% if user.is_doctor or user.is_admin_user %}
+                                        {% if vital.recorded_by == user or user.is_admin_user %}
+                                        <a href="{% url 'vitals:update' vital.pk %}" 
+                                           class="btn btn-outline-warning btn-sm" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        {% endif %}
+                                    {% endif %}
+                                    <a href="{% url 'vitals:patient_dashboard' vital.patient.pk %}" 
+                                       class="btn btn-outline-info btn-sm" title="Patient Dashboard">
+                                        <i class="fas fa-chart-line"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            {% if is_paginated %}
+            <nav aria-label="Vitals pagination" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1{% if request.GET.patient %}&patient={{ request.GET.patient }}{% endif %}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}{% if request.GET.risk_level %}&risk_level={{ request.GET.risk_level }}{% endif %}">First</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.patient %}&patient={{ request.GET.patient }}{% endif %}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}{% if request.GET.risk_level %}&risk_level={{ request.GET.risk_level }}{% endif %}">Previous</a>
+                        </li>
+                    {% endif %}
+                    
+                    <li class="page-item active">
+                        <span class="page-link">
+                            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                        </span>
+                    </li>
+                    
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.patient %}&patient={{ request.GET.patient }}{% endif %}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}{% if request.GET.risk_level %}&risk_level={{ request.GET.risk_level }}{% endif %}">Next</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.patient %}&patient={{ request.GET.patient }}{% endif %}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}{% if request.GET.risk_level %}&risk_level={{ request.GET.risk_level }}{% endif %}">Last</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+            
+            {% else %}
+            <!-- No Data State -->
+            <div class="text-center py-5">
+                <i class="fas fa-heartbeat text-muted mb-3" style="font-size: 4rem;"></i>
+                <h4>No Vital Signs Found</h4>
+                <p class="text-muted mb-4">
+                    {% if request.GET %}
+                        No vital signs match your current filters. Try adjusting your search criteria.
+                    {% else %}
+                        No vital signs have been recorded yet.
+                    {% endif %}
+                </p>
+                {% if user.is_doctor or user.is_admin_user %}
+                <a href="{% url 'vitals:create' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Record First Vitals
+                </a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Select2 for patient dropdown
+    if (typeof $ !== 'undefined' && $.fn.select2) {
+        $('#id_patient').select2({
+            placeholder: 'Select patient...',
+            allowClear: true
+        });
+        
+        $('#id_risk_level').select2({
+            placeholder: 'All risk levels',
+            allowClear: true
+        });
+    }
+    
+    // Auto-submit form on filter change
+    const filterForm = document.querySelector('form');
+    const filterInputs = filterForm.querySelectorAll('select, input[type="date"]');
+    
+    filterInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            // Add a small delay to allow for multiple quick changes
+            clearTimeout(this.submitTimeout);
+            this.submitTimeout = setTimeout(() => {
+                filterForm.submit();
+            }, 500);
+        });
+    });
+});
+</script>
+{% endblock %}

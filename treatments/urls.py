@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 from .views_lab import (
     LabTestListView, LabTestDetailView, LabTestCreateView, 
     LabTestUpdateView, LabTestDeleteView, 
@@ -71,4 +71,7 @@ urlpatterns = [
     path('reports/<int:pk>/update/', ReportUpdateView.as_view(), name='report-update'),
     path('reports/<int:pk>/delete/', ReportDeleteView.as_view(), name='report-delete'),
     path('reports/<int:pk>/file/', serve_report_file, name='serve-report-file'),
+    
+    # Vital Signs
+    path('vitals/', include('treatments.urls_vitals')),
 ]
