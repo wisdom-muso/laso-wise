@@ -28,17 +28,28 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-$87@n^(g6isfhz4rt7uxv
 DEBUG = config('DEBUG', default=True, cast=bool)
 
 # Production security settings
+# Check if we're using HTTPS (via environment variable or request scheme)
+USE_HTTPS = config('USE_HTTPS', default=False, cast=bool)
+
 if not DEBUG:
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
-    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-    SECURE_HSTS_PRELOAD = True
-    SECURE_HSTS_SECONDS = 31536000
-    SECURE_SSL_REDIRECT = True
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
     X_FRAME_OPTIONS = 'DENY'
     SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
+    
+    # Only apply HTTPS-specific settings if HTTPS is enabled
+    if USE_HTTPS:
+        SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+        SECURE_HSTS_PRELOAD = True
+        SECURE_HSTS_SECONDS = 31536000
+        SECURE_SSL_REDIRECT = True
+        SESSION_COOKIE_SECURE = True
+        CSRF_COOKIE_SECURE = True
+    else:
+        # HTTP deployment settings
+        SESSION_COOKIE_SECURE = False
+        CSRF_COOKIE_SECURE = False
+        SECURE_SSL_REDIRECT = False
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,65.108.91.110,host.docker.internal,*', cast=Csv())
 
@@ -50,6 +61,8 @@ CSRF_TRUSTED_ORIGINS = [
     'https://work-2-qeqkgzmqkfgvugnm.prod-runtime.all-hands.dev',
     'https://work-1-gxnncyfvalqqtzrm.prod-runtime.all-hands.dev',
     'https://work-2-gxnncyfvalqqtzrm.prod-runtime.all-hands.dev',
+    'https://work-1-jwkooochxnsceltx.prod-runtime.all-hands.dev',
+    'https://work-2-jwkooochxnsceltx.prod-runtime.all-hands.dev',
     'http://localhost:12000',
     'http://localhost:12001',
     'http://127.0.0.1:12000',
@@ -88,6 +101,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'core.security_enhancements.SecurityMiddleware',  # Custom security middleware
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -213,9 +227,55 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Custom user model
 AUTH_USER_MODEL = 'users.User'
 
+# Authentication backends
+AUTHENTICATION_BACKENDS = [
+    'core.authentication.SecureAuthenticationBackend',
+    'django.contrib.auth.backends.ModelBackend',  # Fallback
+]
+
 # Login/logout settings
 LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL = 'login'
+
+# Enhanced Security Settings
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = 'DENY'
+
+# HTTPS-specific security settings (conditional)
+if USE_HTTPS and not DEBUG:
+    SECURE_HSTS_SECONDS = 31536000  # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+
+# Session Security - conditional based on HTTPS usage
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = 'Lax'  # Changed from 'Strict' to 'Lax' for better compatibility
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_COOKIE_AGE = 3600  # 1 hour
+
+# Set secure cookies only for HTTPS
+if USE_HTTPS and not DEBUG:
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+else:
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
+
+# CSRF Security
+CSRF_COOKIE_HTTPONLY = True
+CSRF_COOKIE_SAMESITE = 'Lax'  # Changed from 'Strict' to 'Lax' for better compatibility
+
+# Content Security Policy
+CSP_DEFAULT_SRC = ("'self'",)
+CSP_SCRIPT_SRC = ("'self'", "'unsafe-inline'", "'unsafe-eval'")
+CSP_STYLE_SRC = ("'self'", "'unsafe-inline'")
+CSP_IMG_SRC = ("'self'", "data:", "https:")
+CSP_FONT_SRC = ("'self'", "https:")
+CSP_CONNECT_SRC = ("'self'",)
+
+# Security Headers
+SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
 LOGIN_URL = 'login'
 
 # Admin login redirect fix

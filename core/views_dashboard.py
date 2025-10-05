@@ -16,6 +16,8 @@ from appointments.models import Appointment
 from treatments.models import Treatment
 from treatments.models_lab import LabTest
 from treatments.models_medical_history import MedicalHistory
+from treatments.models_vitals import VitalSign
+import json
 
 User = get_user_model()
 
@@ -394,3 +396,145 @@ def export_analytics(request):
     }
     
     return JsonResponse(response_data)
+
+
+@login_required
+def enhanced_vitals_dashboard(request):
+    """
+    Enhanced vitals dashboard with charts and analytics
+    """
+    if not request.user.is_patient():
+        from django.core.exceptions import PermissionDenied
+        raise PermissionDenied("Only patients can access this page.")
+    
+    # Get latest vital signs
+    latest_vital = VitalSign.objects.filter(patient=request.user).order_by('-recorded_at').first()
+    recent_vitals = VitalSign.objects.filter(patient=request.user).order_by('-recorded_at')[:10]
+    
+    # Get vitals for the last 30 days for charts
+    thirty_days_ago = timezone.now() - timedelta(days=30)
+    chart_vitals = VitalSign.objects.filter(
+        patient=request.user,
+        recorded_at__gte=thirty_days_ago
+    ).order_by('recorded_at')
+    
+    # Prepare chart data
+    chart_labels = []
+    systolic_data = []
+    diastolic_data = []
+    heart_rate_data = []
+    
+    for vital in chart_vitals:
+        chart_labels.append(vital.recorded_at.strftime('%m/%d'))
+        systolic_data.append(vital.systolic_bp)
+        diastolic_data.append(vital.diastolic_bp)
+        heart_rate_data.append(vital.heart_rate)
+    
+    # Calculate health score (simplified algorithm)
+    health_score = 75  # Default
+    if latest_vital:
+        score = 100
+        
+        # Blood pressure scoring
+        if latest_vital.systolic_bp > 140 or latest_vital.diastolic_bp > 90:
+            score -= 20
+        elif latest_vital.systolic_bp > 130 or latest_vital.diastolic_bp > 80:
+            score -= 10
+        
+        # Heart rate scoring
+        if latest_vital.heart_rate > 100 or latest_vital.heart_rate < 60:
+            score -= 15
+        
+        # Temperature scoring
+        if latest_vital.temperature and (latest_vital.temperature > 37.5 or latest_vital.temperature < 36.0):
+            score -= 10
+        
+        # Oxygen saturation scoring
+        if latest_vital.oxygen_saturation and latest_vital.oxygen_saturation < 95:
+            score -= 25
+        
+        health_score = max(score, 0)
+    
+    # Determine vital statuses and trends
+    bp_status = 'normal'
+    hr_status = 'normal'
+    temp_status = 'normal'
+    o2_status = 'normal'
+    
+    if latest_vital:
+        # Blood pressure status
+        if latest_vital.systolic_bp >= 140 or latest_vital.diastolic_bp >= 90:
+            bp_status = 'high'
+        elif latest_vital.systolic_bp >= 130 or latest_vital.diastolic_bp >= 80:
+            bp_status = 'elevated'
+        
+        # Heart rate status
+        if latest_vital.heart_rate > 100:
+            hr_status = 'high'
+        elif latest_vital.heart_rate < 60:
+            hr_status = 'low'
+        
+        # Temperature status
+        if latest_vital.temperature:
+            if latest_vital.temperature > 37.5:
+                temp_status = 'high'
+            elif latest_vital.temperature < 36.0:
+                temp_status = 'low'
+        
+        # Oxygen saturation status
+        if latest_vital.oxygen_saturation:
+            if latest_vital.oxygen_saturation < 95:
+                o2_status = 'low'
+    
+    # Generate health recommendations
+    health_recommendations = []
+    if bp_status in ['elevated', 'high']:
+        health_recommendations.append({
+            'title': 'Monitor Blood Pressure',
+            'description': 'Your blood pressure is elevated. Consider lifestyle changes and consult your doctor.'
+        })
+    
+    if hr_status == 'high':
+        health_recommendations.append({
+            'title': 'Heart Rate Management',
+            'description': 'Your heart rate is elevated. Consider relaxation techniques and avoid caffeine.'
+        })
+    
+    if not health_recommendations:
+        health_recommendations.append({
+            'title': 'Maintain Healthy Lifestyle',
+            'description': 'Keep up your healthy habits with regular exercise and balanced nutrition.'
+        })
+    
+    # Get active alerts (placeholder - would come from a real alerts system)
+    active_alerts = []
+    if bp_status == 'high':
+        active_alerts.append({
+            'alert_type': 'blood_pressure',
+            'get_alert_type_display': lambda: 'High Blood Pressure',
+            'message': 'Your blood pressure reading is above normal range.',
+            'severity': 'danger',
+            'created_at': timezone.now()
+        })
+    
+    context = {
+        'latest_vital': latest_vital,
+        'recent_vitals': recent_vitals,
+        'health_score': health_score,
+        'bp_status': bp_status,
+        'hr_status': hr_status,
+        'temp_status': temp_status,
+        'o2_status': o2_status,
+        'bp_trend': 'stable',  # Would be calculated from historical data
+        'hr_trend': 'stable',
+        'temp_trend': 'stable',
+        'o2_trend': 'stable',
+        'chart_labels': json.dumps(chart_labels),
+        'systolic_data': json.dumps(systolic_data),
+        'diastolic_data': json.dumps(diastolic_data),
+        'heart_rate_data': json.dumps(heart_rate_data),
+        'health_recommendations': health_recommendations,
+        'active_alerts': active_alerts,
+    }
+    
+    return render(request, 'core/enhanced_vitals_dashboard.html', context)

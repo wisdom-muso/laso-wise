@@ -12,7 +12,7 @@ from .views_theme import toggle_theme, get_theme_preference
 from .views_dashboard import (
     EnhancedDashboardView, DoctorPerformanceView, SystemReportsView,
     dashboard_analytics_api, patient_health_summary_api, recent_activity,
-    export_analytics
+    export_analytics, enhanced_vitals_dashboard
 )
 
 app_name = 'core'
@@ -28,6 +28,9 @@ urlpatterns = [
     path('dashboard/api/patient/<int:patient_id>/health-summary/', patient_health_summary_api, name='patient-health-summary-api'),
     path('dashboard/api/recent-activity/', recent_activity, name='recent_activity'),
     path('dashboard/api/export-analytics/', export_analytics, name='export_analytics'),
+    
+    # Enhanced Vitals Dashboard
+    path('vitals/enhanced/', enhanced_vitals_dashboard, name='enhanced-vitals'),
     
     # Alternative dashboard endpoint for API access
     path('api/dashboard/', RedirectView.as_view(pattern_name='dashboard', permanent=True), name='api-dashboard'),

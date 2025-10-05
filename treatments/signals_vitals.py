@@ -8,8 +8,9 @@ from asgiref.sync import async_to_sync
 from .models_vitals import VitalSign, VitalSignAlert
 
 
-@receiver(post_save, sender=VitalSign)
-def vitals_updated(sender, instance, created, **kwargs):
+# Temporarily disabled to avoid Redis connection issues
+# @receiver(post_save, sender=VitalSign)
+def vitals_updated_disabled(sender, instance, created, **kwargs):
     """Send real-time update when vitals are created or updated"""
     channel_layer = get_channel_layer()
     
