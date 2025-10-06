@@ -14,6 +14,10 @@ from .views_dashboard import (
     dashboard_analytics_api, patient_health_summary_api, recent_activity,
     export_analytics, enhanced_vitals_dashboard
 )
+from .views_ai_dashboard import (
+    AIRiskAssessmentView, AIRiskAssessmentResultsView, DoctorAIDashboardView,
+    SuperAdminAIDashboardView, run_ai_analysis, ai_dashboard_api, generate_risk_report
+)
 
 app_name = 'core'
 
@@ -85,4 +89,13 @@ urlpatterns = [
     
     # Admin Login Sessions
     path('admin/login-sessions/', views.LoginSessionListView.as_view(), name='login-sessions'),
+    
+    # AI Dashboard URLs
+    path('ai/dashboard/doctor/', DoctorAIDashboardView.as_view(), name='doctor-ai-dashboard'),
+    path('ai/dashboard/admin/', SuperAdminAIDashboardView.as_view(), name='superadmin-ai-dashboard'),
+    path('ai/assessment/<int:patient_id>/', AIRiskAssessmentView.as_view(), name='ai-risk-assessment'),
+    path('ai/assessment/<int:patient_id>/results/', AIRiskAssessmentResultsView.as_view(), name='ai-risk-assessment-results'),
+    path('ai/assessment/<int:patient_id>/run/', run_ai_analysis, name='run-ai-analysis'),
+    path('ai/dashboard/api/<int:patient_id>/', ai_dashboard_api, name='ai-dashboard-api'),
+    path('ai/report/<int:patient_id>/', generate_risk_report, name='generate-risk-report'),
 ]

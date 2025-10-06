@@ -63,6 +63,8 @@ CSRF_TRUSTED_ORIGINS = [
     'https://work-2-gxnncyfvalqqtzrm.prod-runtime.all-hands.dev',
     'https://work-1-jwkooochxnsceltx.prod-runtime.all-hands.dev',
     'https://work-2-jwkooochxnsceltx.prod-runtime.all-hands.dev',
+    'https://work-1-nuyaavqmkmvizysi.prod-runtime.all-hands.dev',
+    'https://work-2-nuyaavqmkmvizysi.prod-runtime.all-hands.dev',
     'http://localhost:12000',
     'http://localhost:12001',
     'http://127.0.0.1:12000',
@@ -483,6 +485,17 @@ AI_SETTINGS = {
     'OPENAI_API_KEY': os.getenv('OPENAI_API_KEY', ''),
     'HUGGINGFACE_API_KEY': os.getenv('HUGGINGFACE_API_KEY', ''),
 }
+
+# AI Provider Settings
+OPENROUTER_API_KEY = config('OPENROUTER_API_KEY', default='')
+OPENROUTER_MODEL = config('OPENROUTER_MODEL', default='deepseek/deepseek-chat-v3.1:free')
+OPENROUTER_API_URL = config('OPENROUTER_API_URL', default='https://openrouter.ai/api/v1/chat/completions')
+
+OLLAMA_API_URL = config('OLLAMA_API_URL', default='http://localhost:11434/api/generate')
+OLLAMA_MODEL = config('OLLAMA_MODEL', default='llama2')
+
+ENABLE_AI_FEATURES = config('ENABLE_AI_FEATURES', default=True, cast=bool)
+AI_DEFAULT_PROVIDER = config('AI_DEFAULT_PROVIDER', default='openrouter')
 
 # Analytics Settings
 ANALYTICS_SETTINGS = {

@@ -787,7 +787,7 @@ def ai_chat(request):
     """
     try:
         import json
-        from .ai_service import ai_service
+        from .ai_service import get_ai_service
         
         # Handle both JSON and form data
         if request.content_type == 'application/json':
@@ -805,6 +805,7 @@ def ai_chat(request):
             })
         
         # Use the enhanced AI service
+        ai_service = get_ai_service()
         result = ai_service.chat(request.user, message, session_id)
         
         return JsonResponse({
@@ -819,9 +820,12 @@ def ai_chat(request):
         })
         
     except Exception as e:
+        import traceback
+        print(f"AI Chat Error: {str(e)}")
+        print(f"Traceback: {traceback.format_exc()}")
         return JsonResponse({
             'success': False,
-            'error': 'An error occurred processing your request',
+            'error': f'An error occurred processing your request: {str(e)}',
             'response': 'I apologize, but I encountered an error. Please try again or contact support if the issue persists.'
         })
 
