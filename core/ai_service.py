@@ -54,8 +54,6 @@ class AIService:
                 response = self._chat_openai(enhanced_message)
             elif self.config.provider == 'openrouter':
                 response = self._chat_openrouter(enhanced_message)
-            elif self.config.provider == 'ollama':
-                response = self._chat_ollama(enhanced_message)
             elif self.config.provider == 'huggingface':
                 response = self._chat_huggingface(enhanced_message)
             elif self.config.provider == 'anthropic':
@@ -180,20 +178,15 @@ Please provide a helpful, accurate, and medically appropriate response. Always r
         """
         Chat with OpenRouter API
         """
-        # Use environment variables if available
-        api_key = getattr(settings, 'OPENROUTER_API_KEY', None) or self.config.api_key
-        model_name = getattr(settings, 'OPENROUTER_MODEL', None) or self.config.model_name or 'deepseek/deepseek-chat-v3.1:free'
-        api_url = getattr(settings, 'OPENROUTER_API_URL', None) or self.config.api_url or 'https://openrouter.ai/api/v1/chat/completions'
-        
         headers = {
-            'Authorization': f'Bearer {api_key}',
+            'Authorization': f'Bearer {self.config.api_key}',
             'Content-Type': 'application/json',
             'HTTP-Referer': 'https://laso-healthcare.com',
             'X-Title': 'Laso Healthcare AI Assistant'
         }
         
         data = {
-            'model': model_name,
+            'model': self.config.model_name or 'openai/gpt-3.5-turbo',
             'messages': [
                 {
                     'role': 'system',
@@ -207,6 +200,8 @@ Please provide a helpful, accurate, and medically appropriate response. Always r
             'max_tokens': self.config.max_tokens,
             'temperature': self.config.temperature
         }
+        
+        api_url = self.config.api_url or 'https://openrouter.ai/api/v1/chat/completions'
         
         response = requests.post(
             api_url,
@@ -223,52 +218,6 @@ Please provide a helpful, accurate, and medically appropriate response. Always r
             }
         else:
             raise Exception(f"OpenRouter API error: {response.status_code} - {response.text}")
-    
-    def _chat_ollama(self, message: str) -> Dict[str, Any]:
-        """
-        Chat with Ollama API (local)
-        """
-        # Use environment variables if available
-        api_url = getattr(settings, 'OLLAMA_API_URL', None) or self.config.api_url or 'http://localhost:11434/api/generate'
-        model_name = getattr(settings, 'OLLAMA_MODEL', None) or self.config.model_name or 'llama2'
-        
-        headers = {
-            'Content-Type': 'application/json'
-        }
-        
-        # Ollama uses a different format
-        data = {
-            'model': model_name,
-            'prompt': f"You are a helpful medical AI assistant for Laso Healthcare. Provide accurate, helpful information while always recommending professional medical consultation for serious concerns.\n\nUser: {message}\n\nAssistant:",
-            'stream': False,
-            'options': {
-                'temperature': self.config.temperature,
-                'num_predict': self.config.max_tokens
-            }
-        }
-        
-        try:
-            response = requests.post(
-                api_url,
-                headers=headers,
-                json=data,
-                timeout=60  # Ollama can be slower
-            )
-            
-            if response.status_code == 200:
-                result = response.json()
-                return {
-                    'content': result.get('response', ''),
-                    'tokens_used': len(result.get('response', '').split())  # Approximate token count
-                }
-            else:
-                raise Exception(f"Ollama API error: {response.status_code} - {response.text}")
-        except requests.exceptions.ConnectionError:
-            # Fallback if Ollama is not running
-            return {
-                'content': "Ollama service is not available. Please ensure Ollama is running locally or use a different AI provider.",
-                'tokens_used': 0
-            }
     
     def _chat_huggingface(self, message: str) -> Dict[str, Any]:
         """
@@ -445,12 +394,5 @@ Please provide a helpful, accurate, and medically appropriate response. Always r
         ]
 
 
-# Singleton instance - lazy initialization
-_ai_service_instance = None
-
-def get_ai_service():
-    """Get or create AI service instance"""
-    global _ai_service_instance
-    if _ai_service_instance is None:
-        _ai_service_instance = AIService()
-    return _ai_service_instance
+# Singleton instance
+ai_service = AIService()

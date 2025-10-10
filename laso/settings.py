@@ -63,8 +63,6 @@ CSRF_TRUSTED_ORIGINS = [
     'https://work-2-gxnncyfvalqqtzrm.prod-runtime.all-hands.dev',
     'https://work-1-jwkooochxnsceltx.prod-runtime.all-hands.dev',
     'https://work-2-jwkooochxnsceltx.prod-runtime.all-hands.dev',
-    'https://work-1-nuyaavqmkmvizysi.prod-runtime.all-hands.dev',
-    'https://work-2-nuyaavqmkmvizysi.prod-runtime.all-hands.dev',
     'http://localhost:12000',
     'http://localhost:12001',
     'http://127.0.0.1:12000',
@@ -250,11 +248,13 @@ if USE_HTTPS and not DEBUG:
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
 
-# Session Security - conditional based on HTTPS usage
+# Session Configuration - Fixed for production deployment
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # Use database sessions
 SESSION_COOKIE_HTTPONLY = True
-SESSION_COOKIE_SAMESITE = 'Lax'  # Changed from 'Strict' to 'Lax' for better compatibility
-SESSION_EXPIRE_AT_BROWSER_CLOSE = True
-SESSION_COOKIE_AGE = 3600  # 1 hour
+SESSION_COOKIE_SAMESITE = 'Lax'  # Better compatibility than 'Strict'
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # Allow persistent sessions
+SESSION_COOKIE_AGE = 86400  # 24 hours (increased from 1 hour)
+SESSION_SAVE_EVERY_REQUEST = True  # Ensure session is saved on every request
 
 # Set secure cookies only for HTTPS
 if USE_HTTPS and not DEBUG:
@@ -264,9 +264,11 @@ else:
     SESSION_COOKIE_SECURE = False
     CSRF_COOKIE_SECURE = False
 
-# CSRF Security
-CSRF_COOKIE_HTTPONLY = True
-CSRF_COOKIE_SAMESITE = 'Lax'  # Changed from 'Strict' to 'Lax' for better compatibility
+# CSRF Security - Fixed for production
+CSRF_COOKIE_HTTPONLY = False  # Must be False for AJAX requests
+CSRF_COOKIE_SAMESITE = 'Lax'  # Better compatibility than 'Strict'
+CSRF_USE_SESSIONS = False  # Use cookies instead of sessions for CSRF
+CSRF_COOKIE_AGE = 86400  # 24 hours
 
 # Content Security Policy
 CSP_DEFAULT_SRC = ("'self'",)
@@ -485,17 +487,6 @@ AI_SETTINGS = {
     'OPENAI_API_KEY': os.getenv('OPENAI_API_KEY', ''),
     'HUGGINGFACE_API_KEY': os.getenv('HUGGINGFACE_API_KEY', ''),
 }
-
-# AI Provider Settings
-OPENROUTER_API_KEY = config('OPENROUTER_API_KEY', default='')
-OPENROUTER_MODEL = config('OPENROUTER_MODEL', default='deepseek/deepseek-chat-v3.1:free')
-OPENROUTER_API_URL = config('OPENROUTER_API_URL', default='https://openrouter.ai/api/v1/chat/completions')
-
-OLLAMA_API_URL = config('OLLAMA_API_URL', default='http://localhost:11434/api/generate')
-OLLAMA_MODEL = config('OLLAMA_MODEL', default='llama2')
-
-ENABLE_AI_FEATURES = config('ENABLE_AI_FEATURES', default=True, cast=bool)
-AI_DEFAULT_PROVIDER = config('AI_DEFAULT_PROVIDER', default='openrouter')
 
 # Analytics Settings
 ANALYTICS_SETTINGS = {

@@ -43,8 +43,8 @@ class CustomLoginView(DjangoLoginView):
             return '/admin/'
         else:
             # All other users go to the main dashboard
-            # The dashboard view handles role-based content display
-            return reverse_lazy('dashboard')
+            # Use absolute URL instead of reverse_lazy to avoid potential issues
+            return '/dashboard/'
     
     def form_valid(self, form):
         """

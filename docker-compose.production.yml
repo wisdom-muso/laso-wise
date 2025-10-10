@@ -7,7 +7,7 @@ services:
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-laso_healthcare}
       POSTGRES_USER: ${POSTGRES_USER:-laso_user}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-laso_password}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-laso2403}
     volumes:
       - postgres_data:/var/lib/postgresql/data/
       - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
@@ -16,7 +16,7 @@ services:
     networks:
       - laso_network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-laso_user} -d ${POSTGRES_DB:-laso_healthcare}"]
+      test: ["CMD-SHELL", "pg_isready -U laso_user -d laso_healthcare"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -26,7 +26,7 @@ services:
     image: redis:7-alpine
     container_name: laso_redis
     restart: unless-stopped
-    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-redis_password}
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-laso2403}
     volumes:
       - redis_data:/data
     ports:
@@ -52,7 +52,7 @@ services:
       - SECRET_KEY=${SECRET_KEY}
       - ALLOWED_HOSTS=${ALLOWED_HOSTS:-65.108.91.110,localhost,127.0.0.1}
       - USE_SQLITE=${USE_SQLITE:-False}
-      - DATABASE_URL=postgresql://${POSTGRES_USER:-laso_user}:${POSTGRES_PASSWORD:-laso_password}@db:5432/${POSTGRES_DB:-laso_healthcare}
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-laso_user}:${POSTGRES_PASSWORD:-laso2403}@db:5432/${POSTGRES_DB:-laso_healthcare}
       - LOG_TO_FILE=${LOG_TO_FILE:-True}
       - EMAIL_BACKEND=${EMAIL_BACKEND}
       - EMAIL_HOST=${EMAIL_HOST}
@@ -60,7 +60,7 @@ services:
       - EMAIL_HOST_USER=${EMAIL_HOST_USER}
       - EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD}
       - EMAIL_USE_TLS=${EMAIL_USE_TLS:-True}
-      - REDIS_URL=redis://:${REDIS_PASSWORD:-redis_password}@redis:6379/0
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-laso2403}@redis:6379/0
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - HUGGINGFACE_API_KEY=${HUGGINGFACE_API_KEY}
     volumes:
@@ -96,8 +96,8 @@ services:
       - DEBUG=${DEBUG:-False}
       - SECRET_KEY=${SECRET_KEY}
       - USE_SQLITE=${USE_SQLITE:-False}
-      - DATABASE_URL=postgresql://${POSTGRES_USER:-laso_user}:${POSTGRES_PASSWORD:-laso_password}@db:5432/${POSTGRES_DB:-laso_healthcare}
-      - REDIS_URL=redis://:${REDIS_PASSWORD:-redis_password}@redis:6379/0
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-laso_user}:${POSTGRES_PASSWORD:-laso2403}@db:5432/${POSTGRES_DB:-laso_healthcare}
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-laso2403}@redis:6379/0
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - HUGGINGFACE_API_KEY=${HUGGINGFACE_API_KEY}
     volumes:
@@ -123,8 +123,8 @@ services:
       - DEBUG=${DEBUG:-False}
       - SECRET_KEY=${SECRET_KEY}
       - USE_SQLITE=${USE_SQLITE:-False}
-      - DATABASE_URL=postgresql://${POSTGRES_USER:-laso_user}:${POSTGRES_PASSWORD:-laso_password}@db:5432/${POSTGRES_DB:-laso_healthcare}
-      - REDIS_URL=redis://:${REDIS_PASSWORD:-redis_password}@redis:6379/0
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-laso_user}:${POSTGRES_PASSWORD:-laso2403}@db:5432/${POSTGRES_DB:-laso_healthcare}
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-laso2403}@redis:6379/0
     volumes:
       - logs_volume:/app/logs
     depends_on:

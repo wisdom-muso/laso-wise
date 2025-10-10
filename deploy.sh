@@ -46,7 +46,7 @@ check_requirements() {
     fi
     
     # Check if Docker Compose is installed
-    if ! command -v docker-compose &> /dev/null && ! docker compose version &> /dev/null; then
+    if ! docker compose version &> /dev/null; then
         log_error "Docker Compose is not installed. Please install Docker Compose first."
         exit 1
     fi
@@ -81,26 +81,26 @@ build_and_deploy() {
     
     # Stop existing containers if running
     log_info "Stopping existing containers..."
-    docker-compose -f "$COMPOSE_FILE" down --remove-orphans || true
+    docker compose -f "$COMPOSE_FILE" down --remove-orphans || true
     
     # Pull latest images
     log_info "Pulling latest Docker images..."
-    docker-compose -f "$COMPOSE_FILE" pull
+    docker compose -f "$COMPOSE_FILE" pull || true
     
     # Build the application
     log_info "Building application containers..."
-    docker-compose -f "$COMPOSE_FILE" build --no-cache
+    docker compose -f "$COMPOSE_FILE" build --no-cache
     
     # Start the services
     log_info "Starting services..."
-    docker-compose -f "$COMPOSE_FILE" up -d
+    docker compose -f "$COMPOSE_FILE" up -d
     
     # Wait for services to be healthy
     log_info "Waiting for services to be healthy..."
     sleep 30
     
     # Check service status
-    docker-compose -f "$COMPOSE_FILE" ps
+    docker compose -f "$COMPOSE_FILE" ps
 }
 
 run_migrations() {
@@ -111,11 +111,11 @@ run_migrations() {
     sleep 10
     
     # Run migrations
-    docker-compose -f "$COMPOSE_FILE" exec -T web python manage.py migrate
+    docker compose -f "$COMPOSE_FILE" exec -T web python manage.py migrate
     
     # Collect static files
     log_info "Collecting static files..."
-    docker-compose -f "$COMPOSE_FILE" exec -T web python manage.py collectstatic --noinput
+    docker compose -f "$COMPOSE_FILE" exec -T web python manage.py collectstatic --noinput
     
     log_success "Database migrations completed!"
 }
@@ -124,11 +124,11 @@ create_superuser() {
     log_info "Creating superuser account..."
     
     # Check if admin user already exists
-    if docker-compose -f "$COMPOSE_FILE" exec -T web python manage.py shell -c "from django.contrib.auth import get_user_model; User = get_user_model(); print('exists' if User.objects.filter(username='admin').exists() else 'not_exists')" | grep -q "exists"; then
+    if docker compose -f "$COMPOSE_FILE" exec -T web python manage.py shell -c "from django.contrib.auth import get_user_model; User = get_user_model(); print('exists' if User.objects.filter(username='admin').exists() else 'not_exists')" | grep -q "exists"; then
         log_warning "Admin user already exists. Skipping superuser creation."
     else
         # Create superuser
-        docker-compose -f "$COMPOSE_FILE" exec -T web python manage.py shell -c "
+        docker compose -f "$COMPOSE_FILE" exec -T web python manage.py shell -c "
 from django.contrib.auth import get_user_model
 User = get_user_model()
 User.objects.create_superuser('admin', 'admin@laso.com', '8gJW48Tz8YXDrF57')
@@ -163,11 +163,11 @@ verify_deployment() {
     log_info "Verifying deployment..."
     
     # Check if services are running
-    if docker-compose -f "$COMPOSE_FILE" ps | grep -q "Up"; then
+    if docker compose -f "$COMPOSE_FILE" ps | grep -q "Up"; then
         log_success "Services are running!"
     else
         log_error "Some services are not running properly."
-        docker-compose -f "$COMPOSE_FILE" ps
+        docker compose -f "$COMPOSE_FILE" ps
         exit 1
     fi
     
@@ -201,7 +201,7 @@ verify_deployment() {
 
 show_logs() {
     log_info "Showing recent logs..."
-    docker-compose -f "$COMPOSE_FILE" logs --tail=50
+    docker compose -f "$COMPOSE_FILE" logs --tail=50
 }
 
 # Main deployment process
@@ -234,20 +234,20 @@ main() {
 # Handle script arguments
 case "${1:-}" in
     "logs")
-        docker-compose -f "$COMPOSE_FILE" logs -f
+        docker compose -f "$COMPOSE_FILE" logs -f
         ;;
     "status")
-        docker-compose -f "$COMPOSE_FILE" ps
+        docker compose -f "$COMPOSE_FILE" ps
         ;;
     "stop")
-        docker-compose -f "$COMPOSE_FILE" down
+        docker compose -f "$COMPOSE_FILE" down
         ;;
     "restart")
-        docker-compose -f "$COMPOSE_FILE" restart
+        docker compose -f "$COMPOSE_FILE" restart
         ;;
     "update")
-        docker-compose -f "$COMPOSE_FILE" pull
-        docker-compose -f "$COMPOSE_FILE" up -d
+        docker compose -f "$COMPOSE_FILE" pull
+        docker compose -f "$COMPOSE_FILE" up -d
         ;;
     *)
         main

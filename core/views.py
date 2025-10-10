@@ -45,224 +45,251 @@ def dashboard(request):
     user = request.user
     context = {'user': user}
     
-    if user.is_patient():
-        # Patient dashboard
-        upcoming_appointments = Appointment.objects.filter(
-            patient=user,
-            date__gte=timezone.now().date(),
-            status='planned'
-        ).order_by('date', 'time')
+    try:
+        if user.is_patient():
+            # Patient dashboard
+            upcoming_appointments = Appointment.objects.filter(
+                patient=user,
+                date__gte=timezone.now().date(),
+                status='planned'
+            ).order_by('date', 'time')
+            
+            recent_treatments = Treatment.objects.filter(
+                appointment__in=Appointment.objects.filter(patient=user)
+            ).order_by('-created_at')[:5]
+            
+            # Vitals data
+            latest_vital = VitalSign.objects.filter(patient=user).first()
+            thirty_days_ago = timezone.now() - timedelta(days=30)
+            recent_vitals = VitalSign.objects.filter(
+                patient=user,
+                recorded_at__gte=thirty_days_ago
+            ).order_by('-recorded_at')[:10]
+            
+            # Calculate vitals statistics
+            vitals_stats = recent_vitals.aggregate(
+                avg_systolic=Avg('systolic_bp'),
+                avg_diastolic=Avg('diastolic_bp'),
+                avg_heart_rate=Avg('heart_rate'),
+                max_systolic=Max('systolic_bp'),
+                min_systolic=Min('systolic_bp'),
+            )
+            
+            # Get active vitals alerts
+            active_alerts = VitalSignAlert.objects.filter(
+                vital_sign__patient=user,
+                status='active'
+            ).order_by('-created_at')
+            
+            # Prepare chart data for vitals
+            chart_data = {
+                'dates': [v.recorded_at.strftime('%Y-%m-%d') for v in recent_vitals],
+                'systolic': [v.systolic_bp for v in recent_vitals],
+                'diastolic': [v.diastolic_bp for v in recent_vitals],
+                'heart_rate': [v.heart_rate for v in recent_vitals],
+            }
+            
+            # Enhanced vitals data for the new design
+            vitals_enhanced_data = {}
+            if latest_vital:
+                vitals_enhanced_data = {
+                    'risk_percentage': latest_vital.get_risk_percentage(),
+                    'health_assessment_message': latest_vital.get_health_assessment_message(),
+                    'risk_trend': latest_vital.get_risk_trend(),
+                    'risk_level': latest_vital.calculate_risk_level(),
+                    'assessment_date': latest_vital.recorded_at.strftime('%B %d, %Y'),
+                }
+            
+            # Messaging data
+            message_threads = MessageThread.objects.filter(
+                patient=user,
+                is_active=True
+            ).select_related('doctor')
+            
+            # Get unread message count
+            total_unread_messages = sum(thread.patient_unread_count for thread in message_threads)
+            
+            # Active consultations
+            active_consultations = TeleMedicineConsultation.objects.filter(
+                appointment__patient=user,
+                status='in_progress'
+            ).count()
+            
+            context.update({
+                'upcoming_appointments': upcoming_appointments,
+                'recent_treatments': recent_treatments,
+                # Vitals data
+                'latest_vital': latest_vital,
+                'recent_vitals': recent_vitals,
+                'vitals_stats': vitals_stats,
+                'active_alerts': active_alerts,
+                'chart_data': chart_data,
+                'vitals_enhanced_data': vitals_enhanced_data,
+                # Messaging data
+                'message_threads': message_threads,
+                'total_unread_messages': total_unread_messages,
+                'active_consultations': active_consultations,
+            })
+            return render(request, 'core/patient_dashboard.html', context)
+    
+        elif user.is_doctor():
+            # Doctor dashboard
+            today_appointments = Appointment.objects.filter(
+                doctor=user,
+                date=timezone.now().date(),
+                status='planned'
+            ).order_by('time')
+            
+            upcoming_appointments = Appointment.objects.filter(
+                doctor=user,
+                date__gt=timezone.now().date(),
+                status='planned'
+            ).order_by('date', 'time')[:5]
+            
+            recent_treatments = Treatment.objects.filter(
+                appointment__in=Appointment.objects.filter(doctor=user)
+            ).order_by('-created_at')[:5]
+            
+            # Total patient count
+            # Get all appointments for this doctor
+            doctor_appointments = Appointment.objects.filter(doctor=user)
+            # Then get all patients from those appointments
+            total_patients = User.objects.filter(
+                user_type='patient',
+                patient_appointments__in=doctor_appointments
+            ).distinct().count()
+            
+            # Total treatment count
+            total_treatments = Treatment.objects.filter(
+                appointment__in=doctor_appointments
+            ).count()
+            
+            # Weekly appointment statistics
+            week_start = timezone.now().date() - timedelta(days=timezone.now().weekday())
+            weekly_appointments = []
+            
+            for i in range(7):
+                day = week_start + timedelta(days=i)
+                count = Appointment.objects.filter(doctor=user, date=day).count()
+                weekly_appointments.append(count)
+            
+            # Patient age demographics
+            from django.db.models import Count, Case, When, IntegerField
+            from datetime import date
+            
+            age_demographics = [0, 0, 0, 0, 0]  # 0-18, 19-30, 31-45, 46-60, 60+
+            
+            # Get all patients who have appointments with this doctor
+            doctor_appointments = Appointment.objects.filter(doctor=user)
+            patients = User.objects.filter(
+                user_type='patient',
+                patient_appointments__in=doctor_appointments,
+                date_of_birth__isnull=False
+            ).distinct()
+            
+            for patient in patients:
+                age = (date.today() - patient.date_of_birth).days // 365
+                if age <= 18:
+                    age_demographics[0] += 1
+                elif age <= 30:
+                    age_demographics[1] += 1
+                elif age <= 45:
+                    age_demographics[2] += 1
+                elif age <= 60:
+                    age_demographics[3] += 1
+                else:
+                    age_demographics[4] += 1
+            
+            # Most common diagnoses
+            from django.db.models import Count
+            doctor_appointments = Appointment.objects.filter(doctor=user)
+            common_diagnoses_data = Treatment.objects.filter(
+                appointment__in=doctor_appointments
+            ).values('diagnosis').annotate(
+                count=Count('diagnosis')
+            ).order_by('-count')[:5]
+            
+            common_diagnoses = []
+            for item in common_diagnoses_data:
+                diagnosis = item['diagnosis']
+                if len(diagnosis) > 20:
+                    diagnosis = diagnosis[:20] + "..."
+                common_diagnoses.append({
+                    'name': diagnosis,
+                    'count': item['count']
+                })
+            
+            context.update({
+                'today_appointments': today_appointments,
+                'upcoming_appointments': upcoming_appointments,
+                'recent_treatments': recent_treatments,
+                'total_patients': total_patients,
+                'total_treatments': total_treatments,
+                'weekly_appointments': weekly_appointments,
+                'age_demographics': age_demographics,
+                'common_diagnoses': common_diagnoses,
+            })
+            return render(request, 'core/doctor_dashboard.html', context)
         
-        recent_treatments = Treatment.objects.filter(
-            appointment__in=Appointment.objects.filter(patient=user)
-        ).order_by('-created_at')[:5]
+        elif user.is_receptionist():
+            # Receptionist dashboard
+            today_appointments = Appointment.objects.filter(
+                date=timezone.now().date()
+            ).order_by('time')
+            
+            recent_patients = User.objects.filter(
+                user_type='patient'
+            ).order_by('-date_joined')[:5]
+            
+            context.update({
+                'today_appointments': today_appointments,
+                'recent_patients': recent_patients,
+            })
+            return render(request, 'core/receptionist_dashboard.html', context)
         
-        # Vitals data
-        latest_vital = VitalSign.objects.filter(patient=user).first()
-        thirty_days_ago = timezone.now() - timedelta(days=30)
-        recent_vitals = VitalSign.objects.filter(
-            patient=user,
-            recorded_at__gte=thirty_days_ago
-        ).order_by('-recorded_at')[:10]
+        elif user.is_admin_user() or user.is_superuser:
+            # Admin dashboard
+            total_patients = User.objects.filter(user_type='patient').count()
+            total_doctors = User.objects.filter(user_type='doctor').count()
+            total_appointments = Appointment.objects.count()
+            total_treatments = Treatment.objects.count()
+            
+            context.update({
+                'total_patients': total_patients,
+                'total_doctors': total_doctors,
+                'total_appointments': total_appointments,
+                'total_treatments': total_treatments,
+            })
+            return render(request, 'core/admin_dashboard.html', context)
         
-        # Calculate vitals statistics
-        vitals_stats = recent_vitals.aggregate(
-            avg_systolic=Avg('systolic_bp'),
-            avg_diastolic=Avg('diastolic_bp'),
-            avg_heart_rate=Avg('heart_rate'),
-            max_systolic=Max('systolic_bp'),
-            min_systolic=Min('systolic_bp'),
-        )
+        # Redirect to general dashboard by default
+        return render(request, 'core/dashboard.html', context)
+    
+    except Exception as e:
+        # If there's any error in the dashboard logic, provide a simple fallback
+        print(f"Dashboard error for user {user.username}: {e}")
         
-        # Get active vitals alerts
-        active_alerts = VitalSignAlert.objects.filter(
-            vital_sign__patient=user,
-            status='active'
-        ).order_by('-created_at')
-        
-        # Prepare chart data for vitals
-        chart_data = {
-            'dates': [v.recorded_at.strftime('%Y-%m-%d') for v in recent_vitals],
-            'systolic': [v.systolic_bp for v in recent_vitals],
-            'diastolic': [v.diastolic_bp for v in recent_vitals],
-            'heart_rate': [v.heart_rate for v in recent_vitals],
+        # Create a simple context for error fallback
+        simple_context = {
+            'user': user,
+            'error_message': 'Dashboard is loading with basic functionality.',
+            'user_type': getattr(user, 'user_type', 'unknown'),
         }
         
-        # Enhanced vitals data for the new design
-        vitals_enhanced_data = {}
-        if latest_vital:
-            vitals_enhanced_data = {
-                'risk_percentage': latest_vital.get_risk_percentage(),
-                'health_assessment_message': latest_vital.get_health_assessment_message(),
-                'risk_trend': latest_vital.get_risk_trend(),
-                'risk_level': latest_vital.calculate_risk_level(),
-                'assessment_date': latest_vital.recorded_at.strftime('%B %d, %Y'),
-            }
+        # Try to render appropriate template based on user type
+        if user.is_patient():
+            try:
+                return render(request, 'core/patient_dashboard.html', simple_context)
+            except:
+                pass
+        elif user.is_doctor():
+            try:
+                return render(request, 'core/doctor_dashboard.html', simple_context)
+            except:
+                pass
         
-        # Messaging data
-        message_threads = MessageThread.objects.filter(
-            patient=user,
-            is_active=True
-        ).select_related('doctor')
-        
-        # Get unread message count
-        total_unread_messages = sum(thread.patient_unread_count for thread in message_threads)
-        
-        # Active consultations
-        active_consultations = TeleMedicineConsultation.objects.filter(
-            appointment__patient=user,
-            status='in_progress'
-        ).count()
-        
-        context.update({
-            'upcoming_appointments': upcoming_appointments,
-            'recent_treatments': recent_treatments,
-            # Vitals data
-            'latest_vital': latest_vital,
-            'recent_vitals': recent_vitals,
-            'vitals_stats': vitals_stats,
-            'active_alerts': active_alerts,
-            'chart_data': chart_data,
-            'vitals_enhanced_data': vitals_enhanced_data,
-            # Messaging data
-            'message_threads': message_threads,
-            'total_unread_messages': total_unread_messages,
-            'active_consultations': active_consultations,
-        })
-        return render(request, 'core/patient_dashboard.html', context)
-    
-    elif user.is_doctor():
-        # Doctor dashboard
-        today_appointments = Appointment.objects.filter(
-            doctor=user,
-            date=timezone.now().date(),
-            status='planned'
-        ).order_by('time')
-        
-        upcoming_appointments = Appointment.objects.filter(
-            doctor=user,
-            date__gt=timezone.now().date(),
-            status='planned'
-        ).order_by('date', 'time')[:5]
-        
-        recent_treatments = Treatment.objects.filter(
-            appointment__in=Appointment.objects.filter(doctor=user)
-        ).order_by('-created_at')[:5]
-        
-        # Total patient count
-        # Get all appointments for this doctor
-        doctor_appointments = Appointment.objects.filter(doctor=user)
-        # Then get all patients from those appointments
-        total_patients = User.objects.filter(
-            user_type='patient',
-            patient_appointments__in=doctor_appointments
-        ).distinct().count()
-        
-        # Total treatment count
-        total_treatments = Treatment.objects.filter(
-            appointment__in=doctor_appointments
-        ).count()
-        
-        # Weekly appointment statistics
-        week_start = timezone.now().date() - timedelta(days=timezone.now().weekday())
-        weekly_appointments = []
-        
-        for i in range(7):
-            day = week_start + timedelta(days=i)
-            count = Appointment.objects.filter(doctor=user, date=day).count()
-            weekly_appointments.append(count)
-        
-        # Patient age demographics
-        from django.db.models import Count, Case, When, IntegerField
-        from datetime import date
-        
-        age_demographics = [0, 0, 0, 0, 0]  # 0-18, 19-30, 31-45, 46-60, 60+
-        
-        # Get all patients who have appointments with this doctor
-        doctor_appointments = Appointment.objects.filter(doctor=user)
-        patients = User.objects.filter(
-            user_type='patient',
-            patient_appointments__in=doctor_appointments,
-            date_of_birth__isnull=False
-        ).distinct()
-        
-        for patient in patients:
-            age = (date.today() - patient.date_of_birth).days // 365
-            if age <= 18:
-                age_demographics[0] += 1
-            elif age <= 30:
-                age_demographics[1] += 1
-            elif age <= 45:
-                age_demographics[2] += 1
-            elif age <= 60:
-                age_demographics[3] += 1
-            else:
-                age_demographics[4] += 1
-        
-        # Most common diagnoses
-        from django.db.models import Count
-        doctor_appointments = Appointment.objects.filter(doctor=user)
-        common_diagnoses_data = Treatment.objects.filter(
-            appointment__in=doctor_appointments
-        ).values('diagnosis').annotate(
-            count=Count('diagnosis')
-        ).order_by('-count')[:5]
-        
-        common_diagnoses = []
-        for item in common_diagnoses_data:
-            diagnosis = item['diagnosis']
-            if len(diagnosis) > 20:
-                diagnosis = diagnosis[:20] + "..."
-            common_diagnoses.append({
-                'name': diagnosis,
-                'count': item['count']
-            })
-        
-        context.update({
-            'today_appointments': today_appointments,
-            'upcoming_appointments': upcoming_appointments,
-            'recent_treatments': recent_treatments,
-            'total_patients': total_patients,
-            'total_treatments': total_treatments,
-            'weekly_appointments': weekly_appointments,
-            'age_demographics': age_demographics,
-            'common_diagnoses': common_diagnoses,
-        })
-        return render(request, 'core/doctor_dashboard.html', context)
-    
-    elif user.is_receptionist():
-        # Receptionist dashboard
-        today_appointments = Appointment.objects.filter(
-            date=timezone.now().date()
-        ).order_by('time')
-        
-        recent_patients = User.objects.filter(
-            user_type='patient'
-        ).order_by('-date_joined')[:5]
-        
-        context.update({
-            'today_appointments': today_appointments,
-            'recent_patients': recent_patients,
-        })
-        return render(request, 'core/receptionist_dashboard.html', context)
-    
-    elif user.is_admin_user() or user.is_superuser:
-        # Admin dashboard
-        total_patients = User.objects.filter(user_type='patient').count()
-        total_doctors = User.objects.filter(user_type='doctor').count()
-        total_appointments = Appointment.objects.count()
-        total_treatments = Treatment.objects.count()
-        
-        context.update({
-            'total_patients': total_patients,
-            'total_doctors': total_doctors,
-            'total_appointments': total_appointments,
-            'total_treatments': total_treatments,
-        })
-        return render(request, 'core/admin_dashboard.html', context)
-    
-    # Redirect to general dashboard by default
-    return render(request, 'core/dashboard.html', context)
+        # Final fallback - render a basic dashboard
+        return render(request, 'core/dashboard.html', simple_context)
 
 # Patient Registration
 class PatientRegistrationView(CreateView):
@@ -787,7 +814,7 @@ def ai_chat(request):
     """
     try:
         import json
-        from .ai_service import get_ai_service
+        from .ai_service import ai_service
         
         # Handle both JSON and form data
         if request.content_type == 'application/json':
@@ -805,7 +832,6 @@ def ai_chat(request):
             })
         
         # Use the enhanced AI service
-        ai_service = get_ai_service()
         result = ai_service.chat(request.user, message, session_id)
         
         return JsonResponse({
@@ -820,12 +846,9 @@ def ai_chat(request):
         })
         
     except Exception as e:
-        import traceback
-        print(f"AI Chat Error: {str(e)}")
-        print(f"Traceback: {traceback.format_exc()}")
         return JsonResponse({
             'success': False,
-            'error': f'An error occurred processing your request: {str(e)}',
+            'error': 'An error occurred processing your request',
             'response': 'I apologize, but I encountered an error. Please try again or contact support if the issue persists.'
         })
 
